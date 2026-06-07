@@ -3,13 +3,156 @@
              x:Class="TCMine_Launcher.App"
              xmlns:local="using:TCMine_Launcher"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <!-- "Default" ThemeVariant follows the system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <local:ViewLocator />
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme />
+
+        <!-- ======================================================= -->
+        <!--  BOTÕES DA BARRA DE TÍTULO  (fechar / minimizar)        -->
+        <!-- ======================================================= -->
+        <Style Selector="Button.wnd-btn">
+            <Setter Property="Width" Value="44" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#2A2A40" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Button.wnd-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1A1A2E" />
+        </Style>
+        <Style Selector="Button.wnd-btn:pointerover">
+            <Setter Property="Foreground" Value="#64648A" />
+        </Style>
+        <!-- Botão fechar fica vermelho no hover -->
+        <Style Selector="Button.wnd-btn-close:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#7F1D1D" />
+        </Style>
+        <Style Selector="Button.wnd-btn-close:pointerover">
+            <Setter Property="Foreground" Value="#FCA5A5" />
+        </Style>
+
+        <!-- ======================================================= -->
+        <!--  BOTÕES DE NAVEGAÇÃO DA SIDEBAR                         -->
+        <!-- ======================================================= -->
+        <Style Selector="Button.nav-btn">
+            <Setter Property="Width" Value="48" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#343454" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Button.nav-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#141422" />
+        </Style>
+        <Style Selector="Button.nav-btn:pointerover">
+            <Setter Property="Foreground" Value="#64648A" />
+        </Style>
+        <!-- Estado activo (página atual) -->
+        <Style Selector="Button.nav-btn.active /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1A0E20" />
+        </Style>
+        <Style Selector="Button.nav-btn.active">
+            <Setter Property="Foreground" Value="#F97316" />
+        </Style>
+        <Style Selector="Button.nav-btn.active:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1A0E20" />
+        </Style>
+
+        <!-- ======================================================= -->
+        <!--  SELETORES DE VERSÃO (ComboBox)                         -->
+        <!-- ======================================================= -->
+        <Style Selector="ComboBox.version-select">
+            <Setter Property="Background" Value="#0A0A16" />
+            <Setter Property="BorderBrush" Value="#1A1A28" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="7" />
+            <Setter Property="Foreground" Value="#7A7A9A" />
+            <Setter Property="Padding" Value="11,8" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="MaxDropDownHeight" Value="200" />
+        </Style>
+        <Style Selector="ComboBox.version-select:pointerover">
+            <Setter Property="BorderBrush" Value="#2A2A40" />
+            <Setter Property="Foreground" Value="#94A3B8" />
+        </Style>
+        <Style Selector="ComboBox.version-select:focus">
+            <Setter Property="BorderBrush" Value="#F97316" />
+        </Style>
+
+        <!-- ======================================================= -->
+        <!--  BOTÃO JOGAR                                            -->
+        <!-- ======================================================= -->
+        <Style Selector="Button.play-btn">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Color="#F97316" Offset="0" />
+                        <GradientStop Color="#DC5808" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="Button.play-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.88" />
+        </Style>
+        <Style Selector="Button.play-btn:pressed /template/ ContentPresenter">
+            <Setter Property="Opacity" Value="0.75" />
+        </Style>
+        <Style Selector="Button.play-btn:disabled">
+            <Setter Property="Opacity" Value="0.45" />
+        </Style>
+
+        <!-- ======================================================= -->
+        <!--  BARRA DE PROGRESSO DO LAUNCH                           -->
+        <!-- ======================================================= -->
+        <Style Selector="ProgressBar.launch-progress">
+            <Setter Property="Background" Value="#12121E" />
+            <Setter Property="Foreground" Value="#F97316" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Height" Value="4" />
+        </Style>
+
+        <!-- ======================================================= -->
+        <!--  CARTÃO CENTRAL                                         -->
+        <!-- ======================================================= -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#0E0E1A" />
+            <Setter Property="BorderBrush" Value="#1A1A2A" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="34,30" />
+            <Setter Property="Width" Value="360" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <!-- ======================================================= -->
+        <!--  ETIQUETAS DE SECÇÃO (VERSÃO MINECRAFT / NEOFORGE)      -->
+        <!-- ======================================================= -->
+        <Style Selector="TextBlock.section-label">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#4A4A66" />
+            <Setter Property="LetterSpacing" Value="1.5" />
+            <Setter Property="Margin" Value="2,0,0,7" />
+        </Style>
     </Application.Styles>
 </Application>

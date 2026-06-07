@@ -3,18 +3,197 @@
         xmlns:vm="using:TCMine_Launcher.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="730" d:DesignHeight="470"
         x:Class="TCMine_Launcher.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="TCMine_Launcher">
+        Title="NeoLauncher"
+        Width="730" Height="470"
+        MinWidth="1000" MinHeight="600"
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--  RAIZ — cantos arredondados sobre fundo transparente    -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <Border Background="#0B0B14"
+            CornerRadius="12"
+            ClipToBounds="True">
+        <Grid RowDefinitions="45,*,28">
 
+            <!-- ═══════════════════════════════════════════════════ -->
+            <!--  BARRA DE TÍTULO (arrastável)                       -->
+            <!-- ═══════════════════════════════════════════════════ -->
+            <Border Grid.Row="0"
+                    Background="Transparent"
+                    BorderBrush="#141420"
+                    BorderThickness="0,0,0,1"
+                    PointerPressed="TitleBar_PointerPressed">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                Spacing="11"
+                                VerticalAlignment="Center"
+                                Margin="20,0,0,0">
+                        <TextBlock Text="⬡" FontSize="17" Foreground="#F97316"
+                                   VerticalAlignment="Center" />
+                        <TextBlock Text="TCMine Launcher" FontSize="12.5" Foreground="#3A3A52"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Classes="wnd-btn" Click="MinimizeButton_Click">
+                            <TextBlock Text="—" FontSize="13"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Button>
+                        <Button Classes="wnd-btn wnd-btn-close" Click="CloseButton_Click">
+                            <TextBlock Text="✕" FontSize="13"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- ═══════════════════════════════════════════════════ -->
+            <!--  CORPO — sidebar + conteúdo central                 -->
+            <!-- ═══════════════════════════════════════════════════ -->
+            <Grid Grid.Row="1" ColumnDefinitions="64,*">
+
+                <!-- ── SIDEBAR ──────────────────────────────────── -->
+                <Border Grid.Column="0"
+                        Background="#090912"
+                        BorderBrush="#141420"
+                        BorderThickness="0,0,1,0">
+                    <Grid RowDefinitions="*,Auto">
+                        <StackPanel Grid.Row="0"
+                                    Margin="0,6,0,0"
+                                    Spacing="6"
+                                    HorizontalAlignment="Center">
+                            <Button Classes="nav-btn active" ToolTip.Tip="Jogar">
+                                <TextBlock Text="▶" FontSize="17"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Button>
+                            <Button Classes="nav-btn" ToolTip.Tip="Modpacks">
+                                <TextBlock Text="⊞" FontSize="17"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Button>
+                            <Button Classes="nav-btn" ToolTip.Tip="Novidades">
+                                <TextBlock Text="☰" FontSize="17"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1"
+                                    Margin="0,0,0,12"
+                                    HorizontalAlignment="Center">
+                            <Button Classes="nav-btn" ToolTip.Tip="Definições">
+                                <TextBlock Text="⚙" FontSize="17"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- ── CONTEÚDO CENTRAL: cartão do perfil ────────── -->
+                <Grid Grid.Column="1">
+                    <Border Classes="card">
+                        <StackPanel Spacing="0">
+
+                            <!-- Avatar circular -->
+                            <Border Width="78" Height="78"
+                                    CornerRadius="39"
+                                    HorizontalAlignment="Center">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                        <GradientStop Color="#F97316" Offset="0" />
+                                        <GradientStop Color="#C2410C" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <TextBlock Text="{Binding AvatarInitials}"
+                                           FontSize="26" FontWeight="Bold" Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+
+                            <!-- Nome + tipo de conta -->
+                            <TextBlock Text="{Binding PlayerName}"
+                                       FontSize="17" FontWeight="Bold" Foreground="#E8E8F0"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,13,0,0" />
+                            <TextBlock Text="{Binding AccountLabel}"
+                                       FontSize="11" Foreground="#4A4A66"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,3,0,0" />
+
+                            <!-- Separador -->
+                            <Border Height="1" Background="#16161F" Margin="0,22" />
+
+                            <!-- Versão Minecraft -->
+                            <TextBlock Classes="section-label" Text="VERSÃO MINECRAFT" />
+                            <ComboBox Classes="version-select"
+                                      ItemsSource="{Binding MinecraftVersions}"
+                                      SelectedItem="{Binding SelectedMinecraftVersion}" />
+
+                            <!-- NeoForge -->
+                            <TextBlock Classes="section-label" Text="NEOFORGE" Margin="2,18,0,7" />
+                            <ComboBox Classes="version-select"
+                                      ItemsSource="{Binding NeoForgeVersions}"
+                                      SelectedItem="{Binding SelectedNeoForgeVersion}" />
+
+                            <!-- Botão JOGAR -->
+                            <Button Classes="play-btn"
+                                    Command="{Binding LaunchCommand}"
+                                    Height="46"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,24,0,0">
+                                <StackPanel Orientation="Horizontal" Spacing="9"
+                                            HorizontalAlignment="Center">
+                                    <TextBlock Text="▶" FontSize="12"
+                                               VerticalAlignment="Center" />
+                                    <TextBlock Text="JOGAR" FontSize="13" FontWeight="Bold"
+                                               LetterSpacing="1.5"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- ═══════════════════════════════════════════════════ -->
+            <!--  BARRA DE ESTADO                                    -->
+            <!-- ═══════════════════════════════════════════════════ -->
+            <Border Grid.Row="2"
+                    Background="#070710"
+                    BorderBrush="#141420"
+                    BorderThickness="0,1,0,0">
+                <Grid ColumnDefinitions="*,Auto" Margin="16,0">
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal"
+                                Spacing="7"
+                                VerticalAlignment="Center">
+                        <Ellipse Width="7" Height="7" Fill="#22C55E" />
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   FontSize="11" Foreground="#5A5A7A"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1"
+                               Text="beta v1"
+                               FontSize="11" Foreground="#2A2A40"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
 </Window>
