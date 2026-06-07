@@ -1,0 +1,121 @@
+# ============================================================
+#  .gitignore para projetos C# / .NET + Avalonia UI
+# ============================================================
+
+# ------ Build & Output ------
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+build/
+artifacts/
+
+# ------ Visual Studio ------
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# ------ VS Code ------
+.vscode/
+
+# ------ NuGet ------
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+packages/
+!packages/repositories.config
+project.lock.json
+project.fragment.lock.json
+
+# ------ .NET ------
+*.msbuildproj.cache
+*.msbuild.cache
+*.csproj.bak
+
+# ------ Publicação / Deploy ------
+**/publish/
+**/PublishProfiles/
+*.pubxml
+*.pubxml.user
+
+# ------ Testes ------
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+coverage*/
+TestResults/
+
+# ------ Rider / JetBrains ------
+.idea/
+*.sln.iml
+
+# ------ Avalonia UI ------
+# Ficheiros gerados pelo Avalonia Designer
+**/*.g.cs
+**/*.g.i.cs
+
+# Cache do designer
+.avalonia/
+
+# Source generators (gerados automaticamente em build)
+**/Generated/
+**/*.Generated.cs
+
+# Compilação XAML
+**/*.axaml.cs
+
+# Assets compilados
+**/CompiledAvaloniaXaml/
+
+# ------ Mobile (Avalonia Android/iOS) ------
+# Android
+**/android/build/
+**/android/.gradle/
+**/android/local.properties
+**/android/*.keystore
+**/android/*.jks
+
+# iOS
+**/ios/build/
+**/ios/DerivedData/
+**/ios/*.xcworkspace/xcuserdata/
+**/ios/*.xcodeproj/xcuserdata/
+
+# ------ WebAssembly (Avalonia WASM) ------
+**/wwwroot/dist/
+**/blazor.boot.json
+
+# ------ macOS ------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ------ Windows ------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ------ Secrets & Configuração local ------
+appsettings.local.json
+appsettings.Development.json
+secrets.json
+*.pfx
+*.p12
+*.key
+.env
+.env.*
+
+# ------ Outros ------
+*.cache
+*.pidb
+*.pdb
+*.opendb
+*.VC.VC.opendb
