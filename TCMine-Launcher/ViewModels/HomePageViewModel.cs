@@ -14,6 +14,7 @@ public partial class HomePageViewModel : ViewModelBase
 {
     private readonly GameProfile _game;
     private readonly PlayerProfile _player;
+    private readonly MainWindowViewModel _shell;
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
     private bool _isLaunching;
@@ -21,6 +22,9 @@ public partial class HomePageViewModel : ViewModelBase
     [ObservableProperty] private double _launchProgress;
 
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
+
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleLabel))]
+    private bool _isLogExpanded;
 
     [ObservableProperty] private ObservableCollection<string> _minecraftVersions;
 
@@ -30,10 +34,11 @@ public partial class HomePageViewModel : ViewModelBase
 
     [ObservableProperty] private string? _selectedNeoForgeVersion;
 
-    public HomePageViewModel(PlayerProfile player, GameProfile game)
+    public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
         _player = player;
         _game = game;
+        _shell = shell;
 
         ActiveModpack = new Modpack
         {
@@ -59,6 +64,11 @@ public partial class HomePageViewModel : ViewModelBase
     }
 
     public Modpack ActiveModpack { get; }
+
+    /// <summary>Linhas do console de launch (registo).</summary>
+    public ObservableCollection<string> LaunchLog { get; } = new();
+
+    public string LogToggleLabel => IsLogExpanded ? "▾ Ocultar registo" : "▸ Mostrar registo";
 
     // ── Perfil (delegado ao Model) ───────────────────────────────
     public string PlayerName => _player.Name;
@@ -96,6 +106,8 @@ public partial class HomePageViewModel : ViewModelBase
         // TODO: substituir pela integração real com CmlLib (download + launch).
         IsLaunching = true;
         LaunchProgress = 0;
+        LaunchLog.Clear();
+        LaunchLog.Add($"Modpack: {ActiveModpack.Name} ({ActiveModpack.VersionSummary})");
 
         var steps = new (int Pct, string Msg)[]
         {
@@ -111,11 +123,15 @@ public partial class HomePageViewModel : ViewModelBase
             await Task.Delay(650);
             LaunchProgress = pct;
             LaunchStatus = msg;
+            LaunchLog.Add($"[{pct,3}%] {msg}");
+            _shell.SetBusy(true, pct, msg);
         }
 
         await Task.Delay(700);
+        LaunchLog.Add("[100%] Minecraft iniciado.");
         LaunchStatus = "Pronto para jogar";
         LaunchProgress = 0;
         IsLaunching = false;
+        _shell.SetBusy(false, 0, "Pronto");
     }
 }

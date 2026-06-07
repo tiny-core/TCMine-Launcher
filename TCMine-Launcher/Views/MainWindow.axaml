@@ -138,7 +138,11 @@
                     </Border>
 
                     <!-- PÁGINA ACTIVA (resolvida pelo ViewLocator) -->
-                    <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" />
+                    <TransitioningContentControl Grid.Column="1" Content="{Binding CurrentPage}">
+                        <TransitioningContentControl.PageTransition>
+                            <CrossFade Duration="0:0:0.18" />
+                        </TransitioningContentControl.PageTransition>
+                    </TransitioningContentControl>
                 </Grid>
             </Panel>
 
@@ -149,7 +153,7 @@
                     Background="#070710"
                     BorderBrush="#141420"
                     BorderThickness="0,1,0,0">
-                <Grid ColumnDefinitions="*,Auto" Margin="16,0">
+                <Grid ColumnDefinitions="Auto,*,Auto,16,Auto" Margin="16,0">
                     <StackPanel Grid.Column="0"
                                 Orientation="Horizontal"
                                 Spacing="7"
@@ -161,7 +165,15 @@
                                    FontSize="11" Foreground="#5A5A7A"
                                    VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Grid.Column="1"
+
+                    <!-- Progresso global (visível durante downloads/launch) -->
+                    <ProgressBar Grid.Column="2"
+                                 Classes="status-progress"
+                                 Value="{Binding GlobalProgress}"
+                                 IsVisible="{Binding IsBusy}"
+                                 VerticalAlignment="Center" />
+
+                    <TextBlock Grid.Column="4"
                                Text="beta v1"
                                FontSize="11" Foreground="#2A2A40"
                                VerticalAlignment="Center" />

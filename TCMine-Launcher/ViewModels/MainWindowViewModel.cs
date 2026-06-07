@@ -42,12 +42,17 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private string _statusMessage = "Não autenticado";
 
+    // ── Progresso global (status bar) ────────────────────────────
+    [ObservableProperty] private bool _isBusy;
+
+    [ObservableProperty] private double _globalProgress;
+
     public MainWindowViewModel()
     {
         _player = new PlayerProfile();
         _game = new GameProfile();
 
-        Home = new HomePageViewModel(_player, _game);
+        Home = new HomePageViewModel(_player, _game, this);
         Modpacks = new ModpacksPageViewModel();
         News = new NewsPageViewModel();
         Settings = new SettingsPageViewModel(_player, _game, this);
@@ -127,6 +132,14 @@ public partial class MainWindowViewModel : ViewModelBase
         RefreshPlayer();
         SelectedTab = AppTab.Home;
         IsLoggedIn = true;
+        StatusMessage = status;
+    }
+
+    /// <summary>Atualiza o progresso global mostrado na barra de estado.</summary>
+    public void SetBusy(bool busy, double progress, string status)
+    {
+        IsBusy = busy;
+        GlobalProgress = progress;
         StatusMessage = status;
     }
 
