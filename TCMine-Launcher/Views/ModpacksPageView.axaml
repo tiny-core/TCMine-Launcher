@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:m="using:TCMine_Launcher.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
+             x:Class="TCMine_Launcher.Views.ModpacksPageView"
+             x:DataType="vm:ModpacksPageViewModel">
+
+    <Grid Margin="26" RowDefinitions="Auto,16,*">
+
+        <!-- Cabeçalho -->
+        <StackPanel Grid.Row="0">
+            <TextBlock Classes="page-title" Text="Modpacks" />
+            <TextBlock Classes="muted" Text="Escolhe e instala um pack para jogar"
+                       Margin="0,4,0,0" />
+        </StackPanel>
+
+        <!-- Catálogo -->
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Modpacks}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="m:Modpack">
+                        <Border Classes="modpack-card" Margin="0,0,16,16">
+                            <StackPanel>
+                                <!-- Banner -->
+                                <Border Height="92" CornerRadius="12,12,0,0" ClipToBounds="True">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                            <GradientStop Color="#3B1D4D" Offset="0" />
+                                            <GradientStop Color="#2A1206" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <Border Classes="tag" VerticalAlignment="Top"
+                                            HorizontalAlignment="Left" Margin="12">
+                                        <TextBlock Text="{Binding Tagline}" />
+                                    </Border>
+                                </Border>
+
+                                <!-- Info -->
+                                <StackPanel Margin="16,14,16,16" Spacing="0">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="15" FontWeight="Bold" Foreground="#E8E8F0" />
+                                    <TextBlock Text="{Binding AuthorLabel}"
+                                               Classes="muted" FontSize="11" Margin="0,2,0,0" />
+                                    <TextBlock Text="{Binding VersionSummary}"
+                                               Foreground="#5A5A7A" FontSize="11" Margin="0,8,0,0" />
+                                    <TextBlock Text="{Binding Description}"
+                                               Foreground="#7A7A9A" FontSize="12"
+                                               TextWrapping="Wrap" Height="34" Margin="0,8,0,0" />
+
+                                    <Button Classes="outline-btn"
+                                            HorizontalAlignment="Stretch"
+                                            HorizontalContentAlignment="Center"
+                                            Margin="0,14,0,0">
+                                        <TextBlock Text="{Binding InstallLabel}"
+                                                   FontSize="12.5" FontWeight="SemiBold" />
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

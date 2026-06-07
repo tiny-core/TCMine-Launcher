@@ -1,0 +1,78 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="560"
+             x:Class="TCMine_Launcher.Views.LoginView"
+             x:DataType="vm:MainWindowViewModel">
+
+    <!-- Fundo com leve brilho no topo -->
+    <Panel>
+        <Border>
+            <Border.Background>
+                <RadialGradientBrush Center="50%,0%" GradientOrigin="50%,0%" RadiusX="70%" RadiusY="60%">
+                    <GradientStop Color="#161018" Offset="0" />
+                    <GradientStop Color="#0B0B14" Offset="1" />
+                </RadialGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <!-- Cartão de login centrado -->
+        <Border Background="#0E0E1A"
+                BorderBrush="#1A1A2A"
+                BorderThickness="1"
+                CornerRadius="16"
+                Width="400"
+                Padding="40,38"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel Spacing="0" HorizontalAlignment="Stretch">
+
+                <!-- Logo -->
+                <TextBlock Text="⬡" FontSize="46" Foreground="#F97316"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="TCMine Launcher"
+                           FontSize="20" FontWeight="Bold" Foreground="#E8E8F0"
+                           HorizontalAlignment="Center" Margin="0,10,0,0" />
+                <TextBlock Text="Entra para jogar o modpack oficial"
+                           Classes="muted"
+                           HorizontalAlignment="Center" Margin="0,5,0,0" />
+
+                <Border Height="1" Background="#16161F" Margin="0,26" />
+
+                <!-- Botão Microsoft -->
+                <Button Classes="ms-btn" Command="{Binding LoginMicrosoftCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <!-- Logótipo Microsoft (4 quadrados) -->
+                        <Grid Width="18" Height="18" RowDefinitions="*,*" ColumnDefinitions="*,*"
+                              VerticalAlignment="Center">
+                            <Rectangle Grid.Row="0" Grid.Column="0" Fill="#F25022" Margin="0,0,1,1" />
+                            <Rectangle Grid.Row="0" Grid.Column="1" Fill="#7FBA00" Margin="1,0,0,1" />
+                            <Rectangle Grid.Row="1" Grid.Column="0" Fill="#00A4EF" Margin="0,1,1,0" />
+                            <Rectangle Grid.Row="1" Grid.Column="1" Fill="#FFB900" Margin="1,1,0,0" />
+                        </Grid>
+                        <TextBlock Text="Entrar com a Microsoft"
+                                   FontSize="13.5" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Jogar offline -->
+                <Button Classes="ghost-btn"
+                        Command="{Binding PlayOfflineCommand}"
+                        Margin="0,14,0,0">
+                    <TextBlock Text="Continuar em modo offline" FontSize="12.5" />
+                </Button>
+
+                <TextBlock Text="Ao entrar aceitas os termos de uso do servidor TCMine."
+                           Classes="muted"
+                           FontSize="10.5"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           Foreground="#3A3A52"
+                           Margin="0,22,0,0" />
+            </StackPanel>
+        </Border>
+    </Panel>
+</UserControl>

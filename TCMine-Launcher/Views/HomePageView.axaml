@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
+             x:Class="TCMine_Launcher.Views.HomePageView"
+             x:DataType="vm:HomePageViewModel">
+
+    <Grid Margin="26" ColumnDefinitions="*,18,300">
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!--  ESQUERDA: hero do modpack + barra de launch          -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <Grid Grid.Column="0" RowDefinitions="*,Auto">
+
+            <!-- Hero / banner -->
+            <Border Grid.Row="0" CornerRadius="16" ClipToBounds="True">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                        <GradientStop Color="#3B1D4D" Offset="0" />
+                        <GradientStop Color="#1A1326" Offset="0.55" />
+                        <GradientStop Color="#2A1206" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+
+                <Grid>
+                    <!-- brilho decorativo -->
+                    <Border>
+                        <Border.Background>
+                            <RadialGradientBrush Center="85%,15%" GradientOrigin="85%,15%"
+                                                 RadiusX="50%" RadiusY="60%">
+                                <GradientStop Color="#40F97316" Offset="0" />
+                                <GradientStop Color="#00F97316" Offset="1" />
+                            </RadialGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <StackPanel VerticalAlignment="Bottom" Margin="30,0,30,28" Spacing="0">
+                        <Border Classes="tag">
+                            <TextBlock Text="{Binding ActiveModpack.Tagline}" />
+                        </Border>
+                        <TextBlock Text="{Binding ActiveModpack.Name}"
+                                   FontSize="34" FontWeight="Bold" Foreground="White"
+                                   Margin="0,12,0,0" />
+                        <TextBlock Text="{Binding ActiveModpack.AuthorLabel}"
+                                   FontSize="13" Foreground="#C9B8D8" Margin="0,2,0,0" />
+                        <TextBlock Text="{Binding ActiveModpack.Description}"
+                                   FontSize="13" Foreground="#9A8AA8"
+                                   TextWrapping="Wrap" MaxWidth="460"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,12,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Barra de launch -->
+            <StackPanel Grid.Row="1" Margin="0,18,0,0" Spacing="12">
+                <ProgressBar Classes="launch-progress"
+                             Value="{Binding LaunchProgress}"
+                             IsVisible="{Binding IsLaunching}" />
+                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9"
+                                VerticalAlignment="Center">
+                        <Ellipse Width="8" Height="8" Fill="#22C55E"
+                                 IsVisible="{Binding !IsLaunching}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding LaunchStatus}"
+                                   Foreground="#8A8AAA" FontSize="13"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Classes="play-btn"
+                            Command="{Binding PlayCommand}"
+                            Width="230" Height="50">
+                        <StackPanel Orientation="Horizontal" Spacing="10"
+                                    HorizontalAlignment="Center">
+                            <TextBlock Text="▶" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="JOGAR" FontSize="14" FontWeight="Bold"
+                                       LetterSpacing="2" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!--  DIREITA: painel de perfil + configuração             -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <Border Grid.Column="2" Classes="panel">
+            <StackPanel Spacing="0">
+
+                <!-- Avatar realocado para aqui -->
+                <Border Classes="avatar" Width="72" Height="72">
+                    <TextBlock Text="{Binding AvatarInitials}" FontSize="24" />
+                </Border>
+                <TextBlock Text="{Binding PlayerName}"
+                           FontSize="16" FontWeight="Bold" Foreground="#E8E8F0"
+                           HorizontalAlignment="Center" Margin="0,12,0,0" />
+                <TextBlock Text="{Binding AccountLabel}"
+                           Classes="muted" FontSize="11"
+                           HorizontalAlignment="Center" Margin="0,3,0,0" />
+
+                <Border Height="1" Background="#16161F" Margin="0,20" />
+
+                <TextBlock Classes="section-label" Text="VERSÃO MINECRAFT" />
+                <ComboBox Classes="version-select"
+                          ItemsSource="{Binding MinecraftVersions}"
+                          SelectedItem="{Binding SelectedMinecraftVersion}" />
+
+                <TextBlock Classes="section-label" Text="NEOFORGE" Margin="2,16,0,7" />
+                <ComboBox Classes="version-select"
+                          ItemsSource="{Binding NeoForgeVersions}"
+                          SelectedItem="{Binding SelectedNeoForgeVersion}" />
+
+                <Grid ColumnDefinitions="*,Auto" Margin="2,18,2,0">
+                    <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA" Margin="0" />
+                    <TextBlock Grid.Column="1" Text="{Binding RamDisplay}"
+                               FontSize="11" Foreground="#94A3B8" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

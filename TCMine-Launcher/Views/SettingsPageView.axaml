@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
+             x:Class="TCMine_Launcher.Views.SettingsPageView"
+             x:DataType="vm:SettingsPageViewModel">
+
+    <Grid Margin="26" RowDefinitions="Auto,16,*">
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Classes="page-title" Text="Definições" />
+            <TextBlock Classes="muted" Text="Conta, memória e Java" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2">
+            <StackPanel Spacing="14" MaxWidth="560" HorizontalAlignment="Left">
+
+                <!-- Conta -->
+                <Border Classes="panel">
+                    <Grid ColumnDefinitions="Auto,16,*,Auto">
+                        <Border Grid.Column="0" Classes="avatar" Width="52" Height="52"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding AvatarInitials}" FontSize="18" />
+                        </Border>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{Binding PlayerName}"
+                                       FontSize="15" FontWeight="Bold" Foreground="#E8E8F0" />
+                            <TextBlock Text="{Binding AccountLabel}" Classes="muted" FontSize="11" />
+                        </StackPanel>
+                        <Button Grid.Column="3" Classes="outline-btn"
+                                Command="{Binding LogoutCommand}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="Terminar sessão" FontSize="12.5" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- Jogo -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="0">
+                        <TextBlock Text="Jogo" FontSize="14" FontWeight="Bold"
+                                   Foreground="#E8E8F0" />
+
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0">
+                            <TextBlock Grid.Column="0" Classes="section-label"
+                                       Text="MEMÓRIA ALOCADA" Margin="0" />
+                            <TextBlock Grid.Column="1" Text="{Binding RamDisplay}"
+                                       FontSize="12" Foreground="#F97316" FontWeight="SemiBold" />
+                        </Grid>
+                        <Slider Minimum="1024" Maximum="16384"
+                                TickFrequency="1024" IsSnapToTickEnabled="True"
+                                Value="{Binding RamMb}" Margin="0,4,0,0" />
+
+                        <TextBlock Classes="section-label" Text="CAMINHO DO JAVA (opcional)"
+                                   Margin="2,16,0,7" />
+                        <TextBox Text="{Binding JavaPath}"
+                                 PlaceholderText="Auto-detectar"
+                                 Background="#0A0A16"
+                                 BorderBrush="#1A1A28"
+                                 Foreground="#94A3B8"
+                                 CornerRadius="7"
+                                 Padding="11,8" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Sobre -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Sobre" FontSize="14" FontWeight="Bold"
+                                   Foreground="#E8E8F0" />
+                        <TextBlock Text="TCMine Launcher · beta v1" Classes="muted" />
+                        <TextBlock Text="Launcher do servidor TCMine — NeoForge + modpack custom."
+                                   Classes="muted" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
