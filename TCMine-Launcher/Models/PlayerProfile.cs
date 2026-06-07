@@ -10,6 +10,9 @@ public class PlayerProfile
 {
     public string Name { get; set; } = "Steve";
 
+    /// <summary>UUID do Minecraft (vazio em contas offline sem sessão).</summary>
+    public string Uuid { get; set; } = string.Empty;
+
     public AccountType AccountType { get; set; } = AccountType.Offline;
 
     /// <summary>Texto descritivo do tipo de conta.</summary>

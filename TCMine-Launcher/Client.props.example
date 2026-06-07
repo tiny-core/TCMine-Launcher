@@ -1,0 +1,17 @@
+<Project>
+    <!--
+        Copia este ficheiro para  Client.props  (que está no .gitignore) e
+        coloca o teu Azure "Application (client) ID".
+
+        O valor é embutido no binário em tempo de compilação (build/publish),
+        por isso o launcher (dev e distribuído) funciona sem env vars nem config.
+        O client ID NÃO é um segredo (apps desktop são "public clients" e não
+        têm client secret) — só o mantemos fora do git por higiene.
+
+        Alternativa em CI/produção sem ficheiro:
+            dotnet publish -p:MicrosoftClientId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    -->
+    <PropertyGroup>
+        <MicrosoftClientId>00000000-0000-0000-0000-000000000000</MicrosoftClientId>
+    </PropertyGroup>
+</Project>

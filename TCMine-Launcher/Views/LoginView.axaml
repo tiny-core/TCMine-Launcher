@@ -42,7 +42,8 @@
                 <Border Height="1" Background="#16161F" Margin="0,26" />
 
                 <!-- Botão Microsoft -->
-                <Button Classes="ms-btn" Command="{Binding LoginMicrosoftCommand}">
+                <Button Classes="ms-btn" Command="{Binding LoginMicrosoftCommand}"
+                        IsEnabled="{Binding !IsAuthenticating}">
                     <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <!-- Logótipo Microsoft (4 quadrados) -->
                         <Grid Width="18" Height="18" RowDefinitions="*,*" ColumnDefinitions="*,*"
@@ -61,9 +62,34 @@
                 <!-- Jogar offline -->
                 <Button Classes="ghost-btn"
                         Command="{Binding PlayOfflineCommand}"
+                        IsEnabled="{Binding !IsAuthenticating}"
                         Margin="0,14,0,0">
                     <TextBlock Text="Continuar em modo offline" FontSize="12.5" />
                 </Button>
+
+                <!-- Estado: a autenticar -->
+                <StackPanel Spacing="12"
+                            HorizontalAlignment="Center" Margin="0,18,0,0"
+                            IsVisible="{Binding IsAuthenticating}">
+                    <StackPanel Orientation="Horizontal" Spacing="10"
+                                HorizontalAlignment="Center">
+                        <Ellipse Classes="spinner" Width="18" Height="18" />
+                        <TextBlock Text="A aguardar autorização no navegador..."
+                                   Classes="muted" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Button Classes="ghost-btn"
+                            Command="{Binding CancelLoginCommand}"
+                            HorizontalAlignment="Center">
+                        <TextBlock Text="Cancelar" FontSize="12.5" Foreground="#F87171" />
+                    </Button>
+                </StackPanel>
+
+                <!-- Estado: erro -->
+                <TextBlock Text="{Binding LoginError}"
+                           IsVisible="{Binding LoginError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           Foreground="#F87171" FontSize="11.5"
+                           TextWrapping="Wrap" TextAlignment="Center"
+                           Margin="0,16,0,0" />
 
                 <TextBlock Text="Ao entrar aceitas os termos de uso do servidor TCMine."
                            Classes="muted"

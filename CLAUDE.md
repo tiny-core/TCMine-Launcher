@@ -6,7 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 TCMine-Launcher is a desktop Minecraft launcher targeting **NeoForge** modloader builds. It is built with **Avalonia 12** (cross-platform XAML UI) on **.NET 10**, using the **CommunityToolkit.Mvvm** source generators for MVVM. Game launching, file installation, and authentication are provided by the **CmlLib.Core** family of packages (`CmlLib.Core`, `CmlLib.Core.Installer.NeoForge`, `CmlLib.Core.Auth.Microsoft` + `XboxAuthNet.Game.Msal`).
 
-> Note: backend logic is **not yet wired up** — the UI is built ahead of it. `HomePageViewModel.PlayAsync` runs a fake progress sequence (no CmlLib yet); `MainWindowViewModel.LoginMicrosoft`/`PlayOffline` just flip `IsLoggedIn` without real auth (the XboxAuthNet/MSAL integration is marked with a `TODO`). The `Models/Minecraft.cs` and `Models/Auth.cs` classes are empty placeholders.
+> Note: backend logic is being wired up incrementally. **Microsoft login is real** — `MainWindowViewModel` delegates to `Services/AuthService` (CmlLib `JELoginHandler` via `JELoginHandlerBuilder.BuildDefault()`), which does interactive system-browser auth, silent re-login from cache on startup, and real sign-out. The resulting `MSession` is held in the shell for launching. **Still fake:** `HomePageViewModel.PlayAsync` runs a simulated progress sequence (no CmlLib download/launch yet). The `Models/Minecraft.cs` and `Models/Auth.cs` classes are empty placeholders.
+
+### Services
+
+`Services/AuthService.cs` is the first of a planned services layer. It wraps the CmlLib auth handler and exposes `LoginAsync` (silent→browser), `LoginSilentAsync` (startup), and `SignOutAsync`, all taking a `CancellationToken` (the login command wires a Cancel button + 5-min timeout). On Linux the MSAL default WebUI doesn't exist, so it builds the auth pipeline manually (`CreateAuthenticator… + AddMsalOAuth(app, msal => msal.SystemBrowser()/.Silent())`) — see the `msal-linux-auth` memory. The VM maps the returned `MSession` (`CmlLib.Core.Auth`, from CmlLib.Core.Commons) onto the pure `PlayerProfile` — Models never reference CmlLib. Auth tokens persist via MSAL's cross-platform cache, so login survives restarts.
+
+`Services/AppConfig.cs` reads the Azure **client ID** (a public-client ID, not a secret) solely from a value baked into the assembly at build time — no env vars, no external config files. The value comes from a gitignored `TCMine-Launcher/Client.props` (`<MicrosoftClientId>`) that the `.csproj` imports and emits as an `AssemblyMetadataAttribute` (also overridable via `dotnet build/publish -p:MicrosoftClientId=…`). This keeps the ID out of git while embedding it in both dev and production builds. See `Client.props.example`; a missing/empty value surfaces a clear "not configured" error at login.
 
 ## Commands
 
