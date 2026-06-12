@@ -17,14 +17,17 @@ public static class LauncherPaths
     /// <summary>Ficheiro JSON com as definições globais (RAM, Java, versões).</summary>
     public static string SettingsFile => Path.Combine(Root, "settings.json");
 
-    /// <summary>Pasta onde, na fase 2, viverão as instâncias isoladas.</summary>
+    /// <summary>Pasta-mãe de todas as instâncias isoladas.</summary>
     public static string InstancesDir => Path.Combine(Root, "instances");
 
-    /// <summary>
-    ///     Pasta do jogo na fase 1 (instância única partilhada). Quando as
-    ///     instâncias chegarem, cada uma terá o seu próprio diretório aqui dentro.
-    /// </summary>
-    public static string DefaultGameDir => Path.Combine(Root, "minecraft");
+    /// <summary>Pasta de uma instância concreta (config + jogo).</summary>
+    public static string InstanceDir(string id) => Path.Combine(InstancesDir, id);
+
+    /// <summary>Ficheiro de configuração JSON de uma instância.</summary>
+    public static string InstanceConfigFile(string id) => Path.Combine(InstanceDir(id), "instance.json");
+
+    /// <summary>Diretório <c>.minecraft</c> isolado de uma instância (mods, saves, config).</summary>
+    public static string InstanceGameDir(string id) => Path.Combine(InstanceDir(id), "minecraft");
 
     /// <summary>Garante que a raiz existe antes de escrever.</summary>
     public static void EnsureRoot()

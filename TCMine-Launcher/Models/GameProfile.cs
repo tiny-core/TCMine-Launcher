@@ -16,9 +16,12 @@ public class GameProfile
     public string MinecraftVersion { get; set; } = "1.21.1";
     public string NeoForgeVersion { get; set; } = "21.1.172";
 
-    //    // ── JVM ───────────────────────────────────────────────────────
+    //    // ── JVM (defaults globais; instâncias podem sobrepor a RAM) ────
     public int AllocatedRamMb { get; set; } = 4096;
     public string? JavaPath { get; set; } // null = auto-detectar
+
+    /// <summary>Id da última instância selecionada (restaurada no arranque).</summary>
+    public string? SelectedInstanceId { get; set; }
 
     //    // ── Lógica de domínio pura (calculada — não persistir) ────────
     /// <summary>Descrição compacta do perfil para listas/menus.</summary>

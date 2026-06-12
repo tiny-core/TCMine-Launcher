@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
+             x:Class="TCMine_Launcher.Views.CreateInstancePageView"
+             x:DataType="vm:CreateInstancePageViewModel">
+
+    <Grid Margin="26" RowDefinitions="Auto,*">
+
+        <!-- Cabeçalho com voltar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+            <Button Classes="ghost-btn" Command="{Binding CancelCommand}" Padding="4">
+                <TextBlock Text="←" FontSize="20" Foreground="#94A3B8" />
+            </Button>
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Nova instância" />
+                <TextBlock Classes="muted" Text="Configura uma instalação isolada de Minecraft"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Formulário -->
+        <ScrollViewer Grid.Row="1" Margin="0,20,0,0" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="18" MaxWidth="560" HorizontalAlignment="Left">
+
+                <!-- Nome + versões -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="0">
+                        <TextBlock Classes="section-label" Text="NOME" />
+                        <TextBox Text="{Binding Name}"
+                                 PlaceholderText="Nome da instância"
+                                 Background="#0A0A16" BorderBrush="#1A1A28"
+                                 CornerRadius="7" Foreground="#E8E8F0" Padding="11,8" />
+
+                        <Grid ColumnDefinitions="*,16,*" Margin="0,16,0,0">
+                            <StackPanel Grid.Column="0">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Classes="section-label" Text="VERSÃO MINECRAFT" />
+                                    <Ellipse Grid.Column="1" Classes="spinner" Width="12" Height="12"
+                                             Margin="0,0,4,6"
+                                             IsVisible="{Binding IsLoadingMinecraft}" />
+                                </Grid>
+                                <ComboBox Classes="version-select"
+                                          ItemsSource="{Binding MinecraftVersions}"
+                                          SelectedItem="{Binding SelectedMinecraftVersion}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Classes="section-label" Text="NEOFORGE" />
+                                    <Ellipse Grid.Column="1" Classes="spinner" Width="12" Height="12"
+                                             Margin="0,0,4,6"
+                                             IsVisible="{Binding IsLoadingNeoForge}" />
+                                </Grid>
+                                <ComboBox Classes="version-select"
+                                          ItemsSource="{Binding NeoForgeVersions}"
+                                          SelectedItem="{Binding SelectedNeoForgeVersion}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Classes="muted" FontSize="11" Margin="2,10,0,0"
+                                   Text="Versões obtidas em tempo real (apenas releases do Minecraft)." />
+                    </StackPanel>
+                </Border>
+
+                <!-- Mods (em breve) -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="section-label" Text="MODS" Margin="0" />
+                            <Border Grid.Column="1" Classes="tag">
+                                <TextBlock Text="EM BREVE" />
+                            </Border>
+                        </Grid>
+                        <TextBlock Classes="muted" TextWrapping="Wrap"
+                                   Text="A seleção de mods chega na próxima fase, com a integração do CurseForge. Por agora a instância é criada apenas com NeoForge." />
+                    </StackPanel>
+                </Border>
+
+                <!-- Ações -->
+                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                    <Button Classes="ghost-btn" Command="{Binding CancelCommand}">
+                        <TextBlock Text="Cancelar" FontSize="13" />
+                    </Button>
+                    <Button Classes="play-btn" Height="42" Width="160"
+                            Command="{Binding ConfirmCommand}">
+                        <TextBlock Text="Criar instância" FontSize="13" FontWeight="Bold" />
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

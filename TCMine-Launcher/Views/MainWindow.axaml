@@ -91,6 +91,15 @@
                                                VerticalAlignment="Center" />
                                 </Button>
                                 <Button Classes="nav-btn"
+                                        Classes.active="{Binding IsInstancesSelected}"
+                                        Command="{Binding NavigateCommand}"
+                                        CommandParameter="{x:Static vm:AppTab.Instances}"
+                                        ToolTip.Tip="Instâncias">
+                                    <TextBlock Text="▦" FontSize="17"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                </Button>
+                                <Button Classes="nav-btn"
                                         Classes.active="{Binding IsModpacksSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Modpacks}"

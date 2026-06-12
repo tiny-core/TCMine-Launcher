@@ -1,4 +1,6 @@
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CmlLib.Core.Auth;
@@ -13,6 +15,7 @@ namespace TCMine_Launcher.ViewModels;
 public enum AppTab
 {
     Home,
+    Instances,
     Modpacks,
     News,
     Settings
@@ -35,6 +38,13 @@ public partial class MainWindowViewModel : ViewModelBase
     // Serviços
     private readonly AuthService _auth = new();
     private readonly SettingsService _settings = new();
+    private readonly InstanceService _instances = new();
+
+    /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
+    public ObservableCollection<MinecraftInstance> Instances { get; } = new();
+
+    /// <summary>Instância atualmente selecionada (a que a Home lança).</summary>
+    [ObservableProperty] private MinecraftInstance? _activeInstance;
 
     /// <summary>Sessão Minecraft activa (usada depois para lançar o jogo).</summary>
     private MSession? _session;
@@ -52,6 +62,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsHomeSelected))]
+    [NotifyPropertyChangedFor(nameof(IsInstancesSelected))]
     [NotifyPropertyChangedFor(nameof(IsModpacksSelected))]
     [NotifyPropertyChangedFor(nameof(IsNewsSelected))]
     [NotifyPropertyChangedFor(nameof(IsSettingsSelected))]
@@ -75,7 +86,11 @@ public partial class MainWindowViewModel : ViewModelBase
         _player = new PlayerProfile();
         _game = _settings.Load();
 
+        LoadInstances();
+
         Home = new HomePageViewModel(_player, _game, this);
+        InstancesPage = new InstancesPageViewModel(this);
+        CreateInstancePage = new CreateInstancePageViewModel(_game, this);
         Modpacks = new ModpacksPageViewModel();
         News = new NewsPageViewModel();
         Settings = new SettingsPageViewModel(_player, _game, this);
@@ -88,6 +103,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // ── Páginas (criadas uma vez, reutilizadas) ──────────────────
     public HomePageViewModel Home { get; }
+    public InstancesPageViewModel InstancesPage { get; }
+    public CreateInstancePageViewModel CreateInstancePage { get; }
     public ModpacksPageViewModel Modpacks { get; }
     public NewsPageViewModel News { get; }
     public SettingsPageViewModel Settings { get; }
@@ -99,12 +116,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // ── Realce da aba activa (bind via Classes.active) ───────────
     public bool IsHomeSelected => SelectedTab == AppTab.Home;
+    public bool IsInstancesSelected => SelectedTab == AppTab.Instances;
     public bool IsModpacksSelected => SelectedTab == AppTab.Modpacks;
     public bool IsNewsSelected => SelectedTab == AppTab.News;
     public bool IsSettingsSelected => SelectedTab == AppTab.Settings;
 
     public string PageTitle => SelectedTab switch
     {
+        AppTab.Instances => "Instâncias",
         AppTab.Modpacks => "Modpacks",
         AppTab.News => "Novidades",
         AppTab.Settings => "Definições",
@@ -115,6 +134,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         CurrentPage = value switch
         {
+            AppTab.Instances => InstancesPage,
             AppTab.Modpacks => Modpacks,
             AppTab.News => News,
             AppTab.Settings => Settings,
@@ -235,6 +255,100 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedTab = AppTab.Home;
         IsLoggedIn = true;
         StatusMessage = status;
+    }
+
+    // ── Gestão de instâncias ─────────────────────────────────────
+
+    /// <summary>Carrega as instâncias do disco e restaura a que estava selecionada.</summary>
+    private void LoadInstances()
+    {
+        Instances.Clear();
+        foreach (var instance in _instances.LoadAll())
+            Instances.Add(instance);
+
+        // Primeira execução: cria a instância oficial por defeito.
+        if (Instances.Count == 0)
+        {
+            var seed = _instances.Create(
+                "TCMine Modpack", _game.MinecraftVersion, _game.NeoForgeVersion,
+                InstanceSource.OfficialManifest);
+            Instances.Add(seed);
+        }
+
+        ActiveInstance =
+            Instances.FirstOrDefault(i => i.Id == _game.SelectedInstanceId)
+            ?? Instances.First();
+    }
+
+    /// <summary>Define a instância ativa (a que a Home lança) e persiste a escolha.</summary>
+    public void SelectInstance(MinecraftInstance instance)
+    {
+        ActiveInstance = instance;
+        _game.SelectedInstanceId = instance.Id;
+        PersistSettings();
+        Home.NotifyInstanceChanged();
+        InstancesPage.NotifyActiveChanged();
+    }
+
+    /// <summary>Atalho para voltar à página "Jogar".</summary>
+    public void NavigateToHome()
+    {
+        SelectedTab = AppTab.Home;
+    }
+
+    /// <summary>Abre a página dedicada de criação de instância (mantém a aba Instâncias ativa).</summary>
+    public void ShowCreateInstance()
+    {
+        CreateInstancePage.Begin();
+        CurrentPage = CreateInstancePage;
+    }
+
+    /// <summary>Volta da página de criação para a lista de instâncias.</summary>
+    public void BackToInstances()
+    {
+        SelectedTab = AppTab.Instances;
+        CurrentPage = InstancesPage;
+    }
+
+    /// <summary>Indica se uma instância já tem ficheiros de jogo (define Jogar vs Instalar).</summary>
+    public bool IsInstanceInstalled(MinecraftInstance instance)
+    {
+        return _instances.IsInstalled(instance);
+    }
+
+    /// <summary>Cria uma nova instância, persiste-a e seleciona-a.</summary>
+    public MinecraftInstance CreateInstance(string name, string mcVersion, string neoForgeVersion)
+    {
+        var instance = _instances.Create(name, mcVersion, neoForgeVersion);
+        Instances.Insert(0, instance);
+        SelectInstance(instance);
+        return instance;
+    }
+
+    /// <summary>Grava as alterações de uma instância no disco.</summary>
+    public void SaveInstance(MinecraftInstance instance)
+    {
+        _instances.Save(instance);
+    }
+
+    /// <summary>Elimina uma instância (e a sua pasta). Garante que sobra sempre uma ativa.</summary>
+    public void DeleteInstance(MinecraftInstance instance)
+    {
+        _instances.Delete(instance);
+        Instances.Remove(instance);
+
+        if (ActiveInstance == instance)
+            SelectInstance(Instances.FirstOrDefault() ?? CreateSeedAfterDelete());
+    }
+
+    /// <summary>Se o utilizador apagar a última instância, recria a oficial.</summary>
+    private MinecraftInstance CreateSeedAfterDelete()
+    {
+        var seed = _instances.Create(
+            "TCMine Modpack", _game.MinecraftVersion, _game.NeoForgeVersion,
+            InstanceSource.OfficialManifest);
+        Instances.Add(seed);
+        return seed;
     }
 
     /// <summary>Persiste o perfil de jogo no disco. Chamado pelas páginas ao mudar definições.</summary>

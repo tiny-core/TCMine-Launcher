@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:m="using:TCMine_Launcher.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
+             x:Class="TCMine_Launcher.Views.InstancesPageView"
+             x:DataType="vm:InstancesPageViewModel"
+             x:Name="PageRoot">
+
+    <Grid Margin="26" RowDefinitions="Auto,*">
+
+        <!-- Cabeçalho -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0">
+                <TextBlock Classes="page-title" Text="Instâncias" />
+                <TextBlock Classes="muted" Text="As tuas instalações isoladas de Minecraft"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+
+            <Button Grid.Column="1" Classes="play-btn" Height="40"
+                    VerticalAlignment="Center"
+                    Command="{Binding OpenCreateCommand}">
+                <TextBlock Text="+ Nova instância" FontSize="12.5" FontWeight="Bold"
+                           Margin="6,0" />
+            </Button>
+        </Grid>
+
+        <!-- Lista de instâncias -->
+        <ScrollViewer Grid.Row="1" Margin="0,18,0,0" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Instances}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="m:MinecraftInstance">
+                        <Border Classes="modpack-card" Width="304" Margin="0,0,18,18" Padding="22">
+                            <StackPanel Spacing="0">
+
+                                <!-- Cabeçalho do cartão: ícone + nome + tag -->
+                                <Grid ColumnDefinitions="56,14,*">
+                                    <Border Grid.Column="0" Classes="avatar" Width="56" Height="56">
+                                        <TextBlock Text="{Binding Initial}" FontSize="23" />
+                                    </Border>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="6">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="16.5" FontWeight="Bold" Foreground="#E8E8F0"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <Border Classes="tag">
+                                            <TextBlock Text="{Binding SourceLabel}" />
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Border Height="1" Background="#16161F" Margin="0,18" />
+
+                                <TextBlock Text="{Binding VersionSummary}"
+                                           Foreground="#7A7A9A" FontSize="12.5" />
+
+                                <!-- Ações -->
+                                <Grid ColumnDefinitions="*,10,Auto" Margin="0,18,0,0">
+                                    <Button Grid.Column="0" Classes="play-btn" Height="40"
+                                            HorizontalContentAlignment="Center"
+                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).PlayCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="▶ Jogar" FontSize="13" FontWeight="Bold" />
+                                    </Button>
+                                    <Button Grid.Column="2" Classes="outline-btn" Height="40"
+                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).SelectCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="Selecionar" FontSize="12.5" />
+                                    </Button>
+                                </Grid>
+
+                                <Button Classes="ghost-btn" Margin="0,8,0,0"
+                                        HorizontalAlignment="Right"
+                                        IsVisible="{Binding !IsOfficial}"
+                                        Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DeleteCommand}"
+                                        CommandParameter="{Binding}">
+                                    <TextBlock Text="Eliminar" FontSize="12" Foreground="#F87171" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

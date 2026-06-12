@@ -10,8 +10,9 @@ using TCMine_Launcher.Services;
 namespace TCMine_Launcher.ViewModels;
 
 /// <summary>
-///     Página "Jogar": hero do modpack activo + painel de perfil + launch.
-///     O launch é real: instala NeoForge e arranca o jogo via <see cref="GameLauncher" />.
+///     Página "Jogar": hero da instância ativa + painel de perfil + launch real.
+///     O botão alterna entre <b>Instalar</b> (sem ficheiros) e <b>Jogar</b> (instalada).
+///     Instala NeoForge e arranca o jogo na pasta isolada da instância.
 /// </summary>
 public partial class HomePageViewModel : ViewModelBase
 {
@@ -30,48 +31,35 @@ public partial class HomePageViewModel : ViewModelBase
 
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
 
-    [ObservableProperty] private ObservableCollection<string> _minecraftVersions;
-
-    [ObservableProperty] private ObservableCollection<string> _neoForgeVersions;
-
-    [ObservableProperty] private string? _selectedMinecraftVersion;
-
-    [ObservableProperty] private string? _selectedNeoForgeVersion;
-
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
         _player = player;
         _game = game;
         _shell = shell;
 
-        ActiveModpack = new Modpack
-        {
-            Name = "TCMine Modpack",
-            Author = "Você",
-            Version = "1.0.0",
-            Tagline = "MODPACK OFICIAL",
-            Description = "O pack de mods custom do servidor TCMine — exploração, " +
-                          "tecnologia e aventura numa só experiência.",
-            IsInstalled = false
-        };
-
-        _minecraftVersions = new ObservableCollection<string>
-        {
-            "1.21.4", "1.21.3", "1.21.1", "1.20.6", "1.20.4", "1.20.1"
-        };
-        _neoForgeVersions = new ObservableCollection<string>
-        {
-            "21.1.172", "21.1.171", "21.1.170", "21.1.165", "21.1.160"
-        };
-        _selectedMinecraftVersion = _game.MinecraftVersion;
-        _selectedNeoForgeVersion = _game.NeoForgeVersion;
+        LaunchStatus = DefaultStatus();
     }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
     public partial bool IsLaunching { get; set; }
 
-    public Modpack ActiveModpack { get; }
+    /// <summary>Instância ativa (a que será lançada). Vem do shell.</summary>
+    private MinecraftInstance? Active => _shell.ActiveInstance;
+
+    // ── Hero (derivado da instância ativa) ───────────────────────
+    public string InstanceName => Active?.Name ?? "—";
+    public string InstanceTag => Active?.SourceLabel ?? "";
+    public string InstanceSubtitle => Active is { IsOfficial: true }
+        ? "Modpack oficial do servidor TCMine"
+        : "Instância personalizada";
+    public string InstanceSummary => Active?.VersionSummary ?? "";
+
+    // ── Estado de instalação (define Instalar vs Jogar) ──────────
+    public bool IsInstalled => Active is not null && _shell.IsInstanceInstalled(Active);
+    public string PlayLabel => IsInstalled ? "JOGAR" : "INSTALAR";
+    public string PlayIcon => IsInstalled ? "▶" : "⬇";
+    public string StateLabel => IsInstalled ? "Instalada" : "Por instalar";
 
     /// <summary>Linhas do console de launch (registo).</summary>
     public ObservableCollection<string> LaunchLog { get; } = new();
@@ -83,7 +71,8 @@ public partial class HomePageViewModel : ViewModelBase
     public string AvatarInitials => _player.ComputeInitials();
     public string AccountLabel => _player.AccountLabel;
 
-    public string RamDisplay => $"{_game.AllocatedRamMb} MB";
+    /// <summary>RAM efetiva: override da instância ou default global.</summary>
+    public string RamDisplay => $"{Active?.RamOverrideMb ?? _game.AllocatedRamMb} MB";
 
     /// <summary>Chamado pelo shell quando o login muda o perfil.</summary>
     public void NotifyPlayerChanged()
@@ -93,18 +82,31 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(AccountLabel));
     }
 
-    partial void OnSelectedMinecraftVersionChanged(string? value)
+    /// <summary>Chamado pelo shell quando a instância ativa muda.</summary>
+    public void NotifyInstanceChanged()
     {
-        if (value is null) return;
-        _game.MinecraftVersion = value;
-        _shell.PersistSettings();
+        OnPropertyChanged(nameof(InstanceName));
+        OnPropertyChanged(nameof(InstanceTag));
+        OnPropertyChanged(nameof(InstanceSubtitle));
+        OnPropertyChanged(nameof(InstanceSummary));
+        OnPropertyChanged(nameof(RamDisplay));
+        RefreshInstallState();
+
+        if (!IsLaunching) LaunchStatus = DefaultStatus();
     }
 
-    partial void OnSelectedNeoForgeVersionChanged(string? value)
+    /// <summary>Reavalia (a partir do disco) se a instância ativa está instalada.</summary>
+    private void RefreshInstallState()
     {
-        if (value is null) return;
-        _game.NeoForgeVersion = value;
-        _shell.PersistSettings();
+        OnPropertyChanged(nameof(IsInstalled));
+        OnPropertyChanged(nameof(PlayLabel));
+        OnPropertyChanged(nameof(PlayIcon));
+        OnPropertyChanged(nameof(StateLabel));
+    }
+
+    private string DefaultStatus()
+    {
+        return IsInstalled ? "Pronto para jogar" : "Instância por instalar";
     }
 
     private bool CanPlay()
@@ -122,10 +124,17 @@ public partial class HomePageViewModel : ViewModelBase
             return;
         }
 
+        var instance = Active;
+        if (instance is null)
+        {
+            LaunchStatus = "Nenhuma instância selecionada.";
+            return;
+        }
+
         IsLaunching = true;
         LaunchProgress = 0;
         LaunchLog.Clear();
-        LaunchLog.Add($"Modpack: {ActiveModpack.Name} ({ActiveModpack.VersionSummary})");
+        LaunchLog.Add($"Instância: {instance.Name} ({instance.VersionSummary})");
         _launchCts = new CancellationTokenSource();
 
         // Recebe o progresso do GameLauncher (thread de fundo) e reflete-o na UI.
@@ -140,16 +149,19 @@ public partial class HomePageViewModel : ViewModelBase
         try
         {
             var process = await _launcher.PrepareAsync(
-                LauncherPaths.DefaultGameDir,
-                _game.MinecraftVersion,
-                _game.NeoForgeVersion,
+                LauncherPaths.InstanceGameDir(instance.Id),
+                instance.MinecraftVersion,
+                instance.NeoForgeVersion,
                 session,
-                _game.AllocatedRamMb,
+                instance.RamOverrideMb ?? _game.AllocatedRamMb,
                 _game.JavaPath,
                 progress,
                 _launchCts.Token);
 
             process.Start();
+            instance.LastPlayedAt = DateTimeOffset.Now;
+            _shell.SaveInstance(instance);
+
             LaunchLog.Add("Minecraft iniciado.");
             LaunchStatus = "Minecraft em execução";
         }
@@ -170,6 +182,7 @@ public partial class HomePageViewModel : ViewModelBase
             LaunchProgress = 0;
             IsLaunching = false;
             _shell.SetBusy(false, 0, "Pronto");
+            RefreshInstallState(); // após instalar, o botão passa a "Jogar"
         }
     }
 
