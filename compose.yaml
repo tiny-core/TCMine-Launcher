@@ -1,0 +1,13 @@
+services:
+  tcmine-server:
+    image: tcmine-server
+    build:
+      context: .
+      dockerfile: TCMine-Server/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - CF_API_KEY=${CF_API_KEY}
+      - CF_CACHE_MINUTES=5
+      - CF_ALLOWED_ORIGINS=
+    restart: unless-stopped
