@@ -59,14 +59,6 @@
                     </StackPanel>
                 </Button>
 
-                <!-- Jogar offline -->
-                <Button Classes="ghost-btn"
-                        Command="{Binding PlayOfflineCommand}"
-                        IsEnabled="{Binding !IsAuthenticating}"
-                        Margin="0,14,0,0">
-                    <TextBlock Text="Continuar em modo offline" FontSize="12.5" />
-                </Button>
-
                 <!-- Estado: a autenticar -->
                 <StackPanel Spacing="12"
                             HorizontalAlignment="Center" Margin="0,18,0,0"

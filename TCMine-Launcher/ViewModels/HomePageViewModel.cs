@@ -16,15 +16,12 @@ public partial class HomePageViewModel : ViewModelBase
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
-    private bool _isLaunching;
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleLabel))]
+    private bool _isLogExpanded;
 
     [ObservableProperty] private double _launchProgress;
 
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
-
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleLabel))]
-    private bool _isLogExpanded;
 
     [ObservableProperty] private ObservableCollection<string> _minecraftVersions;
 
@@ -62,6 +59,10 @@ public partial class HomePageViewModel : ViewModelBase
         _selectedMinecraftVersion = _game.MinecraftVersion;
         _selectedNeoForgeVersion = _game.NeoForgeVersion;
     }
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
+    public partial bool IsLaunching { get; set; }
 
     public Modpack ActiveModpack { get; }
 

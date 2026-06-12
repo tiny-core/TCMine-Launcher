@@ -152,8 +152,7 @@ public partial class MainWindowViewModel : ViewModelBase
             var detail = Flatten(ex);
             LoginError = detail.Contains("403") || detail.Contains("Forbidden")
                 ? "Autenticaste com sucesso, mas a aplicação do Azure ainda não tem permissão " +
-                  "para a API do Minecraft (erro 403). Pede aprovação em https://aka.ms/mce-reviewappid. " +
-                  "Entretanto podes usar o modo offline."
+                  "para a API do Minecraft (erro 403). Pede aprovação em https://aka.ms/mce-reviewappid."
                 : "Falha no login: " + detail;
             StatusMessage = "Não autenticado";
         }
@@ -193,15 +192,6 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             // Sem sessão em cache — fica na tela de login.
         }
-    }
-
-    [RelayCommand]
-    private void PlayOffline()
-    {
-        _session = MSession.CreateOfflineSession(_player.Name);
-        _player.Uuid = _session.UUID ?? string.Empty;
-        _player.AccountType = AccountType.Offline;
-        EnterApp("Pronto · modo offline");
     }
 
     [RelayCommand]

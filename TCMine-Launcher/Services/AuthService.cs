@@ -10,11 +10,10 @@ namespace TCMine_Launcher.Services;
 
 /// <summary>
 ///     Autenticação Microsoft/Xbox via CmlLib + MSAL.
-///     No Linux a WebUI embutida do MSAL não existe, por isso montamos a pipeline
-///     manualmente e usamos o NAVEGADOR DO SISTEMA (loopback http://localhost) no
-///     login interactivo e o token em cache no login silencioso.
-///     O token é persistido (keyring/DPAPI) por <see cref="MsalClientHelper" />,
-///     permitindo reentrar entre execuções.
+///     No Windows o MSAL usa WebView2 (popup embutido) para o login interativo
+///     e o token em cache (DPAPI) para o login silencioso.
+///     O token é persistido por <see cref="MsalClientHelper" />, permitindo
+///     reentrar entre execuções sem voltar a pedir credenciais.
 /// </summary>
 public class AuthService
 {
@@ -29,7 +28,7 @@ public class AuthService
                 "Client ID da Microsoft não configurado. Cria TCMine-Launcher/Client.props " +
                 "(ver Client.props.example) com o teu Azure client ID e recompila.");
 
-        // BuildApplicationWithCache => redirect http://localhost + cache persistente.
+        // BuildApplicationWithCache → WebView2 interativo + cache DPAPI persistente.
         return _app ??= await MsalClientHelper.BuildApplicationWithCache(clientId);
     }
 
@@ -44,7 +43,7 @@ public class AuthService
         return await auth.ExecuteForLauncherAsync();
     }
 
-    /// <summary>Login completo: tenta silencioso e, se preciso, abre o navegador do sistema.</summary>
+    /// <summary>Login completo: tenta silencioso e, se preciso, abre popup WebView2.</summary>
     public async Task<MSession> LoginAsync(CancellationToken ct = default)
     {
         try
@@ -53,12 +52,12 @@ public class AuthService
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // Sem conta/token válido — segue para o login interactivo.
+            // Sem conta/token válido — segue para o login interativo.
         }
 
         var app = await GetAppAsync();
         var auth = _handler.CreateAuthenticatorWithNewAccount(ct);
-        auth.AddMsalOAuth(app, msal => msal.SystemBrowser());
+        auth.AddMsalOAuth(app, msal => msal.Interactive());
         auth.AddXboxAuthForJE(xb => xb.Basic());
         auth.AddJEAuthenticator();
         return await auth.ExecuteForLauncherAsync();
