@@ -34,9 +34,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // Serviços
     private readonly AuthService _auth = new();
+    private readonly SettingsService _settings = new();
 
     /// <summary>Sessão Minecraft activa (usada depois para lançar o jogo).</summary>
     private MSession? _session;
+
+    /// <summary>Sessão activa, exposta às páginas que precisam de lançar o jogo.</summary>
+    public MSession? CurrentSession => _session;
 
     /// <summary>Permite cancelar o login interactivo em curso.</summary>
     private CancellationTokenSource? _loginCts;
@@ -69,7 +73,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         _player = new PlayerProfile();
-        _game = new GameProfile();
+        _game = _settings.Load();
 
         Home = new HomePageViewModel(_player, _game, this);
         Modpacks = new ModpacksPageViewModel();
@@ -231,6 +235,12 @@ public partial class MainWindowViewModel : ViewModelBase
         SelectedTab = AppTab.Home;
         IsLoggedIn = true;
         StatusMessage = status;
+    }
+
+    /// <summary>Persiste o perfil de jogo no disco. Chamado pelas páginas ao mudar definições.</summary>
+    public void PersistSettings()
+    {
+        _settings.Save(_game);
     }
 
     /// <summary>Atualiza o progresso global mostrado na barra de estado.</summary>

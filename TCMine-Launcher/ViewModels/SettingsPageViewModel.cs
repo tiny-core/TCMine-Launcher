@@ -44,11 +44,13 @@ public partial class SettingsPageViewModel : ViewModelBase
     partial void OnRamMbChanged(double value)
     {
         _game.AllocatedRamMb = (int)value;
+        _shell.PersistSettings();
     }
 
     partial void OnJavaPathChanged(string value)
     {
         _game.JavaPath = string.IsNullOrWhiteSpace(value) ? null : value;
+        _shell.PersistSettings();
     }
 
     [RelayCommand]

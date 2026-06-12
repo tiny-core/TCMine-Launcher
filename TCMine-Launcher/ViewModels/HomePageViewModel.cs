@@ -1,20 +1,27 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TCMine_Launcher.Models;
+using TCMine_Launcher.Services;
 
 namespace TCMine_Launcher.ViewModels;
 
 /// <summary>
 ///     Página "Jogar": hero do modpack activo + painel de perfil + launch.
-///     O launch é apenas uma simulação visual (sem CmlLib por agora).
+///     O launch é real: instala NeoForge e arranca o jogo via <see cref="GameLauncher" />.
 /// </summary>
 public partial class HomePageViewModel : ViewModelBase
 {
     private readonly GameProfile _game;
+    private readonly GameLauncher _launcher = new();
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
+
+    /// <summary>Permite cancelar uma instalação/launch em curso.</summary>
+    private CancellationTokenSource? _launchCts;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleLabel))]
     private bool _isLogExpanded;
@@ -88,12 +95,16 @@ public partial class HomePageViewModel : ViewModelBase
 
     partial void OnSelectedMinecraftVersionChanged(string? value)
     {
-        if (value is not null) _game.MinecraftVersion = value;
+        if (value is null) return;
+        _game.MinecraftVersion = value;
+        _shell.PersistSettings();
     }
 
     partial void OnSelectedNeoForgeVersionChanged(string? value)
     {
-        if (value is not null) _game.NeoForgeVersion = value;
+        if (value is null) return;
+        _game.NeoForgeVersion = value;
+        _shell.PersistSettings();
     }
 
     private bool CanPlay()
@@ -104,35 +115,67 @@ public partial class HomePageViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanPlay))]
     private async Task PlayAsync()
     {
-        // TODO: substituir pela integração real com CmlLib (download + launch).
+        var session = _shell.CurrentSession;
+        if (session is null)
+        {
+            LaunchStatus = "Sessão inválida — faz login novamente.";
+            return;
+        }
+
         IsLaunching = true;
         LaunchProgress = 0;
         LaunchLog.Clear();
         LaunchLog.Add($"Modpack: {ActiveModpack.Name} ({ActiveModpack.VersionSummary})");
+        _launchCts = new CancellationTokenSource();
 
-        var steps = new (int Pct, string Msg)[]
+        // Recebe o progresso do GameLauncher (thread de fundo) e reflete-o na UI.
+        var progress = new Progress<LaunchProgress>(p =>
         {
-            (12, "A verificar ficheiros..."),
-            (34, "A descarregar assets..."),
-            (58, "A instalar NeoForge..."),
-            (80, "A preparar JVM..."),
-            (100, "A iniciar Minecraft...")
-        };
+            LaunchProgress = p.Percent;
+            LaunchStatus = p.Message;
+            LaunchLog.Add($"[{p.Percent,3:0}%] {p.Message}");
+            _shell.SetBusy(p.IsActive, p.Percent, p.Message);
+        });
 
-        foreach (var (pct, msg) in steps)
+        try
         {
-            await Task.Delay(650);
-            LaunchProgress = pct;
-            LaunchStatus = msg;
-            LaunchLog.Add($"[{pct,3}%] {msg}");
-            _shell.SetBusy(true, pct, msg);
+            var process = await _launcher.PrepareAsync(
+                LauncherPaths.DefaultGameDir,
+                _game.MinecraftVersion,
+                _game.NeoForgeVersion,
+                session,
+                _game.AllocatedRamMb,
+                _game.JavaPath,
+                progress,
+                _launchCts.Token);
+
+            process.Start();
+            LaunchLog.Add("Minecraft iniciado.");
+            LaunchStatus = "Minecraft em execução";
         }
+        catch (OperationCanceledException)
+        {
+            LaunchStatus = "Launch cancelado";
+            LaunchLog.Add("Launch cancelado pelo utilizador.");
+        }
+        catch (Exception ex)
+        {
+            LaunchStatus = "Falha no launch";
+            LaunchLog.Add("ERRO: " + ex.Message);
+        }
+        finally
+        {
+            _launchCts?.Dispose();
+            _launchCts = null;
+            LaunchProgress = 0;
+            IsLaunching = false;
+            _shell.SetBusy(false, 0, "Pronto");
+        }
+    }
 
-        await Task.Delay(700);
-        LaunchLog.Add("[100%] Minecraft iniciado.");
-        LaunchStatus = "Pronto para jogar";
-        LaunchProgress = 0;
-        IsLaunching = false;
-        _shell.SetBusy(false, 0, "Pronto");
+    [RelayCommand]
+    private void CancelLaunch()
+    {
+        _launchCts?.Cancel();
     }
 }
