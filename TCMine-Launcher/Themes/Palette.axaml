@@ -9,50 +9,57 @@
          não fazem parte do sistema de design reutilizável.
          =================================================================== -->
 
-    <!-- Cores base (necessárias para gradientes/animações que pedem Color) -->
+    <!-- Cores-base (necessárias para gradientes/animações que pedem Color) -->
     <Color x:Key="AccentColor">#F97316</Color>
     <Color x:Key="AccentDarkColor">#DC5808</Color>
     <Color x:Key="AccentDeepColor">#C2410C</Color>
 
     <!-- ── Fundos ──────────────────────────────────────────────────── -->
-    <SolidColorBrush x:Key="BgWindow"     Color="#0B0B14" />
-    <SolidColorBrush x:Key="BgPanel"      Color="#0E0E1A" />
-    <SolidColorBrush x:Key="BgInset"      Color="#0A0A16" />
-    <SolidColorBrush x:Key="BgElevated"   Color="#12121E" />
-    <SolidColorBrush x:Key="BgHover"      Color="#141422" />
-    <SolidColorBrush x:Key="BgHoverSoft"  Color="#15151F" />
-    <SolidColorBrush x:Key="BgConsole"    Color="#070710" />
-    <SolidColorBrush x:Key="BgSidebar"    Color="#090912" />
+    <SolidColorBrush x:Key="BgWindow" Color="#0B0B14" />
+    <SolidColorBrush x:Key="BgPanel" Color="#0E0E1A" />
+    <SolidColorBrush x:Key="BgInset" Color="#0A0A16" />
+    <SolidColorBrush x:Key="BgElevated" Color="#12121E" />
+    <SolidColorBrush x:Key="BgHover" Color="#141422" />
+    <SolidColorBrush x:Key="BgHoverSoft" Color="#15151F" />
+    <SolidColorBrush x:Key="BgConsole" Color="#070710" />
+    <SolidColorBrush x:Key="BgSidebar" Color="#090912" />
 
     <!-- ── Acento (laranja) ────────────────────────────────────────── -->
-    <SolidColorBrush x:Key="Accent"        Color="{StaticResource AccentColor}" />
-    <SolidColorBrush x:Key="AccentDark"    Color="{StaticResource AccentDarkColor}" />
-    <SolidColorBrush x:Key="AccentDeep"    Color="{StaticResource AccentDeepColor}" />
-    <SolidColorBrush x:Key="AccentBg"      Color="#2A1206" />
+    <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentDark" Color="{StaticResource AccentDarkColor}" />
+    <SolidColorBrush x:Key="AccentDeep" Color="{StaticResource AccentDeepColor}" />
+    <SolidColorBrush x:Key="AccentBg" Color="#2A1206" />
     <SolidColorBrush x:Key="AccentBgHover" Color="#3A1A08" />
 
     <!-- ── Bordas ──────────────────────────────────────────────────── -->
-    <SolidColorBrush x:Key="BorderSubtle"  Color="#1A1A2A" />
-    <SolidColorBrush x:Key="BorderInset"   Color="#1A1A28" />
+    <SolidColorBrush x:Key="BorderSubtle" Color="#1A1A2A" />
+    <SolidColorBrush x:Key="BorderInset" Color="#1A1A28" />
     <SolidColorBrush x:Key="BorderDivider" Color="#16161F" />
-    <SolidColorBrush x:Key="BorderChrome"  Color="#141420" />
-    <SolidColorBrush x:Key="BorderHover"   Color="#2A2A40" />
-    <SolidColorBrush x:Key="BorderMid"     Color="#26263A" />
-    <SolidColorBrush x:Key="BorderStrong"  Color="#34344E" />
+    <SolidColorBrush x:Key="BorderChrome" Color="#141420" />
+    <SolidColorBrush x:Key="BorderHover" Color="#2A2A40" />
+    <SolidColorBrush x:Key="BorderMid" Color="#26263A" />
+    <SolidColorBrush x:Key="BorderStrong" Color="#34344E" />
 
     <!-- ── Texto ───────────────────────────────────────────────────── -->
-    <SolidColorBrush x:Key="TextPrimary"   Color="#E8E8F0" />
+    <SolidColorBrush x:Key="TextPrimary" Color="#E8E8F0" />
     <SolidColorBrush x:Key="TextSecondary" Color="#94A3B8" />
-    <SolidColorBrush x:Key="TextMuted"     Color="#7A7A9A" />
-    <SolidColorBrush x:Key="TextDim"       Color="#6A6A8A" />
-    <SolidColorBrush x:Key="TextFaint"     Color="#5A5A7A" />
-    <SolidColorBrush x:Key="TextLabel"     Color="#4A4A66" />
-    <SolidColorBrush x:Key="TextSubtle"    Color="#343454" />
-    <SolidColorBrush x:Key="TextHover"     Color="#64648A" />
-    <SolidColorBrush x:Key="TextBright"    Color="#A0A0C0" />
+    <SolidColorBrush x:Key="TextMuted" Color="#7A7A9A" />
+    <SolidColorBrush x:Key="TextDim" Color="#6A6A8A" />
+    <SolidColorBrush x:Key="TextFaint" Color="#5A5A7A" />
+    <SolidColorBrush x:Key="TextLabel" Color="#4A4A66" />
+    <SolidColorBrush x:Key="TextSubtle" Color="#343454" />
+    <SolidColorBrush x:Key="TextHover" Color="#64648A" />
+    <SolidColorBrush x:Key="TextBright" Color="#A0A0C0" />
+
+    <!-- ── Estado (servidor online / atualização) ──────────────────── -->
+    <SolidColorBrush x:Key="Success" Color="#22C55E" />
+    <SolidColorBrush x:Key="SuccessText" Color="#4ADE80" />
+    <SolidColorBrush x:Key="SuccessBg" Color="#0E2A14" />
+    <SolidColorBrush x:Key="WarningText" Color="#FBBF24" />
+    <SolidColorBrush x:Key="WarningBg" Color="#3A2A06" />
 
     <!-- ── Perigo / destrutivo ─────────────────────────────────────── -->
-    <SolidColorBrush x:Key="Danger"       Color="#F87171" />
+    <SolidColorBrush x:Key="Danger" Color="#F87171" />
     <SolidColorBrush x:Key="DangerBorder" Color="#7F1D1D" />
-    <SolidColorBrush x:Key="DangerSoft"   Color="#FCA5A5" />
+    <SolidColorBrush x:Key="DangerSoft" Color="#FCA5A5" />
 </ResourceDictionary>

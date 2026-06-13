@@ -26,4 +26,34 @@
         <Setter Property="Foreground" Value="{StaticResource TextFaint}" />
         <Setter Property="FontSize" Value="12" />
     </Style>
+
+    <!-- ── Título de cartão (nome de instância / modpack / novidade) ── -->
+    <Style Selector="TextBlock.card-title">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- ── Cabeçalho de secção dentro de um painel (Definições) ─────── -->
+    <Style Selector="TextBlock.panel-heading">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+    </Style>
+
+    <!-- ── Hero / banner da instância (Home) ───────────────────────── -->
+    <Style Selector="TextBlock.hero-title">
+        <Setter Property="FontSize" Value="34" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="TextBlock.hero-subtitle">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="#C9B8D8" />
+    </Style>
+    <Style Selector="TextBlock.hero-summary">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="#9A8AA8" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
 </Styles>

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using TCMine_Launcher.Models;
 using TCMine_Launcher.Services;
@@ -70,16 +71,23 @@ public partial class MainWindowViewModel
         }
     }
 
-    /// <summary>Exporta uma instância para um zip.</summary>
-    public void ExportInstance(MinecraftInstance instance, string zipPath)
+    /// <summary>
+    ///     Exporta uma instância para um zip. O trabalho de disco (compressão) corre
+    ///     fora da thread da UI para não congelar a interface.
+    /// </summary>
+    public Task ExportInstanceAsync(MinecraftInstance instance, string zipPath)
     {
-        _instances.Export(instance, zipPath);
+        return Task.Run(() => _instances.Export(instance, zipPath));
     }
 
-    /// <summary>Importa uma instância de um zip, adiciona-a e seleciona-a.</summary>
-    public MinecraftInstance ImportInstance(string zipPath)
+    /// <summary>
+    ///     Importa uma instância de um zip, adiciona-a e seleciona-a. A extração corre
+    ///     fora da thread da UI; a atualização da lista (ObservableCollection) volta
+    ///     automaticamente para a thread da UI após o <c>await</c>.
+    /// </summary>
+    public async Task<MinecraftInstance> ImportInstanceAsync(string zipPath)
     {
-        var instance = _instances.Import(zipPath);
+        var instance = await Task.Run(() => _instances.Import(zipPath));
         Instances.Insert(0, instance);
         SelectInstance(instance);
         return instance;

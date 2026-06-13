@@ -24,6 +24,7 @@ public partial class HomePageViewModel : ViewModelBase
     private readonly MinecraftServerPinger _pinger = new();
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
+    private bool _acceptProgress;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))] [NotifyPropertyChangedFor(nameof(RamMbDecimal))]
     private double _instanceRam = 4096;
@@ -35,8 +36,9 @@ public partial class HomePageViewModel : ViewModelBase
 
     [ObservableProperty] private double _launchProgress;
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
+
+    private CancellationTokenSource? _ramSaveCts;
     private bool _suppressRam;
-    private bool _acceptProgress;
 
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
@@ -120,7 +122,9 @@ public partial class HomePageViewModel : ViewModelBase
     /// <summary>Id (abreviado) da instância ativa — mostrado no painel; clica abre a pasta.</summary>
     public string InstanceIdShort => Active is null
         ? "—"
-        : Active.Id.Length > 12 ? Active.Id[..12] + "…" : Active.Id;
+        : Active.Id.Length > 30
+            ? Active.Id[..30] + "…"
+            : Active.Id;
 
     public string RamDisplay => $"{(int)InstanceRam} MB";
 
@@ -223,8 +227,6 @@ public partial class HomePageViewModel : ViewModelBase
         }
     }
 
-    private CancellationTokenSource? _ramSaveCts;
-
     partial void OnInstanceRamChanged(double value)
     {
         if (_suppressRam || Active is null) return;
@@ -239,8 +241,15 @@ public partial class HomePageViewModel : ViewModelBase
         var ct = _ramSaveCts.Token;
         _ = Task.Run(async () =>
         {
-            try { await Task.Delay(600, ct); }
-            catch { return; }
+            try
+            {
+                await Task.Delay(600, ct);
+            }
+            catch
+            {
+                return;
+            }
+
             if (!ct.IsCancellationRequested) _shell.SaveInstance(instance);
         }, ct);
     }
@@ -304,7 +313,7 @@ public partial class HomePageViewModel : ViewModelBase
                 autoJoin);
 
             await _shell.ModInstaller.EnsureModsAsync(
-                instance, progress, _launchCts.Token, prune: instance.IsOfficial);
+                instance, progress, _launchCts.Token, instance.IsOfficial);
 
             // Ignora updates de progresso atrasados (a partir daqui o estado é o do jogo).
             _acceptProgress = false;
@@ -381,8 +390,14 @@ public partial class HomePageViewModel : ViewModelBase
         RefreshInstallState();
         logCapture.Dispose();
 
-        try { process.Dispose(); }
-        catch { /* noop */ }
+        try
+        {
+            process.Dispose();
+        }
+        catch
+        {
+            /* noop */
+        }
     }
 
     [RelayCommand]

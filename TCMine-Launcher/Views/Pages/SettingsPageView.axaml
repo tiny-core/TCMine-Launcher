@@ -47,8 +47,7 @@
                 <!-- Jogo -->
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
-                        <TextBlock Text="Jogo" FontSize="14" FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimary}" />
+                        <TextBlock Text="Jogo" Classes="panel-heading" />
 
                         <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0">
                             <TextBlock Grid.Column="0" Classes="section-label"
@@ -70,8 +69,7 @@
                 <!-- Servidor TCMine -->
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
-                        <TextBlock Text="Servidor TCMine" FontSize="14" FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimary}" />
+                        <TextBlock Text="Servidor TCMine" Classes="panel-heading" />
                         <TextBlock Classes="section-label" Text="URL DO SERVIDOR"
                                    Margin="2,16,0,7" />
                         <TextBox Classes="field" Text="{Binding ServerUrl}"
@@ -85,8 +83,7 @@
                 <!-- Sobre -->
                 <Border Classes="panel">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Sobre" FontSize="14" FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimary}" />
+                        <TextBlock Text="Sobre" Classes="panel-heading" />
                         <TextBlock Text="TCMine Launcher · beta v1" Classes="muted" />
                         <TextBlock Text="Launcher do servidor TCMine — NeoForge + modpack custom."
                                    Classes="muted" TextWrapping="Wrap" />

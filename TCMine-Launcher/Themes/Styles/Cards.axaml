@@ -71,6 +71,12 @@
         <Setter Property="LetterSpacing" Value="1" />
     </Style>
 
+    <!-- ── Badge de estado (forma; cor via tokens Success/Warning) ── -->
+    <Style Selector="Border.badge">
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="Padding" Value="7,3" />
+    </Style>
+
     <!-- ── Avatar do jogador (círculo com gradiente laranja) ───────── -->
     <Style Selector="Border.avatar">
         <Setter Property="CornerRadius" Value="1000" />

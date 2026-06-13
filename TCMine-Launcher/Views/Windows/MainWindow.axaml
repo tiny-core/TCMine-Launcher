@@ -176,7 +176,7 @@
                                 Spacing="7"
                                 VerticalAlignment="Center">
                         <Ellipse Width="7" Height="7"
-                                 Fill="#22C55E"
+                                 Fill="{StaticResource Success}"
                                  IsVisible="{Binding IsLoggedIn}" />
                         <TextBlock Text="{Binding StatusMessage}"
                                    FontSize="11" Foreground="{StaticResource TextFaint}"

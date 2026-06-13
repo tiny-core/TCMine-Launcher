@@ -1,6 +1,9 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using TCMine_Launcher.Models;
 
 namespace TCMine_Launcher.ViewModels;
@@ -25,8 +28,16 @@ public partial class InstancesPageViewModel : ViewModelBase
     /// <summary>Id da instância ativa — usado para realçar o cartão selecionado.</summary>
     public string? ActiveInstanceId => _shell.ActiveInstance?.Id;
 
-    /// <summary>Ações ficam bloqueadas enquanto há um jogo aberto.</summary>
-    public bool CanInteract => !_shell.IsGameRunning;
+    /// <summary>True enquanto decorre uma operação de import/export (zip).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanInteract))]
+    private bool _isBusy;
+
+    /// <summary>Mensagem mostrada junto à barra de progresso durante import/export.</summary>
+    [ObservableProperty] private string _busyStatus = string.Empty;
+
+    /// <summary>Ações ficam bloqueadas enquanto há um jogo aberto ou uma operação em curso.</summary>
+    public bool CanInteract => !_shell.IsGameRunning && !IsBusy;
 
     /// <summary>Chamado pelo shell quando a instância ativa muda.</summary>
     public void NotifyActiveChanged()
@@ -78,16 +89,45 @@ public partial class InstancesPageViewModel : ViewModelBase
     private async Task Export(MinecraftInstance instance)
     {
         var path = await _shell.SaveFileAsync($"{instance.Name}.zip");
-        if (!string.IsNullOrEmpty(path))
-            _shell.ExportInstance(instance, path);
+        if (string.IsNullOrEmpty(path)) return;
+
+        await RunBusyAsync($"A exportar \"{instance.Name}\"...",
+            () => _shell.ExportInstanceAsync(instance, path));
     }
 
     [RelayCommand]
     private async Task Import()
     {
         var path = await _shell.OpenFileAsync();
-        if (!string.IsNullOrEmpty(path))
-            _shell.ImportInstance(path);
+        if (string.IsNullOrEmpty(path)) return;
+
+        await RunBusyAsync("A importar instância...",
+            () => _shell.ImportInstanceAsync(path));
+    }
+
+    /// <summary>
+    ///     Executa uma operação de import/export: ativa o estado ocupado (desativa os
+    ///     botões + mostra a barra de progresso), corre a tarefa e repõe o estado no
+    ///     fim, mesmo em caso de erro.
+    /// </summary>
+    private async Task RunBusyAsync(string status, Func<Task> operation)
+    {
+        IsBusy = true;
+        BusyStatus = status;
+        try
+        {
+            await operation();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Falha na operação de instância: {Status}", status);
+            // Erro na barra de estado global (persiste após esconder a faixa de progresso).
+            _shell.SetBusy(false, 0, "Erro: " + ex.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]

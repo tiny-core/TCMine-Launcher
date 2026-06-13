@@ -42,14 +42,12 @@
                             <TextBlock Text="{Binding InstanceTag}" />
                         </Border>
                         <TextBlock Text="{Binding InstanceName}"
-                                   FontSize="34" FontWeight="Bold" Foreground="White"
-                                   Margin="0,12,0,0" />
+                                   Classes="hero-title" Margin="0,12,0,0" />
                         <TextBlock Text="{Binding InstanceSubtitle}"
-                                   FontSize="13" Foreground="#C9B8D8" Margin="0,2,0,0" />
+                                   Classes="hero-subtitle" Margin="0,2,0,0" />
                         <TextBlock Text="{Binding InstanceSummary}"
-                                   FontSize="13" Foreground="#9A8AA8"
-                                   TextWrapping="Wrap" MaxWidth="460"
-                                   HorizontalAlignment="Left"
+                                   Classes="hero-summary"
+                                   MaxWidth="460" HorizontalAlignment="Left"
                                    Margin="0,12,0,0" />
                     </StackPanel>
 
@@ -176,11 +174,11 @@
                         <Button Classes="idbox" Command="{Binding OpenInstanceFolderCommand}"
                                 ToolTip.Tip="Abrir a pasta da instância">
                             <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                                <TextBlock Grid.Column="0" Text="ID" FontSize="11"
+                                <TextBlock Grid.Column="0" Text="ID:" FontSize="11"
                                            Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text="{Binding InstanceIdShort}"
-                                           HorizontalAlignment="Right" VerticalAlignment="Center"
-                                           Margin="0,0,8,0"
+                                           HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                           Margin="8,0,8,0"
                                            FontFamily="Cascadia Code,Consolas,monospace"
                                            FontSize="11" Foreground="{StaticResource TextSecondary}" />
                                 <TextBlock Grid.Column="2" Text="📁" FontSize="12"
@@ -200,7 +198,8 @@
                                             <StackPanel Spacing="4" Margin="12,9">
                                                 <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                                                     <TextBlock Grid.Column="0" Text="{Binding Name}"
-                                                               FontSize="12.5" Foreground="{StaticResource TextPrimary}"
+                                                               FontSize="12.5"
+                                                               Foreground="{StaticResource TextPrimary}"
                                                                TextTrimming="CharacterEllipsis"
                                                                VerticalAlignment="Center" />
                                                     <StackPanel Grid.Column="1" Orientation="Horizontal"
@@ -208,11 +207,13 @@
                                                         <Ellipse Width="8" Height="8" VerticalAlignment="Center"
                                                                  Fill="{Binding StatusColor, Converter={StaticResource StringToBrush}}" />
                                                         <TextBlock Text="{Binding StatusText}" FontSize="11"
-                                                                   Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                                                                   Foreground="{StaticResource TextSecondary}"
+                                                                   VerticalAlignment="Center" />
                                                     </StackPanel>
                                                 </Grid>
                                                 <TextBlock Text="{Binding Motd}"
-                                                           FontSize="10.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap"
+                                                           FontSize="10.5" Foreground="{StaticResource TextDim}"
+                                                           TextWrapping="Wrap"
                                                            MaxLines="2" TextTrimming="CharacterEllipsis"
                                                            IsVisible="{Binding Motd, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                             </StackPanel>

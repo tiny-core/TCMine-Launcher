@@ -10,7 +10,7 @@
              x:DataType="vm:InstancesPageViewModel"
              x:Name="PageRoot">
 
-    <Grid Margin="26" RowDefinitions="Auto,Auto,*">
+    <Grid Margin="26" RowDefinitions="Auto,Auto,Auto,*">
 
         <!-- Cabeçalho -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
@@ -35,9 +35,19 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <Border Grid.Row="1" Classes="divider" Margin="0,20" />
+
+        <!-- Progresso de import/export (indeterminado; o zip é atómico) -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12"
+                    Margin="0,16,0,0" VerticalAlignment="Center"
+                    IsVisible="{Binding IsBusy}">
+            <ProgressBar Classes="status-progress" IsIndeterminate="True" Width="220"
+                         VerticalAlignment="Center" />
+            <TextBlock Text="{Binding BusyStatus}" Classes="muted" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <Border Grid.Row="2" Classes="divider" Margin="0,20" />
         <!-- Lista de instâncias -->
-        <ScrollViewer Grid.Row="2" Margin="0,18,0,0" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Grid.Row="3" Margin="0,18,0,0" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Instances}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -65,7 +75,7 @@
                                     </Border>
                                     <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="6">
                                         <TextBlock Text="{Binding Name}"
-                                                   FontSize="16.5" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
+                                                   Classes="card-title"
                                                    TextTrimming="CharacterEllipsis" />
                                         <Border Classes="tag">
                                             <TextBlock Text="{Binding SourceLabel}" />
@@ -77,9 +87,11 @@
 
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Grid.Column="0" Text="{Binding VersionSummary}"
-                                               Foreground="{StaticResource TextMuted}" FontSize="12.5" VerticalAlignment="Center" />
+                                               Foreground="{StaticResource TextMuted}" FontSize="12.5"
+                                               VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="{Binding ModsLabel}"
-                                               Foreground="{StaticResource TextFaint}" FontSize="11" VerticalAlignment="Center" />
+                                               Foreground="{StaticResource TextFaint}" FontSize="11"
+                                               VerticalAlignment="Center" />
                                 </Grid>
 
                                 <!-- Ação principal -->
@@ -109,7 +121,8 @@
                                                 IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
                                                 Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DeleteCommand}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="Eliminar" FontSize="12" Foreground="{StaticResource Danger}" />
+                                            <TextBlock Text="Eliminar" FontSize="12"
+                                                       Foreground="{StaticResource Danger}" />
                                         </Button>
                                     </Grid>
 
@@ -134,6 +147,7 @@
                                     </Button>
                                     <Button Grid.Column="2" Classes="subtle"
                                             HorizontalAlignment="Stretch"
+                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
                                             Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).ExportCommand}"
                                             CommandParameter="{Binding}">
                                         <TextBlock Text="⬇ Exportar" FontSize="11.5" />
