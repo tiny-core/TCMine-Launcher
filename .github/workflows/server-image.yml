@@ -1,7 +1,9 @@
 name: Publicar imagem do servidor (Docker Hub)
 
 # Constrói e publica a imagem do TCMine-Server no Docker Hub.
-# Dispara em tags v* (ex.: v1.0.0) e manualmente.
+# Dispara em tags server-v* (ex.: server-v1.0.0) e manualmente.
+# O prefixo 'server-' separa as releases do servidor das do launcher (tags v*),
+# para que publicar o launcher não dispare o build da imagem do servidor.
 #
 # Pré-requisito — define no repositório (Settings → Secrets and variables → Actions):
 #   DOCKERHUB_USERNAME  → o teu utilizador do Docker Hub
@@ -10,7 +12,7 @@ name: Publicar imagem do servidor (Docker Hub)
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["server-v*"]
   workflow_dispatch:
 
 jobs:
@@ -35,7 +37,7 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/tcmine-server
           tags: |
-            type=semver,pattern={{version}}
+            type=match,pattern=server-v(.*),group=1
             type=raw,value=latest
 
       - name: Build & push

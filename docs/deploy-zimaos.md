@@ -11,7 +11,8 @@ O ZimaOS (baseado em CasaOS) corre apps em **Docker** e **puxa imagens de um reg
 ### Opção A — automático (GitHub Actions, recomendado)
 
 O workflow [`.github/workflows/server-image.yml`](../.github/workflows/server-image.yml)
-constrói e envia a imagem a cada tag `v*`.
+constrói e envia a imagem a cada tag `server-v*` (o prefixo separa as releases do servidor
+das do launcher, que usam `v*`).
 
 1. Em **Settings → Secrets and variables → Actions**, cria:
     - `DOCKERHUB_USERNAME` — o teu utilizador do Docker Hub.
@@ -19,8 +20,8 @@ constrói e envia a imagem a cada tag `v*`.
       com permissão **Read & Write**.
 2. Lança uma release:
    ```bash
-   git tag v1.0.0
-   git push --tags
+   git tag server-v1.0.0
+   git push origin server-v1.0.0
    ```
    A imagem fica em `docker.io/SEU-USUARIO/tcmine-server:1.0.0` e `:latest`.
 
@@ -103,7 +104,7 @@ ignorando a env mesmo que o ZimaOS a corrompa nos reinícios seguintes.
 
 ## 4. Atualizar a versão
 
-1. `git tag v1.0.1 && git push --tags` (ou rebuild/push manual).
+1. `git tag server-v1.0.1 && git push origin server-v1.0.1` (ou rebuild/push manual).
 2. No ZimaOS, na app → **Atualizar / Pull** a imagem (ou muda a tag de `:latest` para a
    nova versão e recria). Os dados persistem no volume `/data`.
 
