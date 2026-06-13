@@ -52,7 +52,8 @@
                             <Border.BorderBrush>
                                 <MultiBinding Converter="{x:Static conv:ActiveBorderConverter.Instance}">
                                     <Binding Path="Id" />
-                                    <Binding Path="DataContext.ActiveInstanceId" ElementName="PageRoot" />
+                                    <Binding Path="((vm:InstancesPageViewModel)DataContext).ActiveInstanceId"
+                                             ElementName="PageRoot" />
                                 </MultiBinding>
                             </Border.BorderBrush>
                             <StackPanel Spacing="0">
