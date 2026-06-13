@@ -4,20 +4,19 @@
         xmlns:vm="using:TCMine_Launcher.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="460"
+        mc:Ignorable="d" d:DesignWidth="720" d:DesignHeight="550"
         x:Class="TCMine_Launcher.Views.LogWindow"
         x:DataType="vm:HomePageViewModel"
         Title="Registo de eventos"
         Icon="/Assets/icon.ico"
-        Width="720" Height="460"
-        MinWidth="480" MinHeight="300"
+        Width="720" Height="550"
         WindowStartupLocation="CenterOwner"
         WindowDecorations="None"
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Border Background="{StaticResource BgWindow}" CornerRadius="12" ClipToBounds="True">
-        <Grid RowDefinitions="45,*">
+    <views:WindowChrome>
+        <Grid RowDefinitions="Auto,*">
             <views:TitleBar Grid.Row="0" Title="Registo de eventos" />
 
             <Grid Grid.Row="1" Margin="18" RowDefinitions="Auto,*">
@@ -39,5 +38,5 @@
                 </Border>
             </Grid>
         </Grid>
-    </Border>
+    </views:WindowChrome>
 </Window>

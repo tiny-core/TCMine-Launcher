@@ -24,10 +24,8 @@
     <!-- ═══════════════════════════════════════════════════════ -->
     <!--  RAIZ — cantos arredondados sobre fundo transparente    -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <Border Background="{StaticResource BgWindow}"
-            CornerRadius="12"
-            ClipToBounds="True">
-        <Grid RowDefinitions="45,*,28">
+    <views:WindowChrome>
+        <Grid RowDefinitions="Auto,*,28">
 
             <!-- ═══════════════════════════════════════════════════ -->
             <!--  BARRA DE TÍTULO (componente reutilizável)          -->
@@ -179,5 +177,5 @@
                 </Grid>
             </Border>
         </Grid>
-    </Border>
+    </views:WindowChrome>
 </Window>
