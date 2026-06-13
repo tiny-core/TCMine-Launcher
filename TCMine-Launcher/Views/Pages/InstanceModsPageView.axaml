@@ -90,9 +90,6 @@
         </Border>
 
         <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-            <Button Classes="ghost-btn" Command="{Binding CancelCommand}">
-                <TextBlock Text="Cancelar" FontSize="13" />
-            </Button>
             <Button Classes="play-btn" Height="40" Width="150"
                     HorizontalContentAlignment="Center"
                     Command="{Binding ConcludeCommand}">

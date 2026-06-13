@@ -68,9 +68,6 @@
 
                 <!-- Ações -->
                 <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-                    <Button Classes="ghost-btn" Command="{Binding CancelCommand}">
-                        <TextBlock Text="Cancelar" FontSize="13" />
-                    </Button>
                     <Button Classes="play-btn" Height="42" Width="160"
                             Command="{Binding ConfirmCommand}">
                         <TextBlock Text="Criar instância" FontSize="13" FontWeight="Bold" />

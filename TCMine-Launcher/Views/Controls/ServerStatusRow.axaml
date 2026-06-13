@@ -9,7 +9,7 @@
 
     <!-- Linha de estado de um servidor (online/offline + jogadores + MOTD). -->
     <StackPanel Spacing="4" Margin="12,9">
-        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+        <Grid ColumnDefinitions="*,Auto,Auto" VerticalAlignment="Center">
             <TextBlock Grid.Column="0" Text="{Binding Name}"
                        FontSize="12.5" Foreground="{StaticResource TextPrimary}"
                        TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
@@ -19,6 +19,14 @@
                 <TextBlock Text="{Binding StatusText}" FontSize="11"
                            Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
             </StackPanel>
+
+            <!-- Toggle compacto: entrar neste servidor ao iniciar (rádio). -->
+            <Button Grid.Column="2" Classes="autojoin-mini" Classes.active="{Binding IsAutoJoin}"
+                    Command="{Binding ToggleAutoJoinCommand}" Margin="6,0,0,0"
+                    ToolTip.Tip="{Binding AutoJoinLabel}">
+                <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10"
+                          VerticalAlignment="Center" />
+            </Button>
         </Grid>
 
         <Separator Classes="divider" Margin="0, 5" />

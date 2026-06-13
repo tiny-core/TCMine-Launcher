@@ -36,6 +36,7 @@ public partial class MainWindow : Window
         vm.OpenModsWindowRequested = OpenInstanceModsWindow;
         vm.OpenModSelectionRequested = OpenModSelectionWindow;
         vm.OpenLogWindowRequested = OpenLogWindow;
+        vm.OpenMemoryWindowRequested = OpenMemoryWindow;
         vm.ConfirmRequested = ShowConfirmAsync;
         vm.SaveFileRequested = SaveZipAsync;
         vm.OpenFileRequested = OpenZipAsync;
@@ -133,6 +134,23 @@ public partial class MainWindow : Window
         _logWindow = new LogWindow { DataContext = logViewModel };
         _logWindow.Closed += (_, _) => _logWindow = null;
         _logWindow.Show(this);
+    }
+
+    private MemoryWindow? _memoryWindow;
+
+    private void OpenMemoryWindow()
+    {
+        // Instância única: se já estiver aberta, traz para a frente.
+        if (_memoryWindow is not null)
+        {
+            _memoryWindow.Activate();
+            return;
+        }
+
+        // Partilha o DataContext (shell) — a janela edita a RAM da instância ativa.
+        _memoryWindow = new MemoryWindow { DataContext = DataContext };
+        _memoryWindow.Closed += (_, _) => _memoryWindow = null;
+        _memoryWindow.Show(this);
     }
 
     private async System.Threading.Tasks.Task<bool> ShowConfirmAsync(string title, string message)

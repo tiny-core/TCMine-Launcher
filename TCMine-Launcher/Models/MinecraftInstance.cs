@@ -56,6 +56,12 @@ public class MinecraftInstance
     /// <summary>Servidores associados — escritos no servers.dat ao instalar.</summary>
     public List<ServerEntry> Servers { get; set; } = new();
 
+    /// <summary>
+    ///     Nome do servidor onde entrar automaticamente ao iniciar o jogo.
+    ///     <c>null</c> = abre no menu principal (sem ligação automática).
+    /// </summary>
+    public string? AutoJoinServerName { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
     public DateTimeOffset? LastPlayedAt { get; set; }
 
