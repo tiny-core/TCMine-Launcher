@@ -49,8 +49,15 @@
                             </StackPanel>
                         </Grid>
 
+                        <TextBlock Classes="section-label" Text="CAMINHO DO JAVA (opcional)"
+                                   Margin="2,16,0,7" />
+                        <TextBox Text="{Binding JavaPathOverride}"
+                                 PlaceholderText="Automático (descarrega o Java correto)"
+                                 Background="#0A0A16" BorderBrush="#1A1A28"
+                                 CornerRadius="7" Foreground="#94A3B8" Padding="11,8" />
+
                         <TextBlock Classes="muted" FontSize="11" Margin="2,10,0,0"
-                                   Text="Mudar a versão exige reinstalar ao jogar a seguir." />
+                                   Text="Mudar a versão exige reinstalar ao jogar a seguir. Java vazio = automático." />
                     </StackPanel>
                 </Border>
 

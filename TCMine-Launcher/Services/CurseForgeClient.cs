@@ -74,6 +74,15 @@ public class CurseForgeClient
         return resp?.Data?.FirstOrDefault(f => !string.IsNullOrEmpty(f.DownloadUrl));
     }
 
+    /// <summary>Detalhe de um mod (usado para o nome das dependências).</summary>
+    public async Task<CurseForgeMod?> GetModAsync(int modId, CancellationToken ct = default)
+    {
+        EnsureConfigured();
+        var resp = await _http.GetFromJsonAsync<CurseForgeSingleResponse<CurseForgeMod>>(
+            $"{BaseUrl}/v1/mods/{modId}", JsonOptions, ct);
+        return resp?.Data;
+    }
+
     /// <summary>
     ///     Descarrega um ficheiro do CDN para o caminho indicado, reportando a
     ///     fração concluída (0..1) quando o tamanho é conhecido.

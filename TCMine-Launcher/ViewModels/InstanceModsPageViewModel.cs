@@ -29,6 +29,7 @@ public partial class InstanceModsPageViewModel : ViewModelBase
     [ObservableProperty] private bool _isLoadingNeoForge;
     [ObservableProperty] private string? _selectedMinecraftVersion;
     [ObservableProperty] private string? _selectedNeoForgeVersion;
+    [ObservableProperty] private string _javaPathOverride = string.Empty;
 
     // Campos do formulário "adicionar servidor"
     [ObservableProperty] private string _newServerName = string.Empty;
@@ -55,6 +56,7 @@ public partial class InstanceModsPageViewModel : ViewModelBase
         _isNew = isNew;
         _loading = true;
         Name = instance.Name;
+        JavaPathOverride = instance.JavaPathOverride ?? string.Empty;
 
         // O callback atualiza só a lista em memória (gravação acontece em Concluído).
         var selected = new ObservableCollection<ModEntry>(instance.Mods);
@@ -168,6 +170,12 @@ public partial class InstanceModsPageViewModel : ViewModelBase
     {
         if (_loading || _instance is null || value is null) return;
         _instance.NeoForgeVersion = value;
+    }
+
+    partial void OnJavaPathOverrideChanged(string value)
+    {
+        if (_loading || _instance is null) return;
+        _instance.JavaPathOverride = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
     private static void Fill(ObservableCollection<string> target, IEnumerable<string> source)

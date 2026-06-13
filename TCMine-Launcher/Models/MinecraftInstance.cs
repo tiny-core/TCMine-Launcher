@@ -32,6 +32,9 @@ public class MinecraftInstance
     /// <summary>RAM específica desta instância; <c>null</c> = usa o default global.</summary>
     public int? RamOverrideMb { get; set; }
 
+    /// <summary>Caminho do Java específico; <c>null</c>/vazio = global ou automático.</summary>
+    public string? JavaPathOverride { get; set; }
+
     /// <summary>Id do modpack oficial de origem (null se criada à mão).</summary>
     public string? ModpackId { get; set; }
 

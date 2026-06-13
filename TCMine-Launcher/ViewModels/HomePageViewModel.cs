@@ -292,7 +292,7 @@ public partial class HomePageViewModel : ViewModelBase
                 instance.NeoForgeVersion,
                 session,
                 instance.RamOverrideMb ?? _game.AllocatedRamMb,
-                _game.JavaPath,
+                string.IsNullOrWhiteSpace(instance.JavaPathOverride) ? _game.JavaPath : instance.JavaPathOverride,
                 progress,
                 _launchCts.Token,
                 instance.Servers,

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TCMine_Launcher.Services;
 
@@ -10,6 +11,11 @@ namespace TCMine_Launcher.Services;
 public class CurseForgeListResponse<T>
 {
     public List<T> Data { get; set; } = new();
+}
+
+public class CurseForgeSingleResponse<T>
+{
+    public T? Data { get; set; }
 }
 
 public class CurseForgeMod
@@ -33,4 +39,24 @@ public class CurseForgeFile
 
     /// <summary>URL do CDN; nulo quando a distribuição por terceiros é proibida.</summary>
     public string? DownloadUrl { get; set; }
+
+    public List<CurseForgeHash>? Hashes { get; set; }
+    public List<CurseForgeDependency>? Dependencies { get; set; }
+
+    /// <summary>Hash SHA-1 (algo = 1) para verificar a integridade do download.</summary>
+    public string? Sha1 => Hashes?.FirstOrDefault(h => h.Algo == 1)?.Value;
+}
+
+public class CurseForgeHash
+{
+    public string Value { get; set; } = string.Empty;
+    public int Algo { get; set; }
+}
+
+public class CurseForgeDependency
+{
+    public int ModId { get; set; }
+
+    /// <summary>3 = dependência obrigatória (required).</summary>
+    public int RelationType { get; set; }
 }

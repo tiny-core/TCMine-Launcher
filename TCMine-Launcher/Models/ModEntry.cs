@@ -18,4 +18,7 @@ public class ModEntry
 
     /// <summary>URL direto do CDN do CurseForge (pode ser nulo se a distribuição for proibida).</summary>
     public string? DownloadUrl { get; set; }
+
+    /// <summary>Hash SHA-1 para verificar a integridade após o download.</summary>
+    public string? Sha1 { get; set; }
 }

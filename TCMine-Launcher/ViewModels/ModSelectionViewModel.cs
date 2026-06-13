@@ -148,27 +148,65 @@ public partial class ModSelectionViewModel : ViewModelBase
         var gameVersion = _gameVersion() ?? string.Empty;
         try
         {
-            var file = await _client.GetBestFileAsync(item.ModId, gameVersion);
-            if (file is null)
-            {
-                StatusMessage = $"'{item.Name}' não tem versão compatível com {gameVersion}.";
-                return;
-            }
+            var before = _selected.Count;
+            var added = await AddWithDependenciesAsync(item.ModId, item.Name, gameVersion, new HashSet<int>());
+            if (!added) return;
 
-            _selected.Add(new ModEntry
-            {
-                ModId = item.ModId,
-                FileId = file.Id,
-                Name = item.Name,
-                FileName = file.FileName,
-                DownloadUrl = file.DownloadUrl
-            });
             item.IsSelected = true;
+            var deps = _selected.Count - before - 1;
+            if (deps > 0) StatusMessage = $"Adicionado com {deps} dependência(s).";
             _onChanged?.Invoke();
         }
         catch (Exception ex)
         {
             StatusMessage = "Erro ao adicionar: " + ex.Message;
         }
+    }
+
+    /// <summary>Adiciona um mod e, recursivamente, as suas dependências obrigatórias.</summary>
+    private async Task<bool> AddWithDependenciesAsync(int modId, string name, string gameVersion, HashSet<int> visited)
+    {
+        if (!visited.Add(modId)) return true;
+        if (_selected.Any(m => m.ModId == modId)) return true;
+
+        var file = await _client.GetBestFileAsync(modId, gameVersion);
+        if (file is null)
+        {
+            StatusMessage = $"'{name}' não tem versão compatível com {gameVersion}.";
+            return false;
+        }
+
+        _selected.Add(new ModEntry
+        {
+            ModId = modId,
+            FileId = file.Id,
+            Name = name,
+            FileName = file.FileName,
+            DownloadUrl = file.DownloadUrl,
+            Sha1 = file.Sha1
+        });
+        EnsureResultItem(modId, name);
+
+        if (file.Dependencies is not null)
+            foreach (var dep in file.Dependencies.Where(d => d.RelationType == 3))
+            {
+                if (_selected.Any(m => m.ModId == dep.ModId)) continue;
+                var depMod = await _client.GetModAsync(dep.ModId);
+                await AddWithDependenciesAsync(dep.ModId, depMod?.Name ?? $"Mod {dep.ModId}", gameVersion, visited);
+            }
+
+        return true;
+    }
+
+    /// <summary>Garante que um mod aparece na lista (marcado), inserindo-o se preciso.</summary>
+    private void EnsureResultItem(int modId, string name)
+    {
+        var existing = Results.FirstOrDefault(r => r.ModId == modId);
+        if (existing is not null)
+        {
+            existing.IsSelected = true;
+            return;
+        }
+        Results.Insert(0, new ModSearchItem(modId, name, string.Empty, true));
     }
 }
