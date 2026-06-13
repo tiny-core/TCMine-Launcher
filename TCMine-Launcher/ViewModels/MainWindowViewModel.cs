@@ -80,6 +80,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Home.NotifyGameRunningChanged();
         InstancesPage.NotifyGameRunningChanged();
+        Modpacks.NotifyGameRunningChanged();
     }
 
     public MainWindowViewModel()

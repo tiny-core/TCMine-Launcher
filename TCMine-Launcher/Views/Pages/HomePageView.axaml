@@ -58,9 +58,6 @@
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                                     Spacing="16">
                             <Ellipse Classes="spinner" HorizontalAlignment="Center" />
-                            <TextBlock Text="{Binding LaunchStatus}"
-                                       Foreground="{StaticResource TextPrimary}" FontSize="14"
-                                       HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding LaunchProgress, StringFormat='{}{0:0}%'}"
                                        Foreground="{StaticResource Accent}" FontSize="13" FontWeight="Bold"
                                        HorizontalAlignment="Center" />

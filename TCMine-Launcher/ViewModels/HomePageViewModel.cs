@@ -22,6 +22,7 @@ public partial class HomePageViewModel : ViewModelBase
     private readonly GameProfile _game;
     private readonly GameLauncher _launcher = new();
     private readonly MinecraftServerPinger _pinger = new();
+    private readonly OverridesInstaller _overrides = new();
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
     private bool _acceptProgress;
@@ -308,8 +309,15 @@ public partial class HomePageViewModel : ViewModelBase
                 instance.Servers,
                 autoJoin);
 
+            // Com overrides não fazemos prune (eles podem trazer jars próprios).
             await _shell.ModInstaller.EnsureModsAsync(
-                instance, progress, _launchCts.Token, instance.IsOfficial);
+                instance, progress, _launchCts.Token, instance.IsOfficial && !instance.HasOverrides);
+
+            // Aplica o bundle de overrides do modpack (configs/resourcepacks/options),
+            // uma vez por versão. Sobreposto por cima dos mods já instalados.
+            ((IProgress<LaunchProgress>)progress).Report(new LaunchProgress(
+                LaunchState.DownloadingAssets, 100, "A aplicar configuração do modpack..."));
+            await _overrides.EnsureAsync(instance, _game.ServerUrl, _launchCts.Token);
 
             // Ignora updates de progresso atrasados (a partir daqui o estado é o do jogo).
             _acceptProgress = false;

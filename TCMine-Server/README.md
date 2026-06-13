@@ -79,6 +79,7 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | `CF_CACHE_MINUTES` | não | TTL da cache em memória (default `5`). |
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
 | `UPDATES_DIR` | não | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
+| `OVERRIDES_DIR` | não | Pasta dos bundles de overrides dos modpacks (default `./overrides`). |
 
 > O seed inicial lê `./news.json` e `./modpacks/*.json` apenas quando a BD está vazia.
 > A partir daí, a fonte de verdade é a BD (gerida em `/admin`).
@@ -89,7 +90,10 @@ Interface web (Blazor Server) para gerir tudo sem editar ficheiros:
 
 - **Novidades** — criar/editar/eliminar/publicar (servidas em `/news`).
 - **Modpacks** — criar/editar, com as listas de mods e servidores (servidos em
-  `/modpacks` e `/modpacks/{id}`, no mesmo formato de antes).
+  `/modpacks` e `/modpacks/{id}`). Podes **importar do CurseForge** (pesquisa →
+  resolve mods, resource packs e shaders pela classe do projeto e captura o bundle
+  de **overrides** — configs/options); o launcher aplica os overrides na instância.
+  Os overrides são servidos em `/modpacks/{id}/overrides`.
 - **Releases** — fazer upload dos artefactos do `vpk pack` (ver abaixo).
 
 Entra em `/admin` com a `ADMIN_PASSWORD`. Os endpoints públicos mantêm o contrato:

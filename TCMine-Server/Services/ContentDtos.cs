@@ -11,8 +11,8 @@ public record ModpackSummaryDto(
 
 public record ModpackManifestDto(
     string Id, string Name, string Version, string Minecraft, string Neoforge,
-    string Description, IReadOnlyList<ModDto> Mods, IReadOnlyList<ServerDto> Servers);
+    string Description, bool HasOverrides, IReadOnlyList<ModDto> Mods, IReadOnlyList<ServerDto> Servers);
 
-public record ModDto(long ModId, long FileId, string Name, string FileName, string DownloadUrl);
+public record ModDto(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target);
 
 public record ServerDto(string Name, string Address, int Port);

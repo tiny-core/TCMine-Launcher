@@ -59,6 +59,7 @@
                 <Button Classes="play-btn" Height="38"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                         Margin="0,14,0,0"
+                        IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                         Command="{Binding #CardRoot.Owner.InstallCommand}"
                         CommandParameter="{Binding}">
                     <TextBlock Text="{Binding InstallLabel}" FontSize="12.5" FontWeight="Bold" />

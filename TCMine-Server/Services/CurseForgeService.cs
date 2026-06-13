@@ -107,31 +107,63 @@ public class CurseForgeService
         var resolved = await GetFilesBulkAsync(fileIds, ct);
         var byId = resolved.ToDictionary(f => f.Id);
 
-        // 4) Nomes legíveis dos mods em lote.
+        // 4) Info dos mods em lote (nome + classe → mod/resourcepack/shaderpack).
         var modIds = manifest.Files.Select(f => f.ProjectID).Distinct().ToList();
-        var names = await GetModNamesAsync(modIds, ct);
+        var info = await GetModsAsync(modIds, ct);
 
         var mods = new List<ImportedMod>();
         foreach (var entry in manifest.Files)
         {
             byId.TryGetValue(entry.FileID, out var file);
+            info.TryGetValue(entry.ProjectID, out var mod);
             var url = file is null ? null : ResolveDownloadUrl(file);
             mods.Add(new ImportedMod(
                 entry.ProjectID, entry.FileID,
-                names.GetValueOrDefault(entry.ProjectID) ?? file?.FileName ?? $"mod {entry.ProjectID}",
+                mod?.Name ?? file?.FileName ?? $"mod {entry.ProjectID}",
                 file?.FileName ?? string.Empty,
-                url ?? string.Empty));
+                url ?? string.Empty,
+                mod?.Target ?? "mod"));
         }
 
         var loader = manifest.Minecraft.ModLoaders.FirstOrDefault(l => l.Primary)
                      ?? manifest.Minecraft.ModLoaders.FirstOrDefault();
+
+        // 5) Bundle de overrides (configs, resourcepacks, options.txt, …) do zip.
+        var overrides = BuildOverridesZip(zip, manifest.Overrides ?? "overrides");
 
         return new ImportedModpack(
             manifest.Name ?? "Modpack importado",
             manifest.Version ?? "1.0.0",
             manifest.Minecraft.Version,
             ExtractNeoForgeVersion(loader?.Id),
-            mods);
+            mods,
+            overrides);
+    }
+
+    /// <summary>Reempacota a pasta de overrides do modpack (sem o prefixo) num zip próprio.</summary>
+    private static byte[]? BuildOverridesZip(ZipArchive src, string folder)
+    {
+        var prefix = folder.TrimEnd('/') + "/";
+        var entries = src.Entries
+            .Where(e => e.FullName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                        && !e.FullName.EndsWith("/"))
+            .ToList();
+        if (entries.Count == 0) return null;
+
+        using var ms = new MemoryStream();
+        using (var outZip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            foreach (var e in entries)
+            {
+                var rel = e.FullName[prefix.Length..];
+                if (string.IsNullOrEmpty(rel)) continue;
+                var outEntry = outZip.CreateEntry(rel);
+                using var inS = e.Open();
+                using var outS = outEntry.Open();
+                inS.CopyTo(outS);
+            }
+        }
+        return ms.ToArray();
     }
 
     private async Task<List<CfFile>> GetFilesBulkAsync(IEnumerable<long> fileIds, CancellationToken ct)
@@ -141,12 +173,20 @@ public class CurseForgeService
         return parsed?.Data ?? new();
     }
 
-    private async Task<Dictionary<long, string>> GetModNamesAsync(IEnumerable<long> modIds, CancellationToken ct)
+    private async Task<Dictionary<long, CfMod>> GetModsAsync(IEnumerable<long> modIds, CancellationToken ct)
     {
         var resp = await Api().PostAsJsonAsync("/v1/mods", new { modIds }, ct);
         var parsed = await resp.Content.ReadFromJsonAsync<CfListResponse>(Json, ct);
-        return (parsed?.Data ?? new()).ToDictionary(m => m.Id, m => m.Name);
+        return (parsed?.Data ?? new()).ToDictionary(m => m.Id);
     }
+
+    /// <summary>Mapeia a classe do CurseForge para a pasta de destino no cliente.</summary>
+    public static string ClassToTarget(long classId) => classId switch
+    {
+        12 => "resourcepack",
+        6552 => "shaderpack",
+        _ => "mod"
+    };
 
     /// <summary>downloadUrl da API, ou reconstrução do URL edge.forgecdn quando vem nulo.</summary>
     public static string? ResolveDownloadUrl(CfFile file)
@@ -174,20 +214,23 @@ public class CurseForgeService
 public record CfListResponse([property: JsonPropertyName("data")] List<CfMod> Data);
 public record CfFilesResponse([property: JsonPropertyName("data")] List<CfFile> Data);
 
-public record CfMod(long Id, string Name, string? Summary, CfLogo? Logo, List<CfFile>? LatestFiles)
+public record CfMod(long Id, string Name, string? Summary, CfLogo? Logo, List<CfFile>? LatestFiles, long ClassId = 6)
 {
     public string? LogoUrl => Logo?.Url;
+
+    /// <summary>Destino do ficheiro no cliente (mod/resourcepack/shaderpack) pela classe CF.</summary>
+    public string Target => CurseForgeService.ClassToTarget(ClassId);
 }
 
 public record CfLogo(string? Url);
 public record CfFile(long Id, long ModId, string FileName, string? DownloadUrl, List<string>? GameVersions);
 
 // ── Manifest de um modpack CurseForge (dentro do .zip) ───────────────────────
-public record CfManifest(CfManifestMc Minecraft, string? Name, string? Version, List<CfManifestFile> Files);
+public record CfManifest(CfManifestMc Minecraft, string? Name, string? Version, List<CfManifestFile> Files, string? Overrides = "overrides");
 public record CfManifestMc(string Version, List<CfManifestLoader> ModLoaders);
 public record CfManifestLoader(string Id, bool Primary);
 public record CfManifestFile(long ProjectID, long FileID, bool Required);
 
 // ── Resultado da importação ──────────────────────────────────────────────────
-public record ImportedModpack(string Name, string Version, string Minecraft, string Neoforge, List<ImportedMod> Mods);
-public record ImportedMod(long ModId, long FileId, string Name, string FileName, string DownloadUrl);
+public record ImportedModpack(string Name, string Version, string Minecraft, string Neoforge, List<ImportedMod> Mods, byte[]? Overrides);
+public record ImportedMod(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target);

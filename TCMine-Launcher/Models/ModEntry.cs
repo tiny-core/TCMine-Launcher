@@ -13,8 +13,15 @@ public class ModEntry
     /// <summary>Nome legível do mod (para a UI).</summary>
     public string Name { get; set; } = string.Empty;
 
-    /// <summary>Nome do ficheiro .jar — também a chave de "já instalado" na pasta mods.</summary>
+    /// <summary>Nome do ficheiro — também a chave de "já instalado" na pasta de destino.</summary>
     public string FileName { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     Onde o ficheiro é instalado: <c>mod</c> (pasta <c>mods/</c>),
+    ///     <c>resourcepack</c> (<c>resourcepacks/</c>) ou <c>shaderpack</c>
+    ///     (<c>shaderpacks/</c>). Default <c>mod</c> (compatível com dados antigos).
+    /// </summary>
+    public string Target { get; set; } = "mod";
 
     /// <summary>URL direto do CDN do CurseForge (pode ser nulo se a distribuição for proibida).</summary>
     public string? DownloadUrl { get; set; }

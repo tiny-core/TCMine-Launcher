@@ -41,6 +41,12 @@ public class MinecraftInstance
     /// <summary>Versão do manifesto instalada (só para instâncias oficiais).</summary>
     public string? ManifestVersion { get; set; }
 
+    /// <summary>O modpack oficial tem um bundle de overrides a aplicar.</summary>
+    public bool HasOverrides { get; set; }
+
+    /// <summary>Versão do manifesto cujos overrides já foram aplicados (evita reaplicar).</summary>
+    public string? OverridesVersion { get; set; }
+
     /// <summary>Mods (CurseForge) associados a esta instância.</summary>
     public List<ModEntry> Mods { get; set; } = new();
 

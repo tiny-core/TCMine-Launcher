@@ -54,8 +54,9 @@ public class ContentService
         if (m is null) return null;
 
         return new ModpackManifestDto(
-            m.Id, m.Name, m.Version, m.Minecraft, m.Neoforge, m.Description,
-            m.Mods.Select(x => new ModDto(x.CurseModId, x.FileId, x.Name, x.FileName, x.DownloadUrl)).ToList(),
+            m.Id, m.Name, m.Version, m.Minecraft, m.Neoforge, m.Description, m.HasOverrides,
+            m.Mods.Select(x => new ModDto(x.CurseModId, x.FileId, x.Name, x.FileName, x.DownloadUrl,
+                string.IsNullOrEmpty(x.Target) ? "mod" : x.Target)).ToList(),
             m.Servers.Select(x => new ServerDto(x.Name, x.Address, x.Port)).ToList());
     }
 

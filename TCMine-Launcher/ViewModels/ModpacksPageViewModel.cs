@@ -69,6 +69,12 @@ public partial class ModpacksPageViewModel : ViewModelBase
 
     public ObservableCollection<ModpackListItem> Modpacks { get; } = new();
 
+    /// <summary>Instalar/atualizar fica bloqueado enquanto há um jogo aberto.</summary>
+    public bool CanInteract => !_shell.IsGameRunning;
+
+    /// <summary>Chamado pelo shell quando o jogo abre/fecha.</summary>
+    public void NotifyGameRunningChanged() => OnPropertyChanged(nameof(CanInteract));
+
     /// <summary>Recarrega a lista (e recalcula estados) sempre que a página é mostrada.</summary>
     public void Begin()
     {

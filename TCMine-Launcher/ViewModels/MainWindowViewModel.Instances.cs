@@ -216,6 +216,8 @@ public partial class MainWindowViewModel
             existing.ManifestVersion = manifest.Version;
             existing.Mods = manifest.Mods;
             existing.Servers = manifest.Servers;
+            existing.HasOverrides = manifest.HasOverrides;
+            existing.OverridesVersion = null; // reaplica os overrides da nova versão
             _instances.Save(existing);
             SelectInstance(existing);
             return existing;
@@ -229,6 +231,7 @@ public partial class MainWindowViewModel
             Source = InstanceSource.OfficialManifest,
             ModpackId = manifest.Id,
             ManifestVersion = manifest.Version,
+            HasOverrides = manifest.HasOverrides,
             Mods = manifest.Mods,
             Servers = manifest.Servers
         };

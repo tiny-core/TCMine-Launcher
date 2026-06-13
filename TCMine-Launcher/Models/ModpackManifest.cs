@@ -17,6 +17,9 @@ public class ModpackManifest
     public string Neoforge { get; set; } = string.Empty;
     public string? Description { get; set; }
 
+    /// <summary>O modpack tem um bundle de overrides (configs/resourcepacks/options).</summary>
+    public bool HasOverrides { get; set; }
+
     /// <summary>Nº de mods (preenchido no resumo da lista, quando Mods vem vazio).</summary>
     public int ModCount { get; set; }
 

@@ -26,7 +26,8 @@ public class ModInstaller
         MinecraftInstance instance, IProgress<LaunchProgress> progress,
         CancellationToken ct = default, bool prune = false)
     {
-        var modsDir = Path.Combine(LauncherPaths.InstanceGameDir(instance.Id), "mods");
+        var gameDir = LauncherPaths.InstanceGameDir(instance.Id);
+        var modsDir = Path.Combine(gameDir, "mods");
         Directory.CreateDirectory(modsDir);
 
         // Diff: remove jars que já não fazem parte do modpack (só em instâncias geridas).
@@ -45,7 +46,9 @@ public class ModInstaller
             try
             {
                 ct.ThrowIfCancellationRequested();
-                var dest = Path.Combine(modsDir, mod.FileName);
+                // Cada ficheiro vai para a pasta certa: mods / resourcepacks / shaderpacks.
+                var dest = Path.Combine(gameDir, FolderFor(mod.Target), mod.FileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
 
                 // Já presente e íntegro na instância? Não faz nada.
                 if (!IsValid(dest, mod.Sha1))
@@ -82,6 +85,14 @@ public class ModInstaller
 
         await Task.WhenAll(tasks);
     }
+
+    /// <summary>Pasta de destino conforme o tipo do ficheiro.</summary>
+    private static string FolderFor(string? target) => target?.ToLowerInvariant() switch
+    {
+        "resourcepack" => "resourcepacks",
+        "shaderpack" => "shaderpacks",
+        _ => "mods"
+    };
 
     /// <summary>Apaga jars na pasta mods que não constam da lista da instância.</summary>
     private static void PruneUnlisted(MinecraftInstance instance, string modsDir)

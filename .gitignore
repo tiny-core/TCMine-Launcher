@@ -51,6 +51,7 @@ appsettings.*.local.json
 *.db
 *.db-shm
 *.db-wal
+**/overrides/
 
 # ------ Lixo do SO ------
 .DS_Store

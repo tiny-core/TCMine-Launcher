@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject CurseForgeService Cf
+@inject OverridesStore Overrides
 @inject NavigationManager Nav
 
 <h1>Modpacks</h1>
@@ -179,13 +180,18 @@
                 Neoforge = imported.Neoforge,
                 Description = m.Summary ?? string.Empty,
                 IsPublished = false, // entra como rascunho para revisão
+                HasOverrides = imported.Overrides is not null,
                 Mods = imported.Mods.Select(x => new ModEntryEntity
                 {
                     CurseModId = x.ModId, FileId = x.FileId, Name = x.Name,
-                    FileName = x.FileName, DownloadUrl = x.DownloadUrl
+                    FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
                 }).ToList()
             });
             await db.SaveChangesAsync();
+
+            if (imported.Overrides is not null)
+                await Overrides.SaveAsync(slug, imported.Overrides);
+
             Nav.NavigateTo($"/admin/modpacks/{slug}");
         }
         catch (Exception ex)
@@ -226,6 +232,7 @@
         await using var db = await DbFactory.CreateDbContextAsync();
         db.Modpacks.Remove(m);
         await db.SaveChangesAsync();
+        Overrides.Delete(m.Id);
         await LoadAsync();
     }
 

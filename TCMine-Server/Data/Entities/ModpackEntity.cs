@@ -25,6 +25,9 @@ public class ModpackEntity
 
     public bool IsPublished { get; set; } = true;
 
+    /// <summary>Tem um bundle de overrides (configs/resourcepacks/options) guardado.</summary>
+    public bool HasOverrides { get; set; }
+
     public List<ModEntryEntity> Mods { get; set; } = new();
     public List<ServerEntryEntity> Servers { get; set; } = new();
 }
@@ -47,6 +50,10 @@ public class ModEntryEntity
 
     [MaxLength(500)]
     public string DownloadUrl { get; set; } = string.Empty;
+
+    /// <summary>Destino no cliente: "mod", "resourcepack" ou "shaderpack".</summary>
+    [MaxLength(20)]
+    public string Target { get; set; } = "mod";
 
     public string ModpackId { get; set; } = string.Empty;
     public ModpackEntity? Modpack { get; set; }

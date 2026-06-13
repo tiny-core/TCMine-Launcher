@@ -30,6 +30,7 @@ var dbPath = builder.Configuration["DB_PATH"]
 builder.Services.AddDbContextFactory<AppDbContext>(o => o.UseSqlite($"Data Source={dbPath}"));
 builder.Services.AddScoped<ContentService>();
 builder.Services.AddScoped<CurseForgeService>();
+builder.Services.AddSingleton<OverridesStore>();
 
 // ── CurseForge proxy (HttpClient + cache) ────────────────────────────────────
 builder.Services.AddHttpClient("curseforge", client =>
@@ -181,6 +182,13 @@ app.MapGet("/modpacks/{id}", async (string id, ContentService content, Cancellat
 {
     var manifest = await content.GetManifestAsync(id, ct);
     return manifest is null ? Results.NotFound() : Results.Json(manifest);
+});
+
+// Bundle de overrides do modpack (configs/resourcepacks/options) — zip.
+app.MapGet("/modpacks/{id}/overrides", (string id, OverridesStore store) =>
+{
+    var file = store.GetFile(id);
+    return file is null ? Results.NotFound() : Results.File(file, "application/zip");
 });
 
 // ── Autenticação de admin (form login/logout) ────────────────────────────────
