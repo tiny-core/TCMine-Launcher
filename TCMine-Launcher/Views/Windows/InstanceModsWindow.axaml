@@ -12,7 +12,14 @@
         Width="800" Height="700"
         MinWidth="640" MinHeight="520"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource BgWindow}">
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
 
-    <views:InstanceModsPageView />
+    <Border Background="{StaticResource BgWindow}" CornerRadius="12" ClipToBounds="True">
+        <Grid RowDefinitions="45,*">
+            <views:TitleBar Grid.Row="0" Title="Gerir instância" ShowMinimize="False" />
+            <views:InstanceModsPageView Grid.Row="1" />
+        </Grid>
+    </Border>
 </Window>

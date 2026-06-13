@@ -17,6 +17,13 @@ public partial class InstancesPageViewModel : ViewModelBase
 {
     private readonly MainWindowViewModel _shell;
 
+    /// <summary>Mensagem mostrada junto à barra de progresso durante import/export.</summary>
+    [ObservableProperty] private string _busyStatus = string.Empty;
+
+    /// <summary>True enquanto decorre uma operação de import/export (zip).</summary>
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CanInteract))]
+    private bool _isBusy;
+
     public InstancesPageViewModel(MainWindowViewModel shell)
     {
         _shell = shell;
@@ -25,16 +32,8 @@ public partial class InstancesPageViewModel : ViewModelBase
     /// <summary>Instâncias instaladas (partilhadas com o shell).</summary>
     public ObservableCollection<MinecraftInstance> Instances => _shell.Instances;
 
-    /// <summary>Id da instância ativa — usado para realçar o cartão selecionado.</summary>
-    public string? ActiveInstanceId => _shell.ActiveInstance?.Id;
-
-    /// <summary>True enquanto decorre uma operação de import/export (zip).</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanInteract))]
-    private bool _isBusy;
-
-    /// <summary>Mensagem mostrada junto à barra de progresso durante import/export.</summary>
-    [ObservableProperty] private string _busyStatus = string.Empty;
+    /// <summary>ID da instância ativa — usado para realçar o cartão selecionado.</summary>
+    public string ActiveInstanceId => _shell.ActiveInstance?.Id ?? "??";
 
     /// <summary>Ações ficam bloqueadas enquanto há um jogo aberto ou uma operação em curso.</summary>
     public bool CanInteract => !_shell.IsGameRunning && !IsBusy;
@@ -76,7 +75,7 @@ public partial class InstancesPageViewModel : ViewModelBase
     {
         // Cria um rascunho da cópia e abre a janela; só grava ao concluir.
         var copy = _shell.DuplicateInstance(instance);
-        _shell.ShowInstanceMods(copy, isNew: true);
+        _shell.ShowInstanceMods(copy, true);
     }
 
     [RelayCommand]

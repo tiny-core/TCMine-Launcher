@@ -14,7 +14,7 @@
         <!-- ════════════════════════════════════════════════════ -->
         <!--  ESQUERDA: hero do modpack + barra de launch          -->
         <!-- ════════════════════════════════════════════════════ -->
-        <Grid Grid.Column="0" RowDefinitions="*,Auto,Auto">
+        <Grid Grid.Column="0" RowDefinitions="*,Auto">
 
             <!-- Hero / banner -->
             <Border Grid.Row="0" CornerRadius="16" ClipToBounds="True">
@@ -99,31 +99,6 @@
                 </Grid>
             </StackPanel>
 
-            <!-- Registo / console do launch (colapsável) -->
-            <StackPanel Grid.Row="2" Margin="0,12,0,0" Spacing="8">
-                <ToggleButton Classes="log-toggle"
-                              HorizontalAlignment="Left"
-                              IsChecked="{Binding IsLogExpanded}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <PathIcon Data="{StaticResource IconChevronRight}" Width="11" Height="11"
-                                  VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding LogToggleText}" VerticalAlignment="Center" />
-                    </StackPanel>
-                </ToggleButton>
-                <Border Classes="log-panel" IsVisible="{Binding IsLogExpanded}">
-                    <ScrollViewer Height="130"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
-                        <ItemsControl ItemsSource="{Binding LaunchLog}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding}" TextWrapping="Wrap" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Border>
-            </StackPanel>
         </Grid>
 
         <!-- ════════════════════════════════════════════════════ -->

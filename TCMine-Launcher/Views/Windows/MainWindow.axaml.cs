@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using TCMine_Launcher.Services;
 using TCMine_Launcher.ViewModels;
@@ -37,6 +35,7 @@ public partial class MainWindow : Window
         // apenas pede (sem referenciar tipos de janela).
         vm.OpenModsWindowRequested = OpenInstanceModsWindow;
         vm.OpenModSelectionRequested = OpenModSelectionWindow;
+        vm.OpenLogWindowRequested = OpenLogWindow;
         vm.ConfirmRequested = ShowConfirmAsync;
         vm.SaveFileRequested = SaveZipAsync;
         vm.OpenFileRequested = OpenZipAsync;
@@ -120,27 +119,25 @@ public partial class MainWindow : Window
         new ModSelectionWindow { DataContext = selection }.Show();
     }
 
+    private LogWindow? _logWindow;
+
+    private void OpenLogWindow(HomePageViewModel logViewModel)
+    {
+        // Instância única: se já estiver aberta, traz para a frente.
+        if (_logWindow is not null)
+        {
+            _logWindow.Activate();
+            return;
+        }
+
+        _logWindow = new LogWindow { DataContext = logViewModel };
+        _logWindow.Closed += (_, _) => _logWindow = null;
+        _logWindow.Show(this);
+    }
+
     private async System.Threading.Tasks.Task<bool> ShowConfirmAsync(string title, string message)
     {
         var dialog = new ConfirmDialog(title, message);
         return await dialog.ShowDialog<bool>(this);
-    }
-
-    // ── Lógica de janela OS (único código legítimo aqui) ─────────
-
-    private void TitleBar_PointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
-            BeginMoveDrag(e);
-    }
-
-    private void MinimizeButton_Click(object? sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
-    }
-
-    private void CloseButton_Click(object? sender, RoutedEventArgs e)
-    {
-        Close();
     }
 }

@@ -29,9 +29,6 @@ public partial class HomePageViewModel : ViewModelBase
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))] [NotifyPropertyChangedFor(nameof(RamMbDecimal))]
     private double _instanceRam = 4096;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleText))]
-    private bool _isLogExpanded;
-
     private CancellationTokenSource? _launchCts;
 
     [ObservableProperty] private double _launchProgress;
@@ -109,7 +106,6 @@ public partial class HomePageViewModel : ViewModelBase
     public bool HasServer => Servers.Count > 0;
 
     public ObservableCollection<string> LaunchLog { get; } = new();
-    public string LogToggleText => IsLogExpanded ? "Ocultar registo" : "Mostrar registo";
 
     // ── Perfil ───────────────────────────────────────────────────
     public string PlayerName => _player.Name;
@@ -379,7 +375,7 @@ public partial class HomePageViewModel : ViewModelBase
             LaunchStatus = "Minecraft terminou com erro";
             LaunchLog.Add($"⚠ Saída com código {exitCode}. Log: {logCapture.LogPath}");
             foreach (var line in logCapture.Tail()) LaunchLog.Add(line);
-            IsLogExpanded = true;
+            _shell.ShowLog();
         }
         else
         {

@@ -13,21 +13,29 @@
         MinWidth="460" MinHeight="420"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
-        Background="{StaticResource BgWindow}">
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
 
-    <Grid Margin="22" RowDefinitions="Auto,*,Auto">
-        <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Classes="page-title" Text="Mods" />
-            <TextBlock Classes="muted" Text="Pesquisa e seleciona os mods (CurseForge)"
-                       Margin="0,4,0,0" />
-        </StackPanel>
+    <Border Background="{StaticResource BgWindow}" CornerRadius="12" ClipToBounds="True">
+        <Grid RowDefinitions="45,*">
+            <views:TitleBar Grid.Row="0" Title="Gerir mods" ShowMinimize="False" />
 
-        <views:ModSelectionView Grid.Row="1" DataContext="{Binding}" VerticalContentAlignment="Stretch" />
+            <Grid Grid.Row="1" Margin="22" RowDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                    <TextBlock Classes="page-title" Text="Mods" />
+                    <TextBlock Classes="muted" Text="Pesquisa e seleciona os mods (CurseForge)"
+                               Margin="0,4,0,0" />
+                </StackPanel>
 
-        <Button Grid.Row="2" Classes="play-btn" Height="40" Width="140"
-                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                Margin="0,16,0,0" Click="Done_Click">
-            <TextBlock Text="Concluído" FontSize="13" FontWeight="Bold" />
-        </Button>
-    </Grid>
+                <views:ModSelectionView Grid.Row="1" DataContext="{Binding}" VerticalContentAlignment="Stretch" />
+
+                <Button Grid.Row="2" Classes="play-btn" Height="40" Width="140"
+                        HorizontalAlignment="Right" HorizontalContentAlignment="Center"
+                        Margin="0,16,0,0" Click="Done_Click">
+                    <TextBlock Text="Concluído" FontSize="13" FontWeight="Bold" />
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

@@ -116,6 +116,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public string CurrentVersion =>
         System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
 
+    /// <summary>Rótulo de versão mostrado na barra de estado (footer).</summary>
+    public string VersionLabel => $"v{CurrentVersion}";
+
     private async Task CheckForUpdateAsync()
     {
         if (await _updater.CheckAsync())
@@ -225,6 +228,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Pedido para abrir a janela de seleção de mods (ligado pela View).</summary>
     public Action<ModSelectionViewModel>? OpenModSelectionRequested { get; set; }
+
+    /// <summary>Pedido para abrir a janela do registo de eventos (ligado pela View).</summary>
+    public Action<HomePageViewModel>? OpenLogWindowRequested { get; set; }
+
+    /// <summary>Abre (ou traz para a frente) a janela do registo de eventos do launch.</summary>
+    public void ShowLog() => OpenLogWindowRequested?.Invoke(Home);
+
+    /// <summary>Comando do botão de registo na barra de estado (footer).</summary>
+    [RelayCommand]
+    private void OpenLog() => ShowLog();
 
     /// <summary>Abre a janela (própria) de seleção de mods.</summary>
     public void ShowModSelection(ModSelectionViewModel selection)
