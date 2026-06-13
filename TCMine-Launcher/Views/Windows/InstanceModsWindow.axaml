@@ -12,7 +12,7 @@
         Width="800" Height="700"
         MinWidth="640" MinHeight="520"
         WindowStartupLocation="CenterOwner"
-        Background="#0B0B14">
+        Background="{StaticResource BgWindow}">
 
     <views:InstanceModsPageView />
 </Window>

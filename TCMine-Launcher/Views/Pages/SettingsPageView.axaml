@@ -33,7 +33,7 @@
                         </Border>
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
                             <TextBlock Text="{Binding PlayerName}"
-                                       FontSize="15" FontWeight="Bold" Foreground="#E8E8F0" />
+                                       FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" />
                             <TextBlock Text="{Binding AccountLabel}" Classes="muted" FontSize="11" />
                         </StackPanel>
                         <Button Grid.Column="3" Classes="outline-btn"
@@ -48,13 +48,13 @@
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
                         <TextBlock Text="Jogo" FontSize="14" FontWeight="Bold"
-                                   Foreground="#E8E8F0" />
+                                   Foreground="{StaticResource TextPrimary}" />
 
                         <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0">
                             <TextBlock Grid.Column="0" Classes="section-label"
                                        Text="MEMÓRIA ALOCADA" Margin="0" />
                             <TextBlock Grid.Column="1" Text="{Binding RamDisplay}"
-                                       FontSize="12" Foreground="#F97316" FontWeight="SemiBold" />
+                                       FontSize="12" Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
                         </Grid>
                         <Slider Minimum="1024" Maximum="16384"
                                 TickFrequency="1024" IsSnapToTickEnabled="True"
@@ -62,13 +62,8 @@
 
                         <TextBlock Classes="section-label" Text="CAMINHO DO JAVA (opcional)"
                                    Margin="2,16,0,7" />
-                        <TextBox Text="{Binding JavaPath}"
-                                 PlaceholderText="Auto-detectar"
-                                 Background="#0A0A16"
-                                 BorderBrush="#1A1A28"
-                                 Foreground="#94A3B8"
-                                 CornerRadius="7"
-                                 Padding="11,8" />
+                        <TextBox Classes="field" Text="{Binding JavaPath}"
+                                 PlaceholderText="Auto-detectar" />
                     </StackPanel>
                 </Border>
 
@@ -76,16 +71,11 @@
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
                         <TextBlock Text="Servidor TCMine" FontSize="14" FontWeight="Bold"
-                                   Foreground="#E8E8F0" />
+                                   Foreground="{StaticResource TextPrimary}" />
                         <TextBlock Classes="section-label" Text="URL DO SERVIDOR"
                                    Margin="2,16,0,7" />
-                        <TextBox Text="{Binding ServerUrl}"
-                                 PlaceholderText="https://o-teu-servidor"
-                                 Background="#0A0A16"
-                                 BorderBrush="#1A1A28"
-                                 Foreground="#94A3B8"
-                                 CornerRadius="7"
-                                 Padding="11,8" />
+                        <TextBox Classes="field" Text="{Binding ServerUrl}"
+                                 PlaceholderText="https://o-teu-servidor" />
                         <TextBlock Classes="muted" FontSize="11" Margin="2,8,0,0"
                                    TextWrapping="Wrap"
                                    Text="Serve os modpacks oficiais e o proxy do CurseForge (mods). Necessário para a aba Modpacks e a pesquisa de mods." />
@@ -96,7 +86,7 @@
                 <Border Classes="panel">
                     <StackPanel Spacing="6">
                         <TextBlock Text="Sobre" FontSize="14" FontWeight="Bold"
-                                   Foreground="#E8E8F0" />
+                                   Foreground="{StaticResource TextPrimary}" />
                         <TextBlock Text="TCMine Launcher · beta v1" Classes="muted" />
                         <TextBlock Text="Launcher do servidor TCMine — NeoForge + modpack custom."
                                    Classes="muted" TextWrapping="Wrap" />

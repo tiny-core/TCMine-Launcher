@@ -21,6 +21,7 @@ public partial class InstanceModsPageViewModel : ViewModelBase
     private readonly MainWindowViewModel _shell;
     private readonly VersionService _versions = new();
     private MinecraftInstance? _instance;
+    private ObservableCollection<ModEntry>? _selectedMods;
     private bool _isNew;
     private bool _loading;
 
@@ -38,6 +39,15 @@ public partial class InstanceModsPageViewModel : ViewModelBase
 
     /// <summary>Servidores associados à instância (editáveis em memória).</summary>
     public ObservableCollection<ServerEntry> Servers { get; } = new();
+
+    /// <summary>Nº de mods selecionados (para o botão).</summary>
+    public int ModCount => _selectedMods?.Count ?? 0;
+
+    [RelayCommand]
+    private void OpenMods()
+    {
+        if (ModSelection is not null) _shell.ShowModSelection(ModSelection);
+    }
 
     public InstanceModsPageViewModel(MainWindowViewModel shell)
     {
@@ -60,11 +70,14 @@ public partial class InstanceModsPageViewModel : ViewModelBase
 
         // O callback atualiza só a lista em memória (gravação acontece em Concluído).
         var selected = new ObservableCollection<ModEntry>(instance.Mods);
+        _selectedMods = selected;
+        selected.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ModCount));
         ModSelection = new ModSelectionViewModel(
             _shell.CurseForge,
             selected,
             () => instance.MinecraftVersion,
             () => instance.Mods = selected.ToList());
+        OnPropertyChanged(nameof(ModCount));
 
         Servers.Clear();
         foreach (var server in instance.Servers) Servers.Add(server);

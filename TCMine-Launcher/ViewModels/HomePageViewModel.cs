@@ -36,6 +36,7 @@ public partial class HomePageViewModel : ViewModelBase
     [ObservableProperty] private double _launchProgress;
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
     private bool _suppressRam;
+    private bool _acceptProgress;
 
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
@@ -66,7 +67,11 @@ public partial class HomePageViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
     [NotifyPropertyChangedFor(nameof(StatusColor))]
+    [NotifyPropertyChangedFor(nameof(CanEditRam))]
     public partial bool IsLaunching { get; set; }
+
+    /// <summary>RAM só é editável fora de instalação/execução.</summary>
+    public bool CanEditRam => !IsLaunching && !_shell.IsGameRunning;
 
     private MinecraftInstance? Active => _shell.ActiveInstance;
 
@@ -128,6 +133,11 @@ public partial class HomePageViewModel : ViewModelBase
     /// <summary>URL da cabeça da skin (para o avatar).</summary>
     public string? PlayerHeadUrl => _player.HeadUrl;
 
+    /// <summary>Id (abreviado) da instância ativa — mostrado no painel; clica abre a pasta.</summary>
+    public string InstanceIdShort => Active is null
+        ? "—"
+        : Active.Id.Length > 12 ? Active.Id[..12] + "…" : Active.Id;
+
     public string RamDisplay => $"{(int)InstanceRam} MB";
 
     public void NotifyPlayerChanged()
@@ -150,6 +160,7 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(InstanceTag));
         OnPropertyChanged(nameof(InstanceSubtitle));
         OnPropertyChanged(nameof(InstanceSummary));
+        OnPropertyChanged(nameof(InstanceIdShort));
         RefreshInstallState();
 
         if (!IsLaunching) LaunchStatus = DefaultStatus();
@@ -164,7 +175,14 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlayIcon));
         OnPropertyChanged(nameof(StateLabel));
         OnPropertyChanged(nameof(StatusColor));
+        OnPropertyChanged(nameof(CanEditRam));
         PlayCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand]
+    private void OpenInstanceFolder()
+    {
+        if (Active is not null) _shell.OpenInstanceFolder(Active);
     }
 
     private void RefreshInstallState()
@@ -274,11 +292,15 @@ public partial class HomePageViewModel : ViewModelBase
         LaunchLog.Clear();
         LaunchLog.Add($"Instância: {instance.Name} ({instance.VersionSummary})");
         _launchCts = new CancellationTokenSource();
+        _acceptProgress = true;
         Log.Information("A lançar instância {Name} ({Mc}/{Neo})",
             instance.Name, instance.MinecraftVersion, instance.NeoForgeVersion);
 
+        // Progress<T> entrega de forma assíncrona; a flag evita que updates atrasados
+        // do download sobrescrevam o estado depois do jogo arrancar.
         var progress = new Progress<LaunchProgress>(p =>
         {
+            if (!_acceptProgress) return;
             LaunchProgress = p.Percent;
             LaunchStatus = p.Message;
             LaunchLog.Add($"[{p.Percent,3:0}%] {p.Message}");
@@ -303,6 +325,9 @@ public partial class HomePageViewModel : ViewModelBase
 
             await _shell.ModInstaller.EnsureModsAsync(
                 instance, progress, _launchCts.Token, prune: instance.IsOfficial);
+
+            // Ignora updates de progresso atrasados (a partir daqui o estado é o do jogo).
+            _acceptProgress = false;
 
             // Captura a saída do jogo para ficheiro (e deteção de crash).
             var logCapture = new GameLogCapture(LauncherPaths.InstanceLogFile(instance.Id));

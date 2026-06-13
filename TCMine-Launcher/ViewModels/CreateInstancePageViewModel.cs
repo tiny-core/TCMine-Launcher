@@ -50,6 +50,16 @@ public partial class CreateInstancePageViewModel : ViewModelBase
 
         ModSelection = new ModSelectionViewModel(
             shell.CurseForge, _pendingMods, () => SelectedMinecraftVersion);
+        _pendingMods.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ModCount));
+    }
+
+    /// <summary>Nº de mods selecionados (para o botão).</summary>
+    public int ModCount => _pendingMods.Count;
+
+    [RelayCommand]
+    private void OpenMods()
+    {
+        _shell.ShowModSelection(ModSelection);
     }
 
     public ObservableCollection<string> MinecraftVersions { get; } = new();

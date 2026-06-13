@@ -9,7 +9,7 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Border Background="#0E0E1A" BorderBrush="#1A1A2A" BorderThickness="1"
+    <Border Background="{StaticResource BgPanel}" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
             CornerRadius="14" Padding="26">
         <DockPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="12"
@@ -18,14 +18,14 @@
                     <TextBlock Text="Cancelar" FontSize="13" />
                 </Button>
                 <Button Click="Confirm_Click" Height="38" Width="120"
-                        Background="#7F1D1D" Foreground="White" BorderThickness="0"
+                        Background="{StaticResource DangerBorder}" Foreground="White" BorderThickness="0"
                         CornerRadius="9" HorizontalContentAlignment="Center">
                     <TextBlock Text="Eliminar" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
                 </Button>
             </StackPanel>
 
             <StackPanel Spacing="10" VerticalAlignment="Center">
-                <TextBlock x:Name="TitleText" FontSize="16" FontWeight="Bold" Foreground="#E8E8F0" />
+                <TextBlock x:Name="TitleText" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" />
                 <TextBlock x:Name="MessageText" FontSize="13" Foreground="#9A9ABA"
                            TextWrapping="Wrap" />
             </StackPanel>

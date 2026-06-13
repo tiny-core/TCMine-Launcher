@@ -65,9 +65,9 @@ public partial class ModSelectionViewModel : ViewModelBase
         _gameVersion = gameVersion;
         _onChanged = onChanged;
 
-        // Mostra já os mods atuais (removíveis) sem precisar de pesquisar.
+        // Mostra já os mods atuais (removíveis) com a sua imagem guardada.
         foreach (var entry in _selected)
-            Results.Add(new ModSearchItem(entry.ModId, entry.Name, string.Empty, true));
+            Results.Add(new ModSearchItem(entry.ModId, entry.Name, string.Empty, true, entry.LogoUrl));
 
         if (!client.IsConfigured)
             StatusMessage = "Proxy do CurseForge não configurado (Definições).";
@@ -87,13 +87,6 @@ public partial class ModSelectionViewModel : ViewModelBase
             return;
         }
 
-        var gameVersion = _gameVersion();
-        if (string.IsNullOrEmpty(gameVersion))
-        {
-            StatusMessage = "Seleciona primeiro a versão do Minecraft.";
-            return;
-        }
-
         _searchCts?.Cancel();
         _searchCts = new CancellationTokenSource();
         IsSearching = true;
@@ -101,7 +94,7 @@ public partial class ModSelectionViewModel : ViewModelBase
 
         try
         {
-            var mods = await _client.SearchAsync(gameVersion, Query, 0, _searchCts.Token);
+            var mods = await _client.SearchAsync(Query, 0, _searchCts.Token);
 
             Results.Clear();
             var shown = new HashSet<int>();
@@ -149,7 +142,7 @@ public partial class ModSelectionViewModel : ViewModelBase
         try
         {
             var before = _selected.Count;
-            var added = await AddWithDependenciesAsync(item.ModId, item.Name, gameVersion, new HashSet<int>());
+            var added = await AddWithDependenciesAsync(item.ModId, item.Name, item.LogoUrl, gameVersion, new HashSet<int>());
             if (!added) return;
 
             item.IsSelected = true;
@@ -164,7 +157,8 @@ public partial class ModSelectionViewModel : ViewModelBase
     }
 
     /// <summary>Adiciona um mod e, recursivamente, as suas dependências obrigatórias.</summary>
-    private async Task<bool> AddWithDependenciesAsync(int modId, string name, string gameVersion, HashSet<int> visited)
+    private async Task<bool> AddWithDependenciesAsync(
+        int modId, string name, string? logoUrl, string gameVersion, HashSet<int> visited)
     {
         if (!visited.Add(modId)) return true;
         if (_selected.Any(m => m.ModId == modId)) return true;
@@ -183,23 +177,26 @@ public partial class ModSelectionViewModel : ViewModelBase
             Name = name,
             FileName = file.FileName,
             DownloadUrl = file.DownloadUrl,
-            Sha1 = file.Sha1
+            Sha1 = file.Sha1,
+            LogoUrl = logoUrl
         });
-        EnsureResultItem(modId, name);
+        EnsureResultItem(modId, name, logoUrl);
 
         if (file.Dependencies is not null)
             foreach (var dep in file.Dependencies.Where(d => d.RelationType == 3))
             {
                 if (_selected.Any(m => m.ModId == dep.ModId)) continue;
                 var depMod = await _client.GetModAsync(dep.ModId);
-                await AddWithDependenciesAsync(dep.ModId, depMod?.Name ?? $"Mod {dep.ModId}", gameVersion, visited);
+                await AddWithDependenciesAsync(
+                    dep.ModId, depMod?.Name ?? $"Mod {dep.ModId}", depMod?.Logo?.ThumbnailUrl,
+                    gameVersion, visited);
             }
 
         return true;
     }
 
     /// <summary>Garante que um mod aparece na lista (marcado), inserindo-o se preciso.</summary>
-    private void EnsureResultItem(int modId, string name)
+    private void EnsureResultItem(int modId, string name, string? logoUrl = null)
     {
         var existing = Results.FirstOrDefault(r => r.ModId == modId);
         if (existing is not null)
@@ -207,6 +204,6 @@ public partial class ModSelectionViewModel : ViewModelBase
             existing.IsSelected = true;
             return;
         }
-        Results.Insert(0, new ModSearchItem(modId, name, string.Empty, true));
+        Results.Insert(0, new ModSearchItem(modId, name, string.Empty, true, logoUrl));
     }
 }

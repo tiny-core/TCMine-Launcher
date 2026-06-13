@@ -24,7 +24,7 @@
     <!-- ═══════════════════════════════════════════════════════ -->
     <!--  RAIZ — cantos arredondados sobre fundo transparente    -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <Border Background="#0B0B14"
+    <Border Background="{StaticResource BgWindow}"
             CornerRadius="12"
             ClipToBounds="True">
         <Grid RowDefinitions="45,*,28">
@@ -34,7 +34,7 @@
             <!-- ═══════════════════════════════════════════════════ -->
             <Border Grid.Row="0"
                     Background="Transparent"
-                    BorderBrush="#141420"
+                    BorderBrush="{StaticResource BorderChrome}"
                     BorderThickness="0,0,0,1"
                     PointerPressed="TitleBar_PointerPressed">
                 <Grid ColumnDefinitions="*,Auto">
@@ -43,7 +43,7 @@
                                 Spacing="11"
                                 VerticalAlignment="Center"
                                 Margin="20,0,0,0">
-                        <TextBlock Text="⬡" FontSize="17" Foreground="#F97316"
+                        <TextBlock Text="⬡" FontSize="17" Foreground="{StaticResource Accent}"
                                    VerticalAlignment="Center" />
                         <TextBlock Text="TCMine Launcher" FontSize="12.5" Foreground="#3A3A52"
                                    VerticalAlignment="Center" />
@@ -75,8 +75,8 @@
 
                     <!-- SIDEBAR -->
                     <Border Grid.Column="0"
-                            Background="#090912"
-                            BorderBrush="#141420"
+                            Background="{StaticResource BgSidebar}"
+                            BorderBrush="{StaticResource BorderChrome}"
                             BorderThickness="0,0,1,0">
                         <Grid RowDefinitions="*,Auto">
                             <StackPanel Grid.Row="0"
@@ -167,8 +167,8 @@
             <!--  BARRA DE ESTADO                                    -->
             <!-- ═══════════════════════════════════════════════════ -->
             <Border Grid.Row="2"
-                    Background="#070710"
-                    BorderBrush="#141420"
+                    Background="{StaticResource BgConsole}"
+                    BorderBrush="{StaticResource BorderChrome}"
                     BorderThickness="0,1,0,0">
                 <Grid ColumnDefinitions="Auto,*,Auto,12,Auto" Margin="16,0">
                     <StackPanel Grid.Column="0"
@@ -179,7 +179,7 @@
                                  Fill="#22C55E"
                                  IsVisible="{Binding IsLoggedIn}" />
                         <TextBlock Text="{Binding StatusMessage}"
-                                   FontSize="11" Foreground="#5A5A7A"
+                                   FontSize="11" Foreground="{StaticResource TextFaint}"
                                    VerticalAlignment="Center" />
                     </StackPanel>
 

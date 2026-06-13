@@ -9,14 +9,13 @@
              x:DataType="vm:ModSelectionViewModel"
              x:Name="ModRoot">
 
-    <StackPanel Spacing="12">
+    <Grid RowDefinitions="Auto,Auto,*">
 
         <!-- Barra de pesquisa -->
-        <Grid ColumnDefinitions="*,10,Auto">
-            <TextBox Grid.Column="0" Text="{Binding Query}"
+        <Grid Grid.Row="0" ColumnDefinitions="*,10,Auto">
+            <TextBox Grid.Column="0" Classes="field" Text="{Binding Query}"
                      PlaceholderText="Pesquisar mods (CurseForge)..."
-                     Background="#0A0A16" BorderBrush="#1A1A28"
-                     CornerRadius="7" Foreground="#E8E8F0" Padding="11,8">
+                     Foreground="{StaticResource TextPrimary}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
                 </TextBox.KeyBindings>
@@ -35,35 +34,35 @@
         </Grid>
 
         <!-- Estado / mensagens -->
-        <TextBlock Text="{Binding StatusMessage}"
-                   Classes="muted" FontSize="11.5" TextWrapping="Wrap"
+        <TextBlock Grid.Row="1" Text="{Binding StatusMessage}"
+                   Classes="muted" FontSize="11.5" TextWrapping="Wrap" Margin="0,12"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
-        <!-- Lista única (resultados + selecionados; o botão alterna) -->
-        <Border Background="#070710" BorderBrush="#16161F" BorderThickness="1"
-                CornerRadius="8" IsVisible="{Binding IsConfigured}">
-            <ScrollViewer Height="240" VerticalScrollBarVisibility="Auto">
+        <!-- Lista única (resultados + selecionados; o botão alterna) — ocupa o resto -->
+        <Border Grid.Row="2" Background="{StaticResource BgConsole}" BorderBrush="{StaticResource BorderDivider}" BorderThickness="1"
+                CornerRadius="8" Margin="0,12,0,0" IsVisible="{Binding IsConfigured}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Results}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vm:ModSearchItem">
                             <Grid ColumnDefinitions="Auto,12,*,Auto" Margin="12,9">
                                 <Border Grid.Column="0" Width="38" Height="38"
                                         CornerRadius="6" ClipToBounds="True"
-                                        Background="#12121E" VerticalAlignment="Center">
+                                        Background="{StaticResource BgElevated}" VerticalAlignment="Center">
                                     <Image bh:ImageLoader.SourceUrl="{Binding LogoUrl}"
                                            Stretch="UniformToFill" />
                                 </Border>
                                 <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="13" FontWeight="SemiBold" Foreground="#E8E8F0" />
+                                               FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
                                     <TextBlock Text="{Binding Summary}"
-                                               FontSize="11" Foreground="#7A7A9A"
+                                               FontSize="11" Foreground="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"
                                                IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                 </StackPanel>
                                 <Button Grid.Column="3" Classes="outline-btn mod-toggle" Height="30"
                                         Classes.selected="{Binding IsSelected}"
-                                        VerticalAlignment="Center" Margin="10,0,0,0"
+                                        VerticalAlignment="Center" Margin="10,0,20,0"
                                         Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ToggleCommand}"
                                         CommandParameter="{Binding}">
                                     <TextBlock Text="{Binding ActionLabel}" FontSize="11.5" />
@@ -74,5 +73,5 @@
                 </ItemsControl>
             </ScrollViewer>
         </Border>
-    </StackPanel>
+    </Grid>
 </UserControl>

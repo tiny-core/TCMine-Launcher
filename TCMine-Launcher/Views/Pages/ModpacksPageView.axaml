@@ -69,13 +69,13 @@
 
                                 <StackPanel Margin="18,15,18,18" Spacing="0">
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="16" FontWeight="Bold" Foreground="#E8E8F0" />
+                                               FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" />
                                     <TextBlock Text="{Binding VersionSummary}"
-                                               Foreground="#5A5A7A" FontSize="11" Margin="0,6,0,0" />
+                                               Foreground="{StaticResource TextFaint}" FontSize="11" Margin="0,6,0,0" />
 
                                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
                                         <TextBlock Text="{Binding ModsSummary}"
-                                                   Foreground="#7A7A9A" FontSize="11" VerticalAlignment="Center" />
+                                                   Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" />
                                         <Border CornerRadius="5" Padding="7,2" VerticalAlignment="Center"
                                                 Background="#0E2A14" IsVisible="{Binding HasServer}">
                                             <StackPanel Orientation="Horizontal" Spacing="5">
@@ -86,7 +86,7 @@
                                         </Border>
                                     </StackPanel>
                                     <TextBlock Text="{Binding Description}"
-                                               Foreground="#7A7A9A" FontSize="12"
+                                               Foreground="{StaticResource TextMuted}" FontSize="12"
                                                TextWrapping="Wrap" Height="36" Margin="0,8,0,0"
                                                TextTrimming="CharacterEllipsis" />
 

@@ -368,6 +368,15 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Pedido para abrir a janela de gestão de instância (ligado pela View).</summary>
     public Action<InstanceModsPageViewModel>? OpenModsWindowRequested { get; set; }
 
+    /// <summary>Pedido para abrir a janela de seleção de mods (ligado pela View).</summary>
+    public Action<ModSelectionViewModel>? OpenModSelectionRequested { get; set; }
+
+    /// <summary>Abre a janela (própria) de seleção de mods.</summary>
+    public void ShowModSelection(ModSelectionViewModel selection)
+    {
+        OpenModSelectionRequested?.Invoke(selection);
+    }
+
     /// <summary>Pedido de confirmação (ligado pela View; abre um diálogo modal).</summary>
     public Func<string, string, Task<bool>>? ConfirmRequested { get; set; }
 

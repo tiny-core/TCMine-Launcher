@@ -1,0 +1,200 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ===================================================================
+         BOTÕES — todas as variantes de botão do launcher.
+         =================================================================== -->
+
+    <!-- ── Botões da barra de título (fechar / minimizar) ──────────── -->
+    <Style Selector="Button.wnd-btn">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource BorderHover}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="Button.wnd-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+    </Style>
+    <Style Selector="Button.wnd-btn:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource TextHover}" />
+    </Style>
+    <Style Selector="Button.wnd-btn-close:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource DangerBorder}" />
+    </Style>
+    <Style Selector="Button.wnd-btn-close:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource DangerSoft}" />
+    </Style>
+
+    <!-- ── Navegação da sidebar ────────────────────────────────────── -->
+    <Style Selector="Button.nav-btn">
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSubtle}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="Button.nav-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+    </Style>
+    <Style Selector="Button.nav-btn:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource TextHover}" />
+    </Style>
+    <!-- Estado activo (página atual) -->
+    <Style Selector="Button.nav-btn.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="#1A0E20" />
+    </Style>
+    <Style Selector="Button.nav-btn.active">
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.nav-btn.active:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#1A0E20" />
+    </Style>
+
+    <!-- ── Botão Jogar ─────────────────────────────────────────────── -->
+    <Style Selector="Button.play-btn">
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+                    <GradientStop Color="{StaticResource AccentColor}" Offset="0" />
+                    <GradientStop Color="{StaticResource AccentDarkColor}" Offset="1" />
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style Selector="Button.play-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.88" />
+    </Style>
+    <Style Selector="Button.play-btn:pressed /template/ ContentPresenter">
+        <Setter Property="Opacity" Value="0.75" />
+    </Style>
+    <Style Selector="Button.play-btn:disabled">
+        <Setter Property="Opacity" Value="0.45" />
+    </Style>
+
+    <!-- ── Botão Microsoft (login) ─────────────────────────────────── -->
+    <Style Selector="Button.ms-btn">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderMid}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.ms-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStrong}" />
+    </Style>
+
+    <!-- ── Botão fantasma / secundário ─────────────────────────────── -->
+    <Style Selector="Button.ghost-btn">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource TextDim}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Padding" Value="8,6" />
+    </Style>
+    <Style Selector="Button.ghost-btn:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource TextBright}" />
+    </Style>
+    <Style Selector="Button.ghost-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ── Botão de acção pequeno (outline) ────────────────────────── -->
+    <Style Selector="Button.outline-btn">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderHover}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="Padding" Value="14,8" />
+    </Style>
+    <Style Selector="Button.outline-btn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHoverSoft}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+
+    <!-- ── Caixa clicável (estilo de caixa de info; ex.: identificador) ── -->
+    <Style Selector="Button.idbox">
+        <Setter Property="Background" Value="{StaticResource BgInset}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderInset}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.idbox:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgElevated}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderHover}" />
+    </Style>
+
+    <!-- ── Botão subtil com hover (ações de cartão: Pasta / Exportar) ── -->
+    <Style Selector="Button.subtle">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.subtle:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHoverSoft}" />
+    </Style>
+    <Style Selector="Button.subtle:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource TextBright}" />
+    </Style>
+
+    <!-- ── Pílula de atualização (barra de estado) ─────────────────── -->
+    <Style Selector="Button.update-pill">
+        <Setter Property="Background" Value="{StaticResource AccentBg}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="11" />
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+        <Setter Property="Padding" Value="10,2" />
+        <Setter Property="Height" Value="20" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.update-pill:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource AccentBgHover}" />
+    </Style>
+
+    <!-- ── Chip de conta (avatar + nome) — clicável ────────────────── -->
+    <Style Selector="Button.account-chip">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="6" />
+    </Style>
+    <Style Selector="Button.account-chip:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+    </Style>
+
+    <!-- ── Estado "selecionado" do botão de mod (Remover) ──────────── -->
+    <Style Selector="Button.mod-toggle.selected">
+        <Setter Property="Foreground" Value="{StaticResource Danger}" />
+    </Style>
+    <Style Selector="Button.mod-toggle.selected /template/ ContentPresenter">
+        <Setter Property="BorderBrush" Value="{StaticResource DangerBorder}" />
+    </Style>
+    <Style Selector="Button.mod-toggle.selected:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#1A0E0E" />
+        <Setter Property="BorderBrush" Value="{StaticResource Danger}" />
+    </Style>
+</Styles>

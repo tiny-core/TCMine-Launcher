@@ -21,4 +21,7 @@ public class ModEntry
 
     /// <summary>Hash SHA-1 para verificar a integridade após o download.</summary>
     public string? Sha1 { get; set; }
+
+    /// <summary>URL do logótipo do mod (persistido para a imagem reaparecer).</summary>
+    public string? LogoUrl { get; set; }
 }

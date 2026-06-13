@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,6 +30,11 @@ public class CurseForgeClient
     private readonly Func<string?> _baseUrlProvider;
     private readonly HttpClient _http = HttpClientProvider.Shared;
 
+    // Cache em memória (por sessão) — evita repetir pedidos iguais.
+    private readonly ConcurrentDictionary<string, List<CurseForgeMod>> _searchCache = new();
+    private readonly ConcurrentDictionary<string, CurseForgeFile?> _fileCache = new();
+    private readonly ConcurrentDictionary<int, CurseForgeMod?> _modCache = new();
+
     public CurseForgeClient(Func<string?> baseUrlProvider)
     {
         _baseUrlProvider = baseUrlProvider;
@@ -39,26 +45,29 @@ public class CurseForgeClient
 
     private string BaseUrl => (_baseUrlProvider() ?? string.Empty).TrimEnd('/');
 
-    /// <summary>Pesquisa mods compatíveis com a versão de MC + NeoForge.</summary>
+    /// <summary>
+    ///     Pesquisa mods POR NOME (sem filtrar por versão/loader, para o termo
+    ///     aparecer mesmo que a compatibilidade só seja avaliada ao adicionar).
+    ///     Ordena por popularidade. Resultados em cache por sessão.
+    /// </summary>
     public async Task<List<CurseForgeMod>> SearchAsync(
-        string gameVersion, string query, int index, CancellationToken ct = default)
+        string query, int index, CancellationToken ct = default)
     {
         EnsureConfigured();
 
-        // Sem searchFilter o CurseForge devolve apenas os mais populares; com ele,
-        // ordena por relevância ao termo (não forçamos sortField para não enterrar
-        // a correspondência exata). gameVersion só é enviado se estiver definido.
+        var cacheKey = $"{query}|{index}";
+        if (_searchCache.TryGetValue(cacheKey, out var cached)) return cached;
+
         var url = $"{BaseUrl}/v1/mods/search" +
                   $"?gameId={MinecraftGameId}" +
-                  $"&modLoaderType={NeoForgeLoaderType}" +
+                  $"&classId=6" + // 6 = categoria "Mods"
                   $"&searchFilter={Uri.EscapeDataString(query)}" +
-                  $"&pageSize=30&index={index}";
-
-        if (!string.IsNullOrWhiteSpace(gameVersion))
-            url += $"&gameVersion={Uri.EscapeDataString(gameVersion)}";
+                  $"&sortField=2&sortOrder=desc&pageSize=30&index={index}";
 
         var resp = await _http.GetFromJsonAsync<CurseForgeListResponse<CurseForgeMod>>(url, JsonOptions, ct);
-        return resp?.Data ?? new List<CurseForgeMod>();
+        var list = resp?.Data ?? new List<CurseForgeMod>();
+        _searchCache[cacheKey] = list;
+        return list;
     }
 
     /// <summary>Melhor ficheiro (mais recente com download permitido) para a versão dada.</summary>
@@ -66,20 +75,30 @@ public class CurseForgeClient
         int modId, string gameVersion, CancellationToken ct = default)
     {
         EnsureConfigured();
+
+        var cacheKey = $"{modId}|{gameVersion}";
+        if (_fileCache.TryGetValue(cacheKey, out var cached)) return cached;
+
         var url = $"{BaseUrl}/v1/mods/{modId}/files" +
                   $"?gameVersion={Uri.EscapeDataString(gameVersion)}" +
                   $"&modLoaderType={NeoForgeLoaderType}&pageSize=20";
 
         var resp = await _http.GetFromJsonAsync<CurseForgeListResponse<CurseForgeFile>>(url, JsonOptions, ct);
-        return resp?.Data?.FirstOrDefault(f => !string.IsNullOrEmpty(f.DownloadUrl));
+        var file = resp?.Data?.FirstOrDefault(f => !string.IsNullOrEmpty(f.DownloadUrl));
+        _fileCache[cacheKey] = file;
+        return file;
     }
 
-    /// <summary>Detalhe de um mod (usado para o nome das dependências).</summary>
+    /// <summary>Detalhe de um mod (usado para o nome das dependências). Em cache.</summary>
     public async Task<CurseForgeMod?> GetModAsync(int modId, CancellationToken ct = default)
     {
         EnsureConfigured();
+
+        if (_modCache.TryGetValue(modId, out var cached)) return cached;
+
         var resp = await _http.GetFromJsonAsync<CurseForgeSingleResponse<CurseForgeMod>>(
             $"{BaseUrl}/v1/mods/{modId}", JsonOptions, ct);
+        _modCache[modId] = resp?.Data;
         return resp?.Data;
     }
 

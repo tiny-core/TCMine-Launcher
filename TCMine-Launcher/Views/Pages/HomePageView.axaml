@@ -59,14 +59,14 @@
                                     Spacing="16">
                             <Ellipse Classes="spinner" HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding LaunchStatus}"
-                                       Foreground="#E8E8F0" FontSize="14"
+                                       Foreground="{StaticResource TextPrimary}" FontSize="14"
                                        HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding LaunchProgress, StringFormat='{}{0:0}%'}"
-                                       Foreground="#F97316" FontSize="13" FontWeight="Bold"
+                                       Foreground="{StaticResource Accent}" FontSize="13" FontWeight="Bold"
                                        HorizontalAlignment="Center" />
                             <Button Classes="ghost-btn" Command="{Binding CancelLaunchCommand}"
                                     HorizontalAlignment="Center" Margin="0,4,0,0">
-                                <TextBlock Text="Cancelar" FontSize="12.5" Foreground="#F87171" />
+                                <TextBlock Text="Cancelar" FontSize="12.5" Foreground="{StaticResource Danger}" />
                             </Button>
                         </StackPanel>
                     </Border>
@@ -129,7 +129,7 @@
 
                 <!-- Memória — sempre fixada no fundo do painel -->
                 <StackPanel DockPanel.Dock="Bottom" Spacing="0">
-                    <Border Height="1" Background="#16161F" Margin="0,16" />
+                    <Border Classes="divider" Margin="0,16" />
                     <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                         <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA"
                                    Margin="0" VerticalAlignment="Center" />
@@ -138,15 +138,15 @@
                                        Minimum="1024" Maximum="16384" Increment="1024"
                                        FormatString="0 'MB'"
                                        ShowButtonSpinner="False"
+                                       IsEnabled="{Binding CanEditRam}"
                                        Width="104" Height="30"
-                                       Background="#0A0A16" BorderBrush="#1A1A28"
-                                       Foreground="#F97316"
-                                       IsEnabled="{Binding !IsLaunching}" />
+                                       Background="{StaticResource BgInset}" BorderBrush="{StaticResource BorderInset}"
+                                       Foreground="{StaticResource Accent}" />
                     </Grid>
                     <Slider Minimum="1024" Maximum="16384"
                             TickFrequency="1024" IsSnapToTickEnabled="True"
                             Value="{Binding InstanceRam}"
-                            IsEnabled="{Binding !IsLaunching}"
+                            IsEnabled="{Binding CanEditRam}"
                             Margin="0,6,0,0" />
                 </StackPanel>
 
@@ -163,30 +163,36 @@
                         </Panel>
                     </Border>
                     <TextBlock Text="{Binding PlayerName}"
-                               FontSize="16" FontWeight="Bold" Foreground="#E8E8F0"
+                               FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
                                HorizontalAlignment="Center" Margin="0,12,0,0" />
                     <TextBlock Text="{Binding AccountLabel}"
                                Classes="muted" FontSize="11"
                                HorizontalAlignment="Center" Margin="0,3,0,0" />
 
-                    <Border Height="1" Background="#16161F" Margin="0,20" />
+                    <Border Classes="divider" Margin="0,20" />
 
                     <StackPanel Spacing="6">
                         <TextBlock Classes="section-label" Text="IDENTIFICADOR" Margin="0" />
-                        <Border Background="#0A0A16" BorderBrush="#1A1A28" BorderThickness="1"
-                                CornerRadius="8" Padding="12,10">
-                            <TextBlock Text="{Binding PlayerUuid}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       FontFamily="Cascadia Code,Consolas,monospace"
-                                       FontSize="11" Foreground="#94A3B8" />
-                        </Border>
+                        <Button Classes="idbox" Command="{Binding OpenInstanceFolderCommand}"
+                                ToolTip.Tip="Abrir a pasta da instância">
+                            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <TextBlock Grid.Column="0" Text="ID" FontSize="11"
+                                           Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding InstanceIdShort}"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Margin="0,0,8,0"
+                                           FontFamily="Cascadia Code,Consolas,monospace"
+                                           FontSize="11" Foreground="{StaticResource TextSecondary}" />
+                                <TextBlock Grid.Column="2" Text="📁" FontSize="12"
+                                           VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
                     </StackPanel>
 
                     <!-- Servidores do modpack (lista com scroll) -->
                     <StackPanel IsVisible="{Binding HasServer}" Margin="0,16,0,0" Spacing="6">
                         <TextBlock Classes="section-label" Text="SERVIDORES" Margin="0" />
-                        <Border Background="#0A0A16" BorderBrush="#1A1A28" BorderThickness="1"
-                                CornerRadius="8">
+                        <Border Classes="inset">
                             <ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto">
                                 <ItemsControl ItemsSource="{Binding Servers}">
                                     <ItemsControl.ItemTemplate>
@@ -194,7 +200,7 @@
                                             <StackPanel Spacing="4" Margin="12,9">
                                                 <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                                                     <TextBlock Grid.Column="0" Text="{Binding Name}"
-                                                               FontSize="12.5" Foreground="#E8E8F0"
+                                                               FontSize="12.5" Foreground="{StaticResource TextPrimary}"
                                                                TextTrimming="CharacterEllipsis"
                                                                VerticalAlignment="Center" />
                                                     <StackPanel Grid.Column="1" Orientation="Horizontal"
@@ -202,11 +208,11 @@
                                                         <Ellipse Width="8" Height="8" VerticalAlignment="Center"
                                                                  Fill="{Binding StatusColor, Converter={StaticResource StringToBrush}}" />
                                                         <TextBlock Text="{Binding StatusText}" FontSize="11"
-                                                                   Foreground="#94A3B8" VerticalAlignment="Center" />
+                                                                   Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
                                                     </StackPanel>
                                                 </Grid>
                                                 <TextBlock Text="{Binding Motd}"
-                                                           FontSize="10.5" Foreground="#6A6A8A" TextWrapping="Wrap"
+                                                           FontSize="10.5" Foreground="{StaticResource TextDim}" TextWrapping="Wrap"
                                                            MaxLines="2" TextTrimming="CharacterEllipsis"
                                                            IsVisible="{Binding Motd, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                             </StackPanel>

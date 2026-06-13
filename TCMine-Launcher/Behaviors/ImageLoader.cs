@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -39,7 +42,7 @@ public static class ImageLoader
         image.Source = null;
         if (string.IsNullOrWhiteSpace(url)) return;
 
-        // Cache: evita voltar a descarregar a mesma imagem (logos de mods, skins).
+        // 1. Cache em memória.
         if (Cache.TryGetValue(url, out var cached))
         {
             image.Source = cached;
@@ -48,7 +51,21 @@ public static class ImageLoader
 
         try
         {
-            var bytes = await HttpClientProvider.Shared.GetByteArrayAsync(url);
+            var diskPath = DiskPath(url);
+
+            // 2. Cache em disco (persiste entre execuções).
+            byte[] bytes;
+            if (File.Exists(diskPath))
+            {
+                bytes = await File.ReadAllBytesAsync(diskPath);
+            }
+            else
+            {
+                bytes = await HttpClientProvider.Shared.GetByteArrayAsync(url);
+                Directory.CreateDirectory(Path.GetDirectoryName(diskPath)!);
+                await File.WriteAllBytesAsync(diskPath, bytes);
+            }
+
             using var stream = new MemoryStream(bytes);
             var bitmap = new Bitmap(stream);
             Cache[url] = bitmap;
@@ -64,5 +81,11 @@ public static class ImageLoader
         {
             // ignora imagens que falham a carregar
         }
+    }
+
+    private static string DiskPath(string url)
+    {
+        var hash = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(url)));
+        return Path.Combine(LauncherPaths.ImageCacheDir, hash + ".img");
     }
 }

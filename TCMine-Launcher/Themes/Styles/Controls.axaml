@@ -1,0 +1,91 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ===================================================================
+         CONTROLOS — ComboBox, ProgressBar, spinner, toggle de registo.
+         =================================================================== -->
+
+    <!-- ── Seletor de versão (ComboBox) ────────────────────────────── -->
+    <Style Selector="ComboBox.version-select">
+        <Setter Property="Background" Value="{StaticResource BgInset}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderInset}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+        <Setter Property="Padding" Value="11,8" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="MaxDropDownHeight" Value="200" />
+    </Style>
+    <Style Selector="ComboBox.version-select:pointerover">
+        <Setter Property="BorderBrush" Value="{StaticResource BorderHover}" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+    </Style>
+    <Style Selector="ComboBox.version-select:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+
+    <!-- ── Campo de texto (input recuado) ──────────────────────────── -->
+    <Style Selector="TextBox.field">
+        <Setter Property="Background" Value="{StaticResource BgInset}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderInset}" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Padding" Value="11,8" />
+    </Style>
+
+    <!-- ── Barra de progresso do launch ────────────────────────────── -->
+    <Style Selector="ProgressBar.launch-progress">
+        <Setter Property="Background" Value="{StaticResource BgElevated}" />
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Height" Value="4" />
+    </Style>
+
+    <!-- ── Progresso fino (barra de estado global) ─────────────────── -->
+    <Style Selector="ProgressBar.status-progress">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Height" Value="5" />
+        <Setter Property="MinWidth" Value="160" />
+    </Style>
+
+    <!-- ── Spinner (anel a girar) — reutilizável ───────────────────── -->
+    <Style Selector="Ellipse.spinner">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Stroke" Value="{StaticResource Accent}" />
+        <Setter Property="StrokeThickness" Value="3" />
+        <Setter Property="StrokeDashArray" Value="8,23" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Style.Animations>
+            <Animation Duration="0:0:0.85" IterationCount="Infinite">
+                <KeyFrame Cue="0%">
+                    <Setter Property="RotateTransform.Angle" Value="0" />
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                    <Setter Property="RotateTransform.Angle" Value="360" />
+                </KeyFrame>
+            </Animation>
+        </Style.Animations>
+    </Style>
+
+    <!-- ── Toggle do painel de registo ─────────────────────────────── -->
+    <Style Selector="ToggleButton.log-toggle">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource TextFaint}" />
+        <Setter Property="Padding" Value="4,2" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+    <Style Selector="ToggleButton.log-toggle:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ToggleButton.log-toggle:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+    </Style>
+    <Style Selector="ToggleButton.log-toggle:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+</Styles>

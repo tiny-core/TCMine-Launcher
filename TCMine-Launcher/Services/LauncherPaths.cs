@@ -32,6 +32,12 @@ public static class LauncherPaths
     /// <summary>Ficheiro de log da última execução do jogo desta instância.</summary>
     public static string InstanceLogFile(string id) => Path.Combine(InstanceDir(id), "logs", "latest.log");
 
+    /// <summary>Cache local partilhada de jars de mods (evita re-descarregar entre instâncias).</summary>
+    public static string ModCacheDir => Path.Combine(Root, "cache", "mods");
+
+    /// <summary>Cache local de imagens (logos de mods, skins) entre execuções.</summary>
+    public static string ImageCacheDir => Path.Combine(Root, "cache", "images");
+
     /// <summary>Garante que a raiz existe antes de escrever.</summary>
     public static void EnsureRoot()
     {

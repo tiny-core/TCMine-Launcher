@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:vm="using:TCMine_Launcher.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="600"
+        x:Class="TCMine_Launcher.Views.ModSelectionWindow"
+        x:DataType="vm:ModSelectionViewModel"
+        Title="Gerir mods"
+        Icon="/Assets/icon.ico"
+        Width="600" Height="640"
+        MinWidth="460" MinHeight="420"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        Background="{StaticResource BgWindow}">
+
+    <Grid Margin="22" RowDefinitions="Auto,*,Auto">
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Classes="page-title" Text="Mods" />
+            <TextBlock Classes="muted" Text="Pesquisa e seleciona os mods (CurseForge)"
+                       Margin="0,4,0,0" />
+        </StackPanel>
+
+        <views:ModSelectionView Grid.Row="1" DataContext="{Binding}" VerticalContentAlignment="Stretch" />
+
+        <Button Grid.Row="2" Classes="play-btn" Height="40" Width="140"
+                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
+                Margin="0,16,0,0" Click="Done_Click">
+            <TextBlock Text="Concluído" FontSize="13" FontWeight="Bold" />
+        </Button>
+    </Grid>
+</Window>

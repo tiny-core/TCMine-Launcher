@@ -47,17 +47,26 @@ public class ModInstaller
                 ct.ThrowIfCancellationRequested();
                 var dest = Path.Combine(modsDir, mod.FileName);
 
-                // Já presente e íntegro? Não volta a descarregar.
+                // Já presente e íntegro na instância? Não faz nada.
                 if (!IsValid(dest, mod.Sha1))
                 {
-                    await _client.DownloadAsync(mod.DownloadUrl!, dest, null, ct);
+                    var cached = Path.Combine(LauncherPaths.ModCacheDir, mod.FileName);
 
-                    if (!IsValid(dest, mod.Sha1))
+                    // Na cache global e íntegro? Copia em vez de descarregar.
+                    if (!IsValid(cached, mod.Sha1))
                     {
-                        TryDelete(dest);
-                        throw new IOException(
-                            $"Mod '{mod.Name}': verificação de integridade (SHA-1) falhou.");
+                        Directory.CreateDirectory(LauncherPaths.ModCacheDir);
+                        await _client.DownloadAsync(mod.DownloadUrl!, cached, null, ct);
+
+                        if (!IsValid(cached, mod.Sha1))
+                        {
+                            TryDelete(cached);
+                            throw new IOException(
+                                $"Mod '{mod.Name}': verificação de integridade (SHA-1) falhou.");
+                        }
                     }
+
+                    File.Copy(cached, dest, overwrite: true);
                 }
 
                 var done = Interlocked.Increment(ref completed);
