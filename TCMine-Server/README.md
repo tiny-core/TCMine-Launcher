@@ -116,4 +116,7 @@ Em vez de copiar ficheiros à mão, faz **upload dos artefactos do `vpk pack` em
 com HTTPS e usa esse URL público no campo das Definições do launcher. Considera
 restringir `CF_ALLOWED_ORIGINS`.
 
+Para **ZimaOS / CasaOS** (imagem no Docker Hub + GitHub Actions), vê
+[`../docs/deploy-zimaos.md`](../docs/deploy-zimaos.md).
+
 > **Nunca** comites a `CF_API_KEY`. Usa variáveis de ambiente / secrets do teu host.
