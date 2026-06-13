@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
              xmlns:m="using:TCMine_Launcher.Models"
+             xmlns:ctl="using:TCMine_Launcher.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
@@ -16,16 +17,8 @@
                 <TextBlock Classes="muted" Text="Últimas atualizações do launcher e do modpack"
                            Margin="0,4,0,0" />
             </StackPanel>
-            <Button Grid.Column="1" Classes="outline-btn" VerticalAlignment="Center"
-                    Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}">
-                <Panel>
-                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !IsLoading}">
-                        <PathIcon Data="{StaticResource IconRefresh}" Width="14" Height="14" VerticalAlignment="Center" />
-                        <TextBlock Text="Atualizar" FontSize="12.5" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <Ellipse Classes="spinner" Width="14" Height="14" IsVisible="{Binding IsLoading}" />
-                </Panel>
-            </Button>
+            <ctl:RefreshButton Grid.Column="1" Command="{Binding RefreshCommand}"
+                               IsLoading="{Binding IsLoading}" />
         </Grid>
 
         <TextBlock Grid.Row="1" Text="{Binding StatusMessage}"
@@ -36,24 +29,7 @@
             <ItemsControl ItemsSource="{Binding News}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="m:NewsItem">
-                        <Border Classes="panel" Margin="0,0,0,12" Padding="20,18">
-                            <StackPanel Spacing="0">
-                                <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <Border Grid.Column="0" Classes="tag">
-                                        <TextBlock Text="{Binding Tag}" />
-                                    </Border>
-                                    <TextBlock Grid.Column="2" Text="{Binding Date}"
-                                               Classes="muted" FontSize="11"
-                                               VerticalAlignment="Center" />
-                                </Grid>
-                                <TextBlock Text="{Binding Title}"
-                                           Classes="card-title"
-                                           Margin="0,12,0,0" />
-                                <TextBlock Text="{Binding Summary}"
-                                           Foreground="{StaticResource TextMuted}" FontSize="13"
-                                           TextWrapping="Wrap" Margin="0,6,0,0" />
-                            </StackPanel>
-                        </Border>
+                        <ctl:NewsCard Margin="0,0,0,12" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

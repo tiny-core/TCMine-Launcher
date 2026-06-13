@@ -35,8 +35,10 @@
     </Style>
 
     <!-- ── Divisória horizontal ────────────────────────────────────── -->
-    <Style Selector="Border.divider">
+    <Style Selector="Separator.divider">
         <Setter Property="Height" Value="1" />
+        <Setter Property="MinHeight" Value="1" />
+        <Setter Property="Margin" Value="0" />
         <Setter Property="Background" Value="{StaticResource BorderDivider}" />
     </Style>
 

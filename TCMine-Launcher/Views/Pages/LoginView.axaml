@@ -39,7 +39,7 @@
                            Classes="muted"
                            HorizontalAlignment="Center" Margin="0,5,0,0" />
 
-                <Border Classes="divider" Margin="0,26" />
+                <Separator Classes="divider" Margin="0,26" />
 
                 <!-- Botão Microsoft -->
                 <Button Classes="ms-btn" Command="{Binding LoginMicrosoftCommand}"

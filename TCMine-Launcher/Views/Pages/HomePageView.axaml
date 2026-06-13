@@ -109,7 +109,7 @@
 
                 <!-- Memória — sempre fixada no fundo do painel -->
                 <StackPanel DockPanel.Dock="Bottom" Spacing="0">
-                    <Border Classes="divider" Margin="0,16" />
+                    <Separator Classes="divider" Margin="0,16" />
                     <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                         <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA"
                                    Margin="0" VerticalAlignment="Center" />
@@ -149,7 +149,7 @@
                                Classes="muted" FontSize="11"
                                HorizontalAlignment="Center" Margin="0,3,0,0" />
 
-                    <Border Classes="divider" Margin="0,20" />
+                    <Separator Classes="divider" Margin="0,20" />
 
                     <StackPanel Spacing="6">
                         <TextBlock Classes="section-label" Text="IDENTIFICADOR" Margin="0" />
