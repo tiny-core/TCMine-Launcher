@@ -8,9 +8,9 @@ Login com a Microsoft, gestão de versões e um modpack próprio — tudo numa i
 
 ![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)
 ![Avalonia](https://img.shields.io/badge/Avalonia-12-8B44AC)
-![Plataforma](https://img.shields.io/badge/plataforma-Linux%20%7C%20Windows-2A2A40)
+![Plataforma](https://img.shields.io/badge/plataforma-Windows-2A2A40)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-GPL--3.0-3DA639)
-![Estado](https://img.shields.io/badge/estado-em%20desenvolvimento-F97316)
+![Versão](https://img.shields.io/badge/vers%C3%A3o-1.0.0-3DA639)
 
 </div>
 
@@ -84,8 +84,7 @@ embutido no binário em tempo de compilação e mantido **fora do git**.
    Em CI/produção, em alternativa: `dotnet publish -p:MicrosoftClientId=<o-teu-id>`.
 
 > ℹ️ Apps do Azure novas precisam de **aprovação para a API do Minecraft
-** ([formulário](https://aka.ms/mce-reviewappid)); sem ela, o login devolve `403`. O modo offline funciona sem
-> aprovação.
+** ([formulário](https://aka.ms/mce-reviewappid)); sem ela, o login devolve `403`.
 
 ## 🗂️ Estrutura
 
@@ -106,13 +105,18 @@ A separação MVVM é estrita: os **Models** não conhecem UI nem CmlLib; os **V
 fazem binding. O conteúdo (novidades, modpacks, releases) é gerido na administração web do **TCMine-Server** — ver [
 `TCMine-Server/README.md`](TCMine-Server/README.md).
 
-## 🗺️ Estado / Roadmap
+## 🗺️ Estado — v1.0.0
 
-- [x] Interface completa e navegação entre telas
-- [x] Login Microsoft real (navegador do sistema) + modo offline
-- [x] Download e instalação do modpack via CmlLib
-- [x] Launch real do Minecraft (NeoForge)
-- [x] Skins reais e persistência de definições
+Primeira versão estável. Inclui:
+
+- ✅ Login Microsoft real (navegador do sistema) + modo offline
+- ✅ Instâncias isoladas — criar, importar/exportar e gerir
+- ✅ Modpacks oficiais do servidor — mods, resource packs/shaders, servidores, overrides e RAM recomendada
+- ✅ Launch real do Minecraft (NeoForge) com progresso e janela de registo de eventos
+- ✅ Auto-update do launcher (Velopack) e deteção de jogo em execução
+- ✅ Servidor com base de dados (SQLite) e administração web para gerir conteúdo
+
+**Ideias futuras:** mais loaders (Fabric/Forge), perfis de RAM por instância, temas claros.
 
 ## 📄 Licença
 
