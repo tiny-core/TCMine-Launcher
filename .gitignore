@@ -13,6 +13,7 @@ artifacts/
 
 # ------ Publicação ------
 **/publish/
+**/releases/
 *.pubxml.user
 
 # ------ NuGet ------

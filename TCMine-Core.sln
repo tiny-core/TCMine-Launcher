@@ -9,9 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 		docs\curseforge-proxy.md = docs\curseforge-proxy.md
 		docs\modpack-manifest.md = docs\modpack-manifest.md
-		docs\release-process.md = docs\release-process.md	
+		docs\release-process.md = docs\release-process.md
 		README.md = README.md
 		CLAUDE.md = CLAUDE.md
+		.gitignore = .gitignore
+		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
 Global
