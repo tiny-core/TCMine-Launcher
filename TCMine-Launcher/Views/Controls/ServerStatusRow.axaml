@@ -20,8 +20,11 @@
                            Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
             </StackPanel>
         </Grid>
+
+        <Separator Classes="divider" Margin="0, 5" />
+
         <TextBlock Text="{Binding Motd}" FontSize="10.5" Foreground="{StaticResource TextDim}"
-                   TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"
+                   TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center"
                    IsVisible="{Binding Motd, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
 </UserControl>

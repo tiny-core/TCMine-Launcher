@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,6 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // Serviços
     private readonly SettingsService _settings = new();
+    private readonly GameRunStateStore _runState = new();
 
     /// <summary>Cliente CurseForge (via proxy), instalador de mods e manifestos.</summary>
     public CurseForgeClient CurseForge { get; }
@@ -83,6 +85,50 @@ public partial class MainWindowViewModel : ViewModelBase
         Modpacks.NotifyGameRunningChanged();
     }
 
+    /// <summary>Regista/limpa o jogo em execução (instância + PID) para deteção ao reabrir.</summary>
+    public void MarkGameStarted(string instanceId, int pid) => _runState.Save(instanceId, pid);
+    public void MarkGameStopped() => _runState.Clear();
+
+    /// <summary>
+    ///     No arranque, se o ficheiro de estado aponta para um processo de jogo ainda
+    ///     vivo, marca <see cref="IsGameRunning" /> e monitoriza a sua saída.
+    /// </summary>
+    private void DetectRunningGame()
+    {
+        var state = _runState.Load();
+        if (state is null) return;
+
+        try
+        {
+            var proc = Process.GetProcessById(state.Pid);
+            if (proc.HasExited)
+            {
+                _runState.Clear();
+                return;
+            }
+
+            IsGameRunning = true;
+            StatusMessage = "Minecraft em execução";
+            _ = MonitorReattachedAsync(proc);
+        }
+        catch (ArgumentException)
+        {
+            _runState.Clear(); // já não existe processo com esse PID
+        }
+    }
+
+    private async Task MonitorReattachedAsync(Process process)
+    {
+        try { await process.WaitForExitAsync(); }
+        catch { /* noop */ }
+
+        IsGameRunning = false;
+        StatusMessage = "Pronto";
+        _runState.Clear();
+        try { process.Dispose(); }
+        catch { /* noop */ }
+    }
+
     public MainWindowViewModel()
     {
         _player = new PlayerProfile();
@@ -105,6 +151,9 @@ public partial class MainWindowViewModel : ViewModelBase
         Settings = new SettingsPageViewModel(_player, _game, this);
 
         _currentPage = Home;
+
+        // Se ficou um Minecraft a correr de uma sessão anterior, deteta-o.
+        DetectRunningGame();
 
         // Tenta entrar automaticamente se houver uma sessão em cache.
         _ = TrySilentLoginAsync();

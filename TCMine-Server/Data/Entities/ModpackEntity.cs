@@ -25,6 +25,9 @@ public class ModpackEntity
 
     public bool IsPublished { get; set; } = true;
 
+    /// <summary>RAM recomendada (MB) para este modpack; aplicada à instância no install.</summary>
+    public int? RecommendedRamMb { get; set; }
+
     /// <summary>Tem um bundle de overrides (configs/resourcepacks/options) guardado.</summary>
     public bool HasOverrides { get; set; }
 

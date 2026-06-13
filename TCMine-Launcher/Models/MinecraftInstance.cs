@@ -41,6 +41,9 @@ public class MinecraftInstance
     /// <summary>Versão do manifesto instalada (só para instâncias oficiais).</summary>
     public string? ManifestVersion { get; set; }
 
+    /// <summary>Descrição do modpack (vinda do servidor, para instâncias oficiais).</summary>
+    public string? Description { get; set; }
+
     /// <summary>O modpack oficial tem um bundle de overrides a aplicar.</summary>
     public bool HasOverrides { get; set; }
 
@@ -58,7 +61,10 @@ public class MinecraftInstance
 
     // ── Lógica de domínio pura (calculada — não persistir) ───────────
     [JsonIgnore]
-    public string VersionSummary => $"MC {MinecraftVersion} · NeoForge {NeoForgeVersion}";
+    public string VersionSummary =>
+        string.IsNullOrWhiteSpace(ManifestVersion)
+            ? $"MC {MinecraftVersion} · NeoForge {NeoForgeVersion}"
+            : $"v{ManifestVersion} · MC {MinecraftVersion} · NeoForge {NeoForgeVersion}";
 
     /// <summary>Etiqueta curta para o "tag" do cartão.</summary>
     [JsonIgnore]

@@ -79,11 +79,17 @@ public partial class HomePageViewModel : ViewModelBase
     public string InstanceName => Active?.Name ?? "—";
     public string InstanceTag => Active?.SourceLabel ?? "";
 
-    public string InstanceSubtitle => Active is { IsOfficial: true }
-        ? "Modpack oficial do servidor TCMine"
-        : "Instância personalizada";
+    // Subtítulo = versão (com a versão do modpack ao lado do MC).
+    public string InstanceSubtitle => Active?.VersionSummary ?? "";
 
-    public string InstanceSummary => Active?.VersionSummary ?? "";
+    // Resumo = descrição vinda do servidor; senão, uma etiqueta genérica.
+    public string InstanceSummary => Active is null
+        ? string.Empty
+        : !string.IsNullOrWhiteSpace(Active.Description)
+            ? Active.Description!
+            : Active.IsOfficial
+                ? "Modpack oficial do servidor TCMine"
+                : "Instância personalizada";
 
     // ── Estado de instalação / execução ──────────────────────────
     public bool IsInstalled => Active is not null && _shell.IsInstanceInstalled(Active);
@@ -335,6 +341,7 @@ public partial class HomePageViewModel : ViewModelBase
             _shell.SaveInstance(instance);
 
             _shell.IsGameRunning = true;
+            _shell.MarkGameStarted(instance.Id, process.Id);
             LaunchStatus = "Minecraft em execução";
             LaunchLog.Add("Minecraft iniciado.");
 
@@ -376,6 +383,7 @@ public partial class HomePageViewModel : ViewModelBase
         }
 
         _shell.IsGameRunning = false;
+        _shell.MarkGameStopped();
 
         if (exitCode != 0)
         {

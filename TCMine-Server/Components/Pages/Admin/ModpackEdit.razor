@@ -35,6 +35,10 @@ else
         </div>
         <label class="field-label">DESCRIÇÃO</label>
         <textarea class="input" rows="2" @bind="_m.Description"></textarea>
+
+        <label class="field-label">RAM RECOMENDADA (MB) — opcional</label>
+        <input class="input narrow" type="number" @bind="_m.RecommendedRamMb" placeholder="ex.: 8192" />
+
         <label class="check">
             <input type="checkbox" @bind="_m.IsPublished" /> Publicado
         </label>
@@ -182,9 +186,15 @@ else
     </section>
 
     <div class="actions sticky">
-        <button class="btn primary" @onclick="SaveAsync">Guardar</button>
-        <button class="btn ghost" @onclick="Back">Voltar</button>
-        @if (_saved)
+        <button class="btn primary" @onclick="SaveAsync" disabled="@_saving">
+            @(_saving ? "A guardar…" : "Guardar")
+        </button>
+        <button class="btn ghost" @onclick="Back" disabled="@_saving">Voltar</button>
+        @if (_saving)
+        {
+            <span class="muted">A guardar, aguarda…</span>
+        }
+        else if (_saved)
         {
             <span class="ok">Guardado ✓</span>
         }
@@ -196,6 +206,7 @@ else
 
     private ModpackEntity? _m;
     private bool _saved;
+    private bool _saving;
 
     protected override async Task OnInitializedAsync()
     {
@@ -366,8 +377,12 @@ else
 
     private async Task SaveAsync()
     {
-        if (_m is null) return;
+        if (_m is null || _saving) return;
 
+        _saving = true;
+        _saved = false;
+        try
+        {
         await using var db = await DbFactory.CreateDbContextAsync();
         var tracked = await db.Modpacks
             .Include(m => m.Mods)
@@ -382,6 +397,7 @@ else
         tracked.Description = _m.Description;
         tracked.IsPublished = _m.IsPublished;
         tracked.HasOverrides = _m.HasOverrides;
+        tracked.RecommendedRamMb = _m.RecommendedRamMb;
 
         // Reconcilia as listas (substitui tudo pelo estado do formulário).
         db.Mods.RemoveRange(tracked.Mods);
@@ -406,5 +422,10 @@ else
         }
 
         _saved = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
     }
 }

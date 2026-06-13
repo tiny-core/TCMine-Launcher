@@ -17,6 +17,9 @@ public static class LauncherPaths
     /// <summary>Ficheiro JSON com as definições globais (RAM, Java, versões).</summary>
     public static string SettingsFile => Path.Combine(Root, "settings.json");
 
+    /// <summary>Estado do jogo em execução (instância + PID) — deteta jogo aberto ao reabrir.</summary>
+    public static string RunStateFile => Path.Combine(Root, "running.json");
+
     /// <summary>Pasta-mãe de todas as instâncias isoladas.</summary>
     public static string InstancesDir => Path.Combine(Root, "instances");
 

@@ -18,7 +18,9 @@ Login com a Microsoft, gestão de versões e um modpack próprio — tudo numa i
 
 ## ✨ Visão geral
 
-O **TCMine Launcher** é um launcher desktop construído com **Avalonia UI** (.NET 10) que instala e lança o **modpack custom do servidor TCMine** sobre **NeoForge**. Foca-se numa experiência simples: entra com a tua conta Microsoft, escolhe o modpack e joga.
+O **TCMine Launcher** é um launcher desktop construído com **Avalonia UI** (.NET 10) que instala e lança o **modpack
+custom do servidor TCMine** sobre **NeoForge**. Foca-se numa experiência simples: entra com a tua conta Microsoft,
+escolhe o modpack e joga.
 
 <div align="center">
 
@@ -29,7 +31,6 @@ O **TCMine Launcher** é um launcher desktop construído com **Avalonia UI** (.N
 ## 🚀 Funcionalidades
 
 - 🔐 **Login com a Microsoft** (navegador do sistema) — obtém o teu perfil, nome e UUID reais
-- 👤 **Modo offline** para jogar/testar sem conta online
 - 🧩 **Modpack oficial** com seleção de versão de Minecraft e NeoForge
 - 🗂️ **Navegação por separadores**: Jogar, Modpacks, Novidades e Definições
 - 📊 **Progresso e registo de launch** com consola integrada
@@ -44,13 +45,13 @@ O **TCMine Launcher** é um launcher desktop construído com **Avalonia UI** (.N
 
 ## 🛠️ Stack
 
-| Camada | Tecnologia |
-|---|---|
-| UI | [Avalonia UI 12](https://avaloniaui.net/) (XAML, tema Fluent) |
-| Padrão | MVVM via [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/) |
-| Minecraft / NeoForge | [CmlLib.Core](https://github.com/CmlLib/CmlLib.Core) + `CmlLib.Core.Installer.NeoForge` |
-| Autenticação | `CmlLib.Core.Auth.Microsoft` + `XboxAuthNet.Game.Msal` (MSAL) |
-| Runtime | .NET 10 |
+| Camada               | Tecnologia                                                                                  |
+|----------------------|---------------------------------------------------------------------------------------------|
+| UI                   | [Avalonia UI 12](https://avaloniaui.net/) (XAML, tema Fluent)                               |
+| Padrão               | MVVM via [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/) |
+| Minecraft / NeoForge | [CmlLib.Core](https://github.com/CmlLib/CmlLib.Core) + `CmlLib.Core.Installer.NeoForge`     |
+| Autenticação         | `CmlLib.Core.Auth.Microsoft` + `XboxAuthNet.Game.Msal` (MSAL)                               |
+| Runtime              | .NET 10                                                                                     |
 
 ## 📦 Compilar e correr
 
@@ -66,12 +67,13 @@ dotnet run --project TCMine-Launcher
 
 ## 🔑 Configurar o login com a Microsoft
 
-A autenticação usa uma **app registada no Azure** (um *public client* — **não tem client secret**). O `Client ID` é embutido no binário em tempo de compilação e mantido **fora do git**.
+A autenticação usa uma **app registada no Azure** (um *public client* — **não tem client secret**). O `Client ID` é
+embutido no binário em tempo de compilação e mantido **fora do git**.
 
 1. Cria uma App Registration no [portal do Azure](https://portal.azure.com) com:
-   - Redirect URI `http://localhost` (plataforma *Mobile and desktop applications*)
-   - *Allow public client flows* = **Yes**
-   - Contas Microsoft pessoais permitidas
+    - Redirect URI `http://localhost` (plataforma *Mobile and desktop applications*)
+    - *Allow public client flows* = **Yes**
+    - Contas Microsoft pessoais permitidas
 2. Copia o template e coloca o teu Client ID:
    ```bash
    cp TCMine-Launcher/Client.props.example TCMine-Launcher/Client.props
@@ -79,31 +81,40 @@ A autenticação usa uma **app registada no Azure** (um *public client* — **n�
    ```
    Em CI/produção, em alternativa: `dotnet publish -p:MicrosoftClientId=<o-teu-id>`.
 
-> ℹ️ Apps do Azure novas precisam de **aprovação para a API do Minecraft** ([formulário](https://aka.ms/mce-reviewappid)); sem ela, o login devolve `403`. O modo offline funciona sem aprovação.
+> ℹ️ Apps do Azure novas precisam de **aprovação para a API do Minecraft
+** ([formulário](https://aka.ms/mce-reviewappid)); sem ela, o login devolve `403`. O modo offline funciona sem
+> aprovação.
 
 ## 🗂️ Estrutura
 
+A solução (`TCMine-Core.sln`) tem três projetos:
+
 ```
-TCMine-Launcher/
-├─ Models/        # dados puros (PlayerProfile, GameProfile, Modpack, ...) — sem UI
-├─ ViewModels/    # MVVM: shell + páginas (Home, Modpacks, News, Settings)
-├─ Views/         # AXAML + code-behind mínimo
-├─ Services/      # AuthService (login MS), AppConfig
-└─ Client.props   # Client ID do Azure (gitignored)
+TCMine-Launcher/   # a app desktop (Avalonia)
+│  ├─ Models/      # dados puros (PlayerProfile, GameProfile, MinecraftInstance, ...) — sem UI
+│  ├─ ViewModels/  # MVVM: shell + páginas (Home, Instances, Modpacks, News, Settings)
+│  ├─ Views/       # AXAML + componentes reutilizáveis (Views/Controls) + temas (Themes/)
+│  ├─ Services/    # auth, launch, instalação de mods/overrides, updates (Velopack)
+│  └─ Client.props # Client ID do Azure (gitignored)
+TCMine-Server/     # API + proxy CurseForge + conteúdo em SQLite + admin web (ver o seu README)
+TCMine-IconGen/    # utilitário que gera o ícone (logótipo) da app
 ```
 
-A separação MVVM é estrita: os **Models** não conhecem UI nem CmlLib; os **ViewModels** orquestram; as **Views** só fazem binding.
+A separação MVVM é estrita: os **Models** não conhecem UI nem CmlLib; os **ViewModels** orquestram; as **Views** só
+fazem binding. O conteúdo (novidades, modpacks, releases) é gerido na administração web do **TCMine-Server** — ver [
+`TCMine-Server/README.md`](TCMine-Server/README.md).
 
 ## 🗺️ Estado / Roadmap
 
 - [x] Interface completa e navegação entre telas
 - [x] Login Microsoft real (navegador do sistema) + modo offline
-- [ ] Download e instalação do modpack via CmlLib
-- [ ] Launch real do Minecraft (NeoForge)
-- [ ] Skins reais e persistência de definições
+- [x] Download e instalação do modpack via CmlLib
+- [x] Launch real do Minecraft (NeoForge)
+- [x] Skins reais e persistência de definições
 
 ## 📄 Licença
 
-Distribuído sob a **GNU General Public License v3.0** (copyleft) — vê o ficheiro [`LICENSE`](LICENSE). Qualquer versão modificada e distribuída deve também disponibilizar o código-fonte sob a mesma licença.
+Distribuído sob a **GNU General Public License v3.0** (copyleft) — vê o ficheiro [`LICENSE`](LICENSE). Qualquer versão
+modificada e distribuída deve também disponibilizar o código-fonte sob a mesma licença.
 
 Copyright © 2026 tiny-core

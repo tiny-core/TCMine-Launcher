@@ -72,14 +72,12 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 var app = builder.Build();
 
-// Cria/atualiza o esquema e importa os dados legados (1.ª execução).
+// Cria/atualiza o esquema da BD no arranque. O conteúdo é gerido em /admin.
 using (var scope = app.Services.CreateScope())
 {
     var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
     await using var db = await factory.CreateDbContextAsync();
     await db.Database.MigrateAsync();
-    await Seeder.SeedAsync(db, app.Environment.ContentRootPath,
-        app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("seed"));
 }
 
 app.UseCors();

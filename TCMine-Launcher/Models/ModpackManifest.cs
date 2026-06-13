@@ -20,6 +20,9 @@ public class ModpackManifest
     /// <summary>O modpack tem um bundle de overrides (configs/resourcepacks/options).</summary>
     public bool HasOverrides { get; set; }
 
+    /// <summary>RAM recomendada (MB) pelo modpack; aplicada à instância ao instalar.</summary>
+    public int? RecommendedRamMb { get; set; }
+
     /// <summary>Nº de mods (preenchido no resumo da lista, quando Mods vem vazio).</summary>
     public int ModCount { get; set; }
 
@@ -42,7 +45,10 @@ public class ModpackManifest
     public string ServerLabel => HasServer ? "Com servidor" : "Sem servidor";
 
     [JsonIgnore]
-    public string VersionSummary => $"MC {Minecraft} · NeoForge {Neoforge}";
+    public string VersionSummary =>
+        string.IsNullOrWhiteSpace(Version)
+            ? $"MC {Minecraft} · NeoForge {Neoforge}"
+            : $"v{Version} · MC {Minecraft} · NeoForge {Neoforge}";
 
     [JsonIgnore]
     public string ModsSummary => TotalMods == 0 ? "Sem mods" : $"{TotalMods} mod(s)";

@@ -10,8 +10,8 @@ Servidor ASP.NET Core com:
 4. **Interface de administração** — em **`/admin`** (Blazor Server, protegida por senha)
    para gerir novidades, modpacks e releases sem editar ficheiros à mão.
 
-O esquema da BD é criado automaticamente e, na 1.ª execução, é **semeado** a partir do
-`news.json` e dos `modpacks/*.json` existentes (para não perder os dados atuais).
+O esquema da BD é criado automaticamente no arranque; todo o conteúdo (novidades,
+modpacks, releases) é gerido na administração web.
 
 Contratos (inalterados): [`../docs/curseforge-proxy.md`](../docs/curseforge-proxy.md) (mods) e
 [`../docs/modpack-manifest.md`](../docs/modpack-manifest.md) (modpacks).
@@ -80,9 +80,6 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
 | `UPDATES_DIR` | não | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
 | `OVERRIDES_DIR` | não | Pasta dos bundles de overrides dos modpacks (default `./overrides`). |
-
-> O seed inicial lê `./news.json` e `./modpacks/*.json` apenas quando a BD está vazia.
-> A partir daí, a fonte de verdade é a BD (gerida em `/admin`).
 
 ## Administração (`/admin`)
 

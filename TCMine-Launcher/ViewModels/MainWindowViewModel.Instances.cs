@@ -214,6 +214,7 @@ public partial class MainWindowViewModel
             existing.MinecraftVersion = manifest.Minecraft;
             existing.NeoForgeVersion = manifest.Neoforge;
             existing.ManifestVersion = manifest.Version;
+            existing.Description = manifest.Description;
             existing.Mods = manifest.Mods;
             existing.Servers = manifest.Servers;
             existing.HasOverrides = manifest.HasOverrides;
@@ -231,7 +232,9 @@ public partial class MainWindowViewModel
             Source = InstanceSource.OfficialManifest,
             ModpackId = manifest.Id,
             ManifestVersion = manifest.Version,
+            Description = manifest.Description,
             HasOverrides = manifest.HasOverrides,
+            RamOverrideMb = manifest.RecommendedRamMb, // RAM recomendada pelo modpack
             Mods = manifest.Mods,
             Servers = manifest.Servers
         };

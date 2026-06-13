@@ -20,9 +20,6 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <!-- Dados de seed inicial: importados para a BD na 1.ª execução. -->
-      <Content Update="modpacks\**\*.json" CopyToOutputDirectory="PreserveNewest" />
-      <Content Update="news.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>
