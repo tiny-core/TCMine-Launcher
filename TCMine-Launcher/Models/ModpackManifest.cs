@@ -20,11 +20,23 @@ public class ModpackManifest
     /// <summary>Nº de mods (preenchido no resumo da lista, quando Mods vem vazio).</summary>
     public int ModCount { get; set; }
 
+    /// <summary>Nº de servidores (preenchido no resumo da lista).</summary>
+    public int ServerCount { get; set; }
+
     public List<ModEntry> Mods { get; set; } = new();
     public List<ServerEntry> Servers { get; set; } = new();
 
     [JsonIgnore]
     public int TotalMods => Mods.Count > 0 ? Mods.Count : ModCount;
+
+    [JsonIgnore]
+    public int TotalServers => Servers.Count > 0 ? Servers.Count : ServerCount;
+
+    [JsonIgnore]
+    public bool HasServer => TotalServers > 0;
+
+    [JsonIgnore]
+    public string ServerLabel => HasServer ? "Com servidor" : "Sem servidor";
 
     [JsonIgnore]
     public string VersionSummary => $"MC {Minecraft} · NeoForge {Neoforge}";

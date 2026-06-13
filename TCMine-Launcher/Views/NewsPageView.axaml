@@ -8,15 +8,28 @@
              x:Class="TCMine_Launcher.Views.NewsPageView"
              x:DataType="vm:NewsPageViewModel">
 
-    <Grid Margin="26" RowDefinitions="Auto,16,*">
+    <Grid Margin="26" RowDefinitions="Auto,Auto,16,*">
 
-        <StackPanel Grid.Row="0">
-            <TextBlock Classes="page-title" Text="Novidades" />
-            <TextBlock Classes="muted" Text="Últimas atualizações do launcher e do modpack"
-                       Margin="0,4,0,0" />
-        </StackPanel>
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0">
+                <TextBlock Classes="page-title" Text="Novidades" />
+                <TextBlock Classes="muted" Text="Últimas atualizações do launcher e do modpack"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="outline-btn" VerticalAlignment="Center"
+                    Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}">
+                <Panel>
+                    <TextBlock Text="↻ Atualizar" FontSize="12.5" IsVisible="{Binding !IsLoading}" />
+                    <Ellipse Classes="spinner" Width="14" Height="14" IsVisible="{Binding IsLoading}" />
+                </Panel>
+            </Button>
+        </Grid>
 
-        <ScrollViewer Grid.Row="2">
+        <TextBlock Grid.Row="1" Text="{Binding StatusMessage}"
+                   Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,12,0,0"
+                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <ScrollViewer Grid.Row="3">
             <ItemsControl ItemsSource="{Binding News}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="m:NewsItem">

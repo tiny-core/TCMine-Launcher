@@ -73,8 +73,8 @@
                 <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9"
                                 VerticalAlignment="Center">
-                        <Ellipse Width="8" Height="8" Fill="#22C55E"
-                                 IsVisible="{Binding !IsLaunching}" VerticalAlignment="Center" />
+                        <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                 Fill="{Binding StatusColor, Converter={StaticResource StringToBrush}}" />
                         <TextBlock Text="{Binding LaunchStatus}"
                                    Foreground="#8A8AAA" FontSize="13"
                                    VerticalAlignment="Center" />
@@ -139,6 +139,26 @@
                                FontFamily="Cascadia Code,Consolas,monospace"
                                FontSize="11" Foreground="#94A3B8" />
                 </Grid>
+
+                <!-- Estado do servidor (instâncias com servidor) -->
+                <StackPanel IsVisible="{Binding HasServer}" Margin="0,16,0,0" Spacing="6">
+                    <TextBlock Classes="section-label" Text="SERVIDOR" Margin="0" />
+                    <Border Background="#0A0A16" BorderBrush="#1A1A28" BorderThickness="1"
+                            CornerRadius="8" Padding="12,10">
+                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                            <TextBlock Grid.Column="0" Text="{Binding ServerName}"
+                                       FontSize="12.5" Foreground="#E8E8F0"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                                        VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                         Fill="{Binding ServerStatusColor, Converter={StaticResource StringToBrush}}" />
+                                <TextBlock Text="{Binding ServerStatusText}" FontSize="11.5"
+                                           Foreground="#94A3B8" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
 
                 <Border Height="1" Background="#16161F" Margin="0,20" />
 

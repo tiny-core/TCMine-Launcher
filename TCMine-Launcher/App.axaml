@@ -2,8 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="TCMine_Launcher.App"
              xmlns:local="using:TCMine_Launcher"
+             xmlns:conv="using:TCMine_Launcher.Converters"
              RequestedThemeVariant="Default">
     <!-- "Default" ThemeVariant follows the system theme variant. "Dark" or "Light" are other available options. -->
+
+    <Application.Resources>
+        <conv:StringToBrushConverter x:Key="StringToBrush" />
+    </Application.Resources>
 
     <Application.DataTemplates>
         <local:ViewLocator />

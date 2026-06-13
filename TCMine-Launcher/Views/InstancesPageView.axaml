@@ -59,44 +59,53 @@
 
                                 <Border Height="1" Background="#16161F" Margin="0,18" />
 
-                                <TextBlock Text="{Binding VersionSummary}"
-                                           Foreground="#7A7A9A" FontSize="12.5" />
-                                <TextBlock Text="{Binding ModsLabel}"
-                                           Foreground="#5A5A7A" FontSize="11" Margin="0,5,0,0" />
-
-                                <!-- Ações -->
-                                <Grid ColumnDefinitions="*,10,Auto" Margin="0,16,0,0">
-                                    <Button Grid.Column="0" Classes="play-btn" Height="40"
-                                            HorizontalContentAlignment="Center"
-                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
-                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).PlayCommand}"
-                                            CommandParameter="{Binding}">
-                                        <TextBlock Text="▶ Jogar" FontSize="13" FontWeight="Bold" />
-                                    </Button>
-                                    <Button Grid.Column="2" Classes="outline-btn" Height="40"
-                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
-                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).SelectCommand}"
-                                            CommandParameter="{Binding}">
-                                        <TextBlock Text="Selecionar" FontSize="12.5" />
-                                    </Button>
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding VersionSummary}"
+                                               Foreground="#7A7A9A" FontSize="12.5" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding ModsLabel}"
+                                               Foreground="#5A5A7A" FontSize="11" VerticalAlignment="Center" />
                                 </Grid>
 
-                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,8,0,0"
-                                            HorizontalAlignment="Right">
-                                    <Button Classes="ghost-btn"
+                                <!-- Ação principal -->
+                                <Button Classes="play-btn" Height="40" Margin="0,16,0,0"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center"
+                                        IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
+                                        Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).SelectCommand}"
+                                        CommandParameter="{Binding}">
+                                    <TextBlock Text="Selecionar" FontSize="13" FontWeight="Bold" />
+                                </Button>
+
+                                <!-- Ações secundárias: personalizadas vs oficiais -->
+                                <Grid Margin="0,10,0,0">
+                                    <!-- Personalizada: gerir mods + eliminar -->
+                                    <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding !IsOfficial}">
+                                        <Button Grid.Column="0" Classes="outline-btn" Height="34"
+                                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                                IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
+                                                Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).ManageModsCommand}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="Mods" FontSize="12" />
+                                        </Button>
+                                        <Button Grid.Column="2" Classes="outline-btn" Height="34"
+                                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                                IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
+                                                Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DeleteCommand}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="Eliminar" FontSize="12" Foreground="#F87171" />
+                                        </Button>
+                                    </Grid>
+
+                                    <!-- Oficial: não editável; só permite criar uma cópia -->
+                                    <Button Classes="outline-btn" Height="34"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                            IsVisible="{Binding IsOfficial}"
                                             IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
-                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).ManageModsCommand}"
+                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DuplicateCommand}"
                                             CommandParameter="{Binding}">
-                                        <TextBlock Text="Mods" FontSize="12" Foreground="#94A3B8" />
+                                        <TextBlock Text="＋ Criar cópia editável" FontSize="12" />
                                     </Button>
-                                    <Button Classes="ghost-btn"
-                                            IsVisible="{Binding !IsOfficial}"
-                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
-                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DeleteCommand}"
-                                            CommandParameter="{Binding}">
-                                        <TextBlock Text="Eliminar" FontSize="12" Foreground="#F87171" />
-                                    </Button>
-                                </StackPanel>
+                                </Grid>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

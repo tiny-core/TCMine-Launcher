@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:bh="using:TCMine_Launcher.Behaviors"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="420"
@@ -45,8 +46,14 @@
                 <ItemsControl ItemsSource="{Binding Results}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vm:ModSearchItem">
-                            <Grid ColumnDefinitions="*,Auto" Margin="12,9">
-                                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                            <Grid ColumnDefinitions="Auto,12,*,Auto" Margin="12,9">
+                                <Border Grid.Column="0" Width="38" Height="38"
+                                        CornerRadius="6" ClipToBounds="True"
+                                        Background="#12121E" VerticalAlignment="Center">
+                                    <Image bh:ImageLoader.SourceUrl="{Binding LogoUrl}"
+                                           Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}"
                                                FontSize="13" FontWeight="SemiBold" Foreground="#E8E8F0" />
                                     <TextBlock Text="{Binding Summary}"
@@ -54,7 +61,7 @@
                                                TextTrimming="CharacterEllipsis"
                                                IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                 </StackPanel>
-                                <Button Grid.Column="1" Classes="outline-btn mod-toggle" Height="30"
+                                <Button Grid.Column="3" Classes="outline-btn mod-toggle" Height="30"
                                         Classes.selected="{Binding IsSelected}"
                                         VerticalAlignment="Center" Margin="10,0,0,0"
                                         Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ToggleCommand}"

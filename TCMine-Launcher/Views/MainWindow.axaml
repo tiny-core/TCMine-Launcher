@@ -11,6 +11,7 @@
         Title="TCMine Launcher"
         Width="1040" Height="640"
         MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
         WindowDecorations="None"
         Background="Transparent"
         TransparencyLevelHint="Transparent">

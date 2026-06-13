@@ -62,6 +62,7 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | `CF_CACHE_MINUTES` | não | TTL da cache em memória (default `5`). |
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
 | `MODPACKS_DIR` | não | Pasta dos manifestos de modpacks (default `./modpacks`). |
+| `NEWS_FILE` | não | Ficheiro JSON das novidades (default `./news.json`). |
 
 ## Modpacks oficiais
 
@@ -75,6 +76,17 @@ GET /modpacks/{id}    → manifesto completo (mods + servidores)
 
 O launcher mostra-os na aba **Modpacks**; ao instalar, cria uma instância com os mods
 e escreve os servidores no `servers.dat` (aparecem na lista multijogador do jogo).
+
+## Novidades
+
+O ficheiro `news.json` (ou `NEWS_FILE`) é um array de notícias servido em `GET /news`,
+lido pela aba **Novidades** do launcher:
+
+```json
+[
+  { "tag": "MODPACK", "title": "...", "date": "07 jun 2026", "summary": "..." }
+]
+```
 
 ## Deploy
 

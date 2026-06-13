@@ -1,42 +1,69 @@
+using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using TCMine_Launcher.Models;
+using TCMine_Launcher.Services;
 
 namespace TCMine_Launcher.ViewModels;
 
 /// <summary>
-///     Página "Novidades": feed de notícias/changelog do launcher e do modpack.
+///     Página "Novidades": feed de notícias publicado pelo servidor TCMine (<c>/news</c>).
 /// </summary>
-public class NewsPageViewModel : ViewModelBase
+public partial class NewsPageViewModel : ViewModelBase
 {
-    public NewsPageViewModel()
+    private readonly NewsService _news;
+    private bool _loadedOnce;
+
+    [ObservableProperty] private bool _isLoading;
+    [ObservableProperty] private string? _statusMessage;
+
+    public NewsPageViewModel(NewsService news)
     {
-        News = new ObservableCollection<NewsItem>
-        {
-            new()
-            {
-                Tag = "MODPACK",
-                Title = "TCMine Modpack 1.0.0 disponível",
-                Date = "07 jun 2026",
-                Summary = "Primeira versão pública do nosso pack custom, com mods de " +
-                          "tecnologia, exploração e novos biomas."
-            },
-            new()
-            {
-                Tag = "LAUNCHER",
-                Title = "Login com a Microsoft",
-                Date = "05 jun 2026",
-                Summary = "Agora podes entrar com a tua conta Microsoft para sincronizar " +
-                          "o teu perfil e skins."
-            },
-            new()
-            {
-                Tag = "SERVIDOR",
-                Title = "Servidor TCMine renovado",
-                Date = "01 jun 2026",
-                Summary = "Mapa novo, regras actualizadas e eventos semanais a começar já."
-            }
-        };
+        _news = news;
     }
 
-    public ObservableCollection<NewsItem> News { get; }
+    public ObservableCollection<NewsItem> News { get; } = new();
+
+    /// <summary>Carrega na primeira vez que a página é mostrada.</summary>
+    public void Begin()
+    {
+        if (_loadedOnce) return;
+        _loadedOnce = true;
+        _ = LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        if (!_news.IsConfigured)
+        {
+            StatusMessage = "Configura o URL do servidor TCMine nas Definições.";
+            return;
+        }
+
+        IsLoading = true;
+        StatusMessage = null;
+        try
+        {
+            var list = await _news.GetNewsAsync();
+            News.Clear();
+            foreach (var item in list) News.Add(item);
+            if (News.Count == 0) StatusMessage = "Sem novidades.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Erro ao carregar novidades: " + ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 }

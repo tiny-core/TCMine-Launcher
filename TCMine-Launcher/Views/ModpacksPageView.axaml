@@ -64,8 +64,19 @@
                                                FontSize="16" FontWeight="Bold" Foreground="#E8E8F0" />
                                     <TextBlock Text="{Binding VersionSummary}"
                                                Foreground="#5A5A7A" FontSize="11" Margin="0,6,0,0" />
-                                    <TextBlock Text="{Binding ModsSummary}"
-                                               Foreground="#7A7A9A" FontSize="11" Margin="0,3,0,0" />
+
+                                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                                        <TextBlock Text="{Binding ModsSummary}"
+                                                   Foreground="#7A7A9A" FontSize="11" VerticalAlignment="Center" />
+                                        <Border CornerRadius="5" Padding="7,2" VerticalAlignment="Center"
+                                                Background="#0E2A14" IsVisible="{Binding HasServer}">
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <Ellipse Width="6" Height="6" Fill="#22C55E" VerticalAlignment="Center" />
+                                                <TextBlock Text="Servidor" FontSize="10" Foreground="#4ADE80"
+                                                           VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
                                     <TextBlock Text="{Binding Description}"
                                                Foreground="#7A7A9A" FontSize="12"
                                                TextWrapping="Wrap" Height="36" Margin="0,8,0,0"

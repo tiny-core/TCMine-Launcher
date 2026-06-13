@@ -12,8 +12,9 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <!-- Manifestos de modpacks copiados para o output (Docker/publish). -->
+      <!-- Manifestos + novidades copiados para o output (Docker/publish). -->
       <Content Update="modpacks\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+      <Content Update="news.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

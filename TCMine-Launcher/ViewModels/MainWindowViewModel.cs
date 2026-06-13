@@ -44,6 +44,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public CurseForgeClient CurseForge { get; }
     public ModInstaller ModInstaller { get; }
     public ManifestService Manifest { get; }
+    public NewsService NewsFeed { get; }
 
     /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
     public ObservableCollection<MinecraftInstance> Instances { get; } = new();
@@ -103,6 +104,7 @@ public partial class MainWindowViewModel : ViewModelBase
         CurseForge = new CurseForgeClient(() => _game.ServerUrl);
         ModInstaller = new ModInstaller(CurseForge);
         Manifest = new ManifestService(() => _game.ServerUrl);
+        NewsFeed = new NewsService(() => _game.ServerUrl);
 
         LoadInstances();
 
@@ -111,7 +113,7 @@ public partial class MainWindowViewModel : ViewModelBase
         CreateInstancePage = new CreateInstancePageViewModel(_game, this);
         InstanceModsPage = new InstanceModsPageViewModel(this);
         Modpacks = new ModpacksPageViewModel(this, Manifest);
-        News = new NewsPageViewModel();
+        News = new NewsPageViewModel(NewsFeed);
         Settings = new SettingsPageViewModel(_player, _game, this);
 
         _currentPage = Home;
@@ -162,6 +164,7 @@ public partial class MainWindowViewModel : ViewModelBase
         };
 
         if (value == AppTab.Modpacks) Modpacks.Begin();
+        if (value == AppTab.News) News.Begin();
     }
 
     // ── Comandos de navegação ────────────────────────────────────
@@ -358,6 +361,36 @@ public partial class MainWindowViewModel : ViewModelBase
     public void SaveInstance(MinecraftInstance instance)
     {
         _instances.Save(instance);
+    }
+
+    /// <summary>
+    ///     Cria uma cópia editável (Manual) de uma instância — útil para
+    ///     personalizar a partir de um modpack oficial sem o alterar.
+    /// </summary>
+    public MinecraftInstance DuplicateInstance(MinecraftInstance source)
+    {
+        var copy = new MinecraftInstance
+        {
+            Name = source.Name + " (cópia)",
+            MinecraftVersion = source.MinecraftVersion,
+            NeoForgeVersion = source.NeoForgeVersion,
+            Source = InstanceSource.Manual,
+            RamOverrideMb = source.RamOverrideMb,
+            Mods = source.Mods
+                .Select(m => new ModEntry
+                {
+                    ModId = m.ModId, FileId = m.FileId, Name = m.Name,
+                    FileName = m.FileName, DownloadUrl = m.DownloadUrl
+                }).ToList(),
+            Servers = source.Servers
+                .Select(s => new ServerEntry { Name = s.Name, Address = s.Address, Port = s.Port })
+                .ToList()
+        };
+
+        _instances.Save(copy);
+        Instances.Insert(0, copy);
+        SelectInstance(copy);
+        return copy;
     }
 
     /// <summary>Elimina uma instância (e a sua pasta). Garante que sobra sempre uma ativa.</summary>

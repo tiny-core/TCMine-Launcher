@@ -20,17 +20,19 @@ public partial class ModSearchItem : ViewModelBase
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(ActionLabel))]
     private bool _isSelected;
 
-    public ModSearchItem(int modId, string name, string summary, bool isSelected)
+    public ModSearchItem(int modId, string name, string summary, bool isSelected, string? logoUrl = null)
     {
         ModId = modId;
         Name = name;
         Summary = summary;
         _isSelected = isSelected;
+        LogoUrl = logoUrl;
     }
 
     public int ModId { get; }
     public string Name { get; }
     public string Summary { get; }
+    public string? LogoUrl { get; }
 
     public string ActionLabel => IsSelected ? "Remover" : "+ Adicionar";
 }
@@ -106,7 +108,8 @@ public partial class ModSelectionViewModel : ViewModelBase
             foreach (var mod in mods)
             {
                 Results.Add(new ModSearchItem(
-                    mod.Id, mod.Name, mod.Summary, _selected.Any(m => m.ModId == mod.Id)));
+                    mod.Id, mod.Name, mod.Summary, _selected.Any(m => m.ModId == mod.Id),
+                    mod.Logo?.ThumbnailUrl));
                 shown.Add(mod.Id);
             }
 

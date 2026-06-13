@@ -54,14 +54,16 @@ public partial class InstancesPageViewModel : ViewModelBase
     [RelayCommand]
     private void Select(MinecraftInstance instance)
     {
+        // Ativa a instância e volta à tela principal.
         _shell.SelectInstance(instance);
+        _shell.NavigateToHome();
     }
 
     [RelayCommand]
-    private void Play(MinecraftInstance instance)
+    private void Duplicate(MinecraftInstance instance)
     {
-        _shell.SelectInstance(instance);
-        _shell.NavigateToHome();
+        // Cria uma cópia editável (útil para personalizar a partir de um modpack oficial).
+        _shell.DuplicateInstance(instance);
     }
 
     [RelayCommand]

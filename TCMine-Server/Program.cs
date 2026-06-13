@@ -118,6 +118,9 @@ app.MapGet("/modpacks", () =>
             var modCount = root.TryGetProperty("mods", out var mods) && mods.ValueKind == JsonValueKind.Array
                 ? mods.GetArrayLength()
                 : 0;
+            var serverCount = root.TryGetProperty("servers", out var srv) && srv.ValueKind == JsonValueKind.Array
+                ? srv.GetArrayLength()
+                : 0;
 
             summaries.Add(new
             {
@@ -127,7 +130,8 @@ app.MapGet("/modpacks", () =>
                 minecraft = GetString(root, "minecraft"),
                 neoforge = GetString(root, "neoforge"),
                 description = GetString(root, "description"),
-                modCount
+                modCount,
+                serverCount
             });
         }
         catch
@@ -148,5 +152,14 @@ app.MapGet("/modpacks/{id}", (string id) =>
         ? Results.Content(File.ReadAllText(file), "application/json")
         : Results.NotFound();
 });
+
+// ── Novidades do launcher (lidas de um ficheiro news.json) ───────────────────
+var newsFile = app.Configuration["NEWS_FILE"]
+               ?? Path.Combine(app.Environment.ContentRootPath, "news.json");
+
+app.MapGet("/news", () =>
+    File.Exists(newsFile)
+        ? Results.Content(File.ReadAllText(newsFile), "application/json")
+        : Results.Json(Array.Empty<object>()));
 
 app.Run();
