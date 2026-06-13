@@ -14,9 +14,9 @@ O workflow [`.github/workflows/server-image.yml`](../.github/workflows/server-im
 constrói e envia a imagem a cada tag `v*`.
 
 1. Em **Settings → Secrets and variables → Actions**, cria:
-   - `DOCKERHUB_USERNAME` — o teu utilizador do Docker Hub.
-   - `DOCKERHUB_TOKEN` — um *Access Token* (Docker Hub → Account Settings → Security),
-     com permissão **Read & Write**.
+    - `DOCKERHUB_USERNAME` — o teu utilizador do Docker Hub.
+    - `DOCKERHUB_TOKEN` — um *Access Token* (Docker Hub → Account Settings → Personal access tokens),
+      com permissão **Read & Write**.
 2. Lança uma release:
    ```bash
    git tag v1.0.0
@@ -66,6 +66,7 @@ services:
 ```
 
 Notas:
+
 - **Porta** — o container escuta em `8080` (imagem ASP.NET); mapeado para `8080` no host.
 - **Volume `/data`** — guarda a BD SQLite, o feed de updates e os overrides. A pasta já é
   criada e fica gravável pelo utilizador não-root da imagem.

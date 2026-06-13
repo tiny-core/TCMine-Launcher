@@ -1,7 +1,9 @@
 using SkiaSharp;
 
-// Gera o logótipo do TCMine (tile arredondado escuro + cubo isométrico laranja)
-// em PNG (256px) e ICO multi-resolução. Uso: dotnet run -- <pasta-Assets>
+// Gera os recursos visuais do TCMine:
+//   icon.png (256) + icon.ico (multi-res)  → ícone da app e dos atalhos
+//   splash.png (520×300)                   → imagem do instalador (Velopack --splashImage)
+// Uso: dotnet run -- <pasta-Assets>
 
 var assetsDir = args.Length > 0 ? args[0] : ".";
 Directory.CreateDirectory(assetsDir);
@@ -9,21 +11,22 @@ Directory.CreateDirectory(assetsDir);
 int[] sizes = { 16, 32, 48, 64, 128, 256 };
 var pngs = new Dictionary<int, byte[]>();
 foreach (var s in sizes)
-    pngs[s] = Render(s);
+    pngs[s] = RenderIcon(s);
 
 File.WriteAllBytes(Path.Combine(assetsDir, "icon.png"), pngs[256]);
 WriteIco(Path.Combine(assetsDir, "icon.ico"), pngs);
+File.WriteAllBytes(Path.Combine(assetsDir, "splash.png"), RenderSplash(520, 300));
 
-Console.WriteLine($"icon.png + icon.ico escritos em {Path.GetFullPath(assetsDir)}");
+Console.WriteLine($"icon.png + icon.ico + splash.png escritos em {Path.GetFullPath(assetsDir)}");
 return;
 
-static byte[] Render(int s)
+// ── Ícone da app (tile arredondado escuro + cubo isométrico) ─────────────────
+static byte[] RenderIcon(int s)
 {
     using var bmp = new SKBitmap(s, s, SKColorType.Rgba8888, SKAlphaType.Premul);
     using var canvas = new SKCanvas(bmp);
     canvas.Clear(SKColors.Transparent);
 
-    // Tile arredondado escuro com borda laranja
     var pad = s * 0.06f;
     var radius = s * 0.22f;
     var tile = new SKRect(pad, pad, s - pad, s - pad);
@@ -42,8 +45,42 @@ static byte[] Render(int s)
         canvas.DrawRoundRect(inner, radius - bw, radius - bw, border);
     }
 
-    // Cubo isométrico de 3 faces
-    float cx = s / 2f, cy = s * 0.52f, w = s * 0.26f;
+    DrawCube(canvas, s / 2f, s * 0.52f, s * 0.26f);
+
+    using var img = SKImage.FromBitmap(bmp);
+    using var data = img.Encode(SKEncodedImageFormat.Png, 100);
+    return data.ToArray();
+}
+
+// ── Splash do instalador (fundo da marca + cubo + nome) ──────────────────────
+static byte[] RenderSplash(int w, int h)
+{
+    using var bmp = new SKBitmap(w, h, SKColorType.Rgba8888, SKAlphaType.Premul);
+    using var canvas = new SKCanvas(bmp);
+
+    // Fundo com leve brilho radial no topo (igual ao splash/login da app).
+    using (var bg = new SKPaint { IsAntialias = true })
+    {
+        bg.Shader = SKShader.CreateRadialGradient(
+            new SKPoint(w / 2f, 0), h * 1.1f,
+            new[] { new SKColor(0x16, 0x10, 0x18), new SKColor(0x0B, 0x0B, 0x14) },
+            new[] { 0f, 1f }, SKShaderTileMode.Clamp);
+        canvas.DrawRect(0, 0, w, h, bg);
+    }
+
+    DrawCube(canvas, w / 2f, h * 0.36f, 48f);
+
+    DrawText(canvas, "TCMine Launcher", w / 2f, h * 0.70f, 27f, SKColors.White, bold: true);
+    DrawText(canvas, "A preparar a instalação…", w / 2f, h * 0.70f + 26f, 13f,
+        new SKColor(0x7A, 0x7A, 0x9A));
+
+    using var img = SKImage.FromBitmap(bmp);
+    using var data = img.Encode(SKEncodedImageFormat.Png, 100);
+    return data.ToArray();
+}
+
+static void DrawCube(SKCanvas canvas, float cx, float cy, float w)
+{
     var top = new[] { P(cx, cy - w), P(cx + w, cy - w / 2), P(cx, cy), P(cx - w, cy - w / 2) };
     var left = new[] { P(cx - w, cy - w / 2), P(cx, cy), P(cx, cy + w), P(cx - w, cy + w / 2) };
     var right = new[] { P(cx + w, cy - w / 2), P(cx, cy), P(cx, cy + w), P(cx + w, cy + w / 2) };
@@ -51,10 +88,17 @@ static byte[] Render(int s)
     Face(canvas, top, new SKColor(0xFB, 0x92, 0x3C));
     Face(canvas, left, new SKColor(0xC2, 0x41, 0x0C));
     Face(canvas, right, new SKColor(0xF9, 0x73, 0x16));
+}
 
-    using var img = SKImage.FromBitmap(bmp);
-    using var data = img.Encode(SKEncodedImageFormat.Png, 100);
-    return data.ToArray();
+static void DrawText(SKCanvas canvas, string text, float cx, float baseline, float size, SKColor color, bool bold = false)
+{
+    using var paint = new SKPaint
+    {
+        Color = color, IsAntialias = true, TextSize = size, TextAlign = SKTextAlign.Center,
+        Typeface = SKTypeface.FromFamilyName("Segoe UI",
+            bold ? SKFontStyle.Bold : SKFontStyle.Normal)
+    };
+    canvas.DrawText(text, cx, baseline, paint);
 }
 
 static SKPoint P(float x, float y) => new(x, y);
