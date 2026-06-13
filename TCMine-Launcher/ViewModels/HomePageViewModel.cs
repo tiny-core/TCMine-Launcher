@@ -96,12 +96,6 @@ public partial class HomePageViewModel : ViewModelBase
 
     public string PlayIcon => _shell.IsGameRunning ? "■" : IsInstalled ? "▶" : "⬇";
 
-    public string StateLabel => _shell.IsGameRunning
-        ? "Em execução"
-        : IsInstalled
-            ? "Instalada"
-            : "Por instalar";
-
     /// <summary>Cor do indicador de estado (verde/âmbar/azul/roxo).</summary>
     public string StatusColor =>
         _shell.IsGameRunning ? "#3B82F6" :
@@ -120,16 +114,6 @@ public partial class HomePageViewModel : ViewModelBase
     public string AvatarInitials => _player.ComputeInitials();
     public string AccountLabel => _player.AccountLabel;
 
-    public string PlayerUuidShort => string.IsNullOrEmpty(_player.Uuid)
-        ? "—"
-        : _player.Uuid.Length > 12
-            ? _player.Uuid[..12] + "…"
-            : _player.Uuid;
-
-    public string PlayerUuid => string.IsNullOrEmpty(_player.Uuid)
-        ? "_"
-        : _player.Uuid;
-
     /// <summary>URL da cabeça da skin (para o avatar).</summary>
     public string? PlayerHeadUrl => _player.HeadUrl;
 
@@ -145,8 +129,6 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlayerName));
         OnPropertyChanged(nameof(AvatarInitials));
         OnPropertyChanged(nameof(AccountLabel));
-        OnPropertyChanged(nameof(PlayerUuidShort));
-        OnPropertyChanged(nameof(PlayerUuid));
         OnPropertyChanged(nameof(PlayerHeadUrl));
     }
 
@@ -173,7 +155,6 @@ public partial class HomePageViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(PlayLabel));
         OnPropertyChanged(nameof(PlayIcon));
-        OnPropertyChanged(nameof(StateLabel));
         OnPropertyChanged(nameof(StatusColor));
         OnPropertyChanged(nameof(CanEditRam));
         PlayCommand.NotifyCanExecuteChanged();
@@ -190,7 +171,6 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsInstalled));
         OnPropertyChanged(nameof(PlayLabel));
         OnPropertyChanged(nameof(PlayIcon));
-        OnPropertyChanged(nameof(StateLabel));
         OnPropertyChanged(nameof(StatusColor));
     }
 
