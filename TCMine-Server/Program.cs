@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.FileProviders;
@@ -31,6 +32,14 @@ builder.Services.AddDbContextFactory<AppDbContext>(o => o.UseSqlite($"Data Sourc
 builder.Services.AddScoped<ContentService>();
 builder.Services.AddScoped<CurseForgeService>();
 builder.Services.AddSingleton<OverridesStore>();
+
+// Persiste as chaves de Data Protection no volume (junto da BD) para que os cookies
+// de admin e os tokens antiforgery sobrevivam a reinícios/atualizações do container.
+var keysDir = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(dbPath))!, "keys");
+Directory.CreateDirectory(keysDir);
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysDir))
+    .SetApplicationName("TCMine-Server");
 
 // ── CurseForge proxy (HttpClient + cache) ────────────────────────────────────
 builder.Services.AddHttpClient("curseforge", client =>
