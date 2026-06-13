@@ -31,20 +31,17 @@ Isto cria, em `releases/`:
 
 ## 3. Publicar o feed no servidor
 
-Copia **todo** o conteúdo de `releases/` para a pasta `UPDATES_DIR` do servidor
-(servida em `/updates`). Ex. com Docker, monta um volume:
+**Recomendado — pela administração web:** abre `/admin` → **Releases**, indica a versão
+e as notas, e faz **upload de todo o conteúdo de `releases/`** (`Setup.exe`,
+`*-full.nupkg`, `*-delta.nupkg`, `releases.win.json`). Os ficheiros são gravados no
+`UPDATES_DIR` e passam a ser servidos em `/updates`.
 
-```yaml
-# compose.yaml
-environment:
-  - UPDATES_DIR=/data/updates
-volumes:
-  - ./releases:/data/updates
-```
+> Alternativa manual: copiar `releases/*` diretamente para a pasta `UPDATES_DIR`
+> (útil em automação/CI). Em Docker, essa pasta é o volume persistente `/data/updates`.
 
 Distribui o `Setup.exe` aos utilizadores na primeira vez. A partir daí, sempre que
-publicares uma versão nova nesta pasta, o launcher deteta, mostra **"⬆ Atualizar"**,
-descarrega e reinicia automaticamente.
+publicares uma versão nova, o launcher deteta, mostra **"⬆ Atualizar"**, descarrega e
+reinicia automaticamente.
 
 > Para o auto-update funcionar, o launcher tem de ter sido **instalado pelo `Setup.exe`**
 > do Velopack (não basta correr o `.exe` solto). O `VelopackApp.Build().Run()` no

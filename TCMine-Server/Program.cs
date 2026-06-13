@@ -1,25 +1,45 @@
-using System.Text.Json;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.FileProviders;
+using TCMine_Server.Components;
+using TCMine_Server.Data;
+using TCMine_Server.Services;
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  Proxy CurseForge do TCMine.
-//  Reencaminha GET /v1/* para https://api.curseforge.com/v1/* injetando a
-//  x-api-key (lida da env var CF_API_KEY). A key nunca chega ao cliente.
-//  Ver docs/curseforge-proxy.md para o contrato consumido pelo launcher.
+//  TCMine Server
+//  • Proxy CurseForge (/v1/*) — injeta a x-api-key (env CF_API_KEY).
+//  • Conteúdo (novidades + modpacks) servido a partir de SQLite (EF Core).
+//  • Feed de update do launcher (Velopack) servido em /updates (ficheiros).
+//  • Interface de administração em /admin (Blazor Server, senha ADMIN_PASSWORD).
 // ─────────────────────────────────────────────────────────────────────────────
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Config local (fora do git): CF_API_KEY, ADMIN_PASSWORD, etc. sem env vars.
+// Re-adiciona as env vars a seguir para que continuem a ter prioridade em
+// produção/Docker (o ficheiro local serve sobretudo para desenvolvimento).
+builder.Configuration.AddJsonFile("appsettings.local.json", true, true);
+builder.Configuration.AddEnvironmentVariables();
+
+// ── Base de dados (SQLite via EF Core) ───────────────────────────────────────
+var dbPath = builder.Configuration["DB_PATH"]
+             ?? Path.Combine(builder.Environment.ContentRootPath, "tcmine.db");
+builder.Services.AddDbContextFactory<AppDbContext>(o => o.UseSqlite($"Data Source={dbPath}"));
+builder.Services.AddScoped<ContentService>();
+builder.Services.AddScoped<CurseForgeService>();
+
+// ── CurseForge proxy (HttpClient + cache) ────────────────────────────────────
 builder.Services.AddHttpClient("curseforge", client =>
 {
     client.BaseAddress = new Uri("https://api.curseforge.com");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
-
 builder.Services.AddMemoryCache();
 
-// CORS aberto por defeito (é um proxy de leitura). Restringe as origens se o
-// expuseres publicamente — ver CF_ALLOWED_ORIGINS no README.
+// CORS aberto por defeito (proxy de leitura). Restringe via CF_ALLOWED_ORIGINS.
 builder.Services.AddCors(options =>
 {
     var origins = builder.Configuration["CF_ALLOWED_ORIGINS"];
@@ -34,31 +54,76 @@ builder.Services.AddCors(options =>
     });
 });
 
-var app = builder.Build();
-app.UseCors();
+// ── Autenticação de admin (cookie + senha única) ─────────────────────────────
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "tcmine_admin";
+        options.LoginPath = "/admin/login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+    });
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
-// Feed de updates do launcher (Velopack): serve os ficheiros de release em /updates.
+// ── Blazor Server (Razor Components) ─────────────────────────────────────────
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+var app = builder.Build();
+
+// Cria/atualiza o esquema e importa os dados legados (1.ª execução).
+using (var scope = app.Services.CreateScope())
+{
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<AppDbContext>>();
+    await using var db = await factory.CreateDbContextAsync();
+    await db.Database.MigrateAsync();
+    await Seeder.SeedAsync(db, app.Environment.ContentRootPath,
+        app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("seed"));
+}
+
+app.UseCors();
+app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseAntiforgery();
+
+// Feed de updates do launcher (Velopack): ficheiros de release em /updates.
 var updatesDir = app.Configuration["UPDATES_DIR"]
                  ?? Path.Combine(app.Environment.ContentRootPath, "updates");
 Directory.CreateDirectory(updatesDir);
-app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
+app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(updatesDir),
+    FileProvider = new PhysicalFileProvider(updatesDir),
     RequestPath = "/updates",
     ServeUnknownFileTypes = true // .nupkg / RELEASES
+});
+
+// Porta de entrada do /admin: exige sessão (exceto a própria página/POST de login).
+app.Use(async (ctx, next) =>
+{
+    var path = ctx.Request.Path;
+    var isAdmin = path.StartsWithSegments("/admin");
+    var isLogin = path.StartsWithSegments("/admin/login");
+    if (isAdmin && !isLogin && ctx.User.Identity?.IsAuthenticated != true)
+    {
+        ctx.Response.Redirect("/admin/login");
+        return;
+    }
+
+    await next();
 });
 
 var apiKey = app.Configuration["CF_API_KEY"];
 var cacheMinutes = double.TryParse(app.Configuration["CF_CACHE_MINUTES"], out var m) ? m : 5;
 
-// Health check / raiz.
+// ── Health check / raiz ──────────────────────────────────────────────────────
 app.MapGet("/", () => Results.Ok(new
 {
-    service = "TCMine CurseForge proxy",
+    service = "TCMine Server",
     configured = !string.IsNullOrWhiteSpace(apiKey)
 }));
 
-// Reencaminhamento 1:1 das rotas /v1/* do CurseForge.
+// ── Proxy CurseForge (reencaminhamento 1:1 de /v1/*) ─────────────────────────
 app.MapGet("/v1/{**path}", async (
     HttpContext ctx,
     string path,
@@ -77,7 +142,6 @@ app.MapGet("/v1/{**path}", async (
     var query = ctx.Request.QueryString.Value ?? string.Empty;
     var upstream = $"/v1/{path}{query}";
 
-    // Cache leve das respostas GET para poupar quota da API.
     if (cache.TryGetValue(upstream, out string? cached) && cached is not null)
         return Results.Content(cached, "application/json");
 
@@ -106,71 +170,44 @@ app.MapGet("/v1/{**path}", async (
     }
 });
 
-// ── Modpacks oficiais (manifestos servidos a partir de ficheiros JSON) ───────
-var modpacksDir = app.Configuration["MODPACKS_DIR"]
-                  ?? Path.Combine(app.Environment.ContentRootPath, "modpacks");
+// ── Conteúdo público (BD) — mesmo contrato JSON de antes ─────────────────────
+app.MapGet("/news", (ContentService content, CancellationToken ct) =>
+    content.GetNewsAsync(ct));
 
-static string? GetString(JsonElement e, string name) =>
-    e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+app.MapGet("/modpacks", (ContentService content, CancellationToken ct) =>
+    content.GetModpackSummariesAsync(ct));
 
-// Lista (resumo: sem mods, só a contagem).
-app.MapGet("/modpacks", () =>
+app.MapGet("/modpacks/{id}", async (string id, ContentService content, CancellationToken ct) =>
 {
-    if (!Directory.Exists(modpacksDir))
-        return Results.Json(Array.Empty<object>());
-
-    var summaries = new List<object>();
-    foreach (var file in Directory.EnumerateFiles(modpacksDir, "*.json"))
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(File.ReadAllText(file));
-            var root = doc.RootElement;
-            var modCount = root.TryGetProperty("mods", out var mods) && mods.ValueKind == JsonValueKind.Array
-                ? mods.GetArrayLength()
-                : 0;
-            var serverCount = root.TryGetProperty("servers", out var srv) && srv.ValueKind == JsonValueKind.Array
-                ? srv.GetArrayLength()
-                : 0;
-
-            summaries.Add(new
-            {
-                id = GetString(root, "id"),
-                name = GetString(root, "name"),
-                version = GetString(root, "version"),
-                minecraft = GetString(root, "minecraft"),
-                neoforge = GetString(root, "neoforge"),
-                description = GetString(root, "description"),
-                modCount,
-                serverCount
-            });
-        }
-        catch
-        {
-            // ficheiro inválido — ignora
-        }
-    }
-
-    return Results.Json(summaries);
+    var manifest = await content.GetManifestAsync(id, ct);
+    return manifest is null ? Results.NotFound() : Results.Json(manifest);
 });
 
-// Detalhe (manifesto completo com mods + servidores).
-app.MapGet("/modpacks/{id}", (string id) =>
+// ── Autenticação de admin (form login/logout) ────────────────────────────────
+app.MapPost("/auth/login", async (HttpContext ctx, IConfiguration cfg) =>
 {
-    var safe = Path.GetFileName(id); // evita path traversal
-    var file = Path.Combine(modpacksDir, safe + ".json");
-    return File.Exists(file)
-        ? Results.Content(File.ReadAllText(file), "application/json")
-        : Results.NotFound();
-});
+    var form = await ctx.Request.ReadFormAsync();
+    var password = form["password"].ToString();
+    var expected = cfg["ADMIN_PASSWORD"];
 
-// ── Novidades do launcher (lidas de um ficheiro news.json) ───────────────────
-var newsFile = app.Configuration["NEWS_FILE"]
-               ?? Path.Combine(app.Environment.ContentRootPath, "news.json");
+    if (string.IsNullOrEmpty(expected) || password != expected)
+        return Results.Redirect("/admin/login?error=1");
 
-app.MapGet("/news", () =>
-    File.Exists(newsFile)
-        ? Results.Content(File.ReadAllText(newsFile), "application/json")
-        : Results.Json(Array.Empty<object>()));
+    var identity = new ClaimsIdentity(
+        new[] { new Claim(ClaimTypes.Name, "admin") },
+        CookieAuthenticationDefaults.AuthenticationScheme);
+    await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+        new ClaimsPrincipal(identity));
+    return Results.Redirect("/admin");
+}).DisableAntiforgery();
+
+app.MapPost("/auth/logout", async (HttpContext ctx) =>
+{
+    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Redirect("/admin/login");
+}).DisableAntiforgery();
+
+// ── Interface de administração (Blazor) ──────────────────────────────────────
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();

@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand">TCMine <span>Admin</span></div>
+        <nav>
+            <NavLink class="nav" href="/admin/news" Match="NavLinkMatch.All">Novidades</NavLink>
+            <NavLink class="nav" href="/admin/modpacks">Modpacks</NavLink>
+            <NavLink class="nav" href="/admin/releases">Releases</NavLink>
+        </nav>
+        <form method="post" action="/auth/logout" class="logout">
+            <button type="submit" class="btn ghost">Terminar sessão</button>
+        </form>
+    </aside>
+    <main class="content">
+        @Body
+    </main>
+</div>

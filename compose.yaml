@@ -10,4 +10,15 @@ services:
       - CF_API_KEY=${CF_API_KEY}
       - CF_CACHE_MINUTES=5
       - CF_ALLOWED_ORIGINS=
+      # Senha da interface de administração (/admin). Define no ambiente do host
+      # ou num ficheiro .env ao lado deste compose.yaml.
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      # BD SQLite e feed de updates vivem no volume persistente /data.
+      - DB_PATH=/data/tcmine.db
+      - UPDATES_DIR=/data/updates
+    volumes:
+      - tcmine-data:/data
     restart: unless-stopped
+
+volumes:
+  tcmine-data:

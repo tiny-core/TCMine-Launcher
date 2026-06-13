@@ -18,6 +18,11 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TCMine-Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+# Pasta persistente para a BD SQLite e o feed de updates (volume /data),
+# gravável pelo utilizador não-root da imagem.
+USER root
+RUN mkdir -p /data && chown $APP_UID:0 /data
+USER $APP_UID
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TCMine-Server.dll"]

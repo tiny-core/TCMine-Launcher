@@ -1,13 +1,19 @@
 # TCMine — Servidor
 
-Servidor mínimo (ASP.NET Core) com duas funções:
+Servidor ASP.NET Core com:
 
 1. **Proxy CurseForge** — reencaminha `/v1/*` para `api.curseforge.com` injetando a
    `x-api-key`. A key fica **só no servidor**, nunca no launcher.
-2. **Modpacks oficiais** — serve os manifestos dos modpacks em `/modpacks` e
-   `/modpacks/{id}`, a partir de ficheiros JSON na pasta `modpacks/`.
+2. **Conteúdo** — novidades (`/news`) e modpacks oficiais (`/modpacks`, `/modpacks/{id}`)
+   servidos a partir de uma **base de dados SQLite** (EF Core).
+3. **Updates do launcher** — feed Velopack servido em `/updates`.
+4. **Interface de administração** — em **`/admin`** (Blazor Server, protegida por senha)
+   para gerir novidades, modpacks e releases sem editar ficheiros à mão.
 
-Contratos: [`../docs/curseforge-proxy.md`](../docs/curseforge-proxy.md) (mods) e
+O esquema da BD é criado automaticamente e, na 1.ª execução, é **semeado** a partir do
+`news.json` e dos `modpacks/*.json` existentes (para não perder os dados atuais).
+
+Contratos (inalterados): [`../docs/curseforge-proxy.md`](../docs/curseforge-proxy.md) (mods) e
 [`../docs/modpack-manifest.md`](../docs/modpack-manifest.md) (modpacks).
 
 ## 1. Obter uma API key do CurseForge
@@ -21,14 +27,23 @@ Define a key como variável de ambiente e arranca:
 ```powershell
 # Windows (PowerShell)
 $env:CF_API_KEY = "a-tua-key"
+$env:ADMIN_PASSWORD = "uma-senha"   # necessária para entrar em /admin
 dotnet run --project TCMine-Server
 ```
 
 ```bash
 # Linux / macOS
 export CF_API_KEY="a-tua-key"
+export ADMIN_PASSWORD="uma-senha"   # necessária para entrar em /admin
 dotnet run --project TCMine-Server
 ```
+
+A BD (`tcmine.db`) é criada na pasta do projeto. Abre a administração em
+`http://localhost:5062/admin` e entra com a `ADMIN_PASSWORD`.
+
+> **Em vez de variáveis de ambiente** podes criar `TCMine-Server/appsettings.local.json`
+> (ignorado pelo git — ver `appsettings.local.json.example`) com `CF_API_KEY` e
+> `ADMIN_PASSWORD`. É lido em runtime; as env vars, quando existem, têm prioridade.
 
 Fica em `http://localhost:5062`. Testa:
 
@@ -59,42 +74,40 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | Variável | Obrigatória | Descrição |
 |---|---|---|
 | `CF_API_KEY` | **sim** (mods) | API key do CurseForge (Eternal). |
+| `ADMIN_PASSWORD` | **sim** (admin) | Senha da interface `/admin`. Vazia = login sempre recusado. |
+| `DB_PATH` | não | Caminho do ficheiro SQLite (default `./tcmine.db`). |
 | `CF_CACHE_MINUTES` | não | TTL da cache em memória (default `5`). |
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
-| `MODPACKS_DIR` | não | Pasta dos manifestos de modpacks (default `./modpacks`). |
-| `NEWS_FILE` | não | Ficheiro JSON das novidades (default `./news.json`). |
 | `UPDATES_DIR` | não | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
 
-## Modpacks oficiais
+> O seed inicial lê `./news.json` e `./modpacks/*.json` apenas quando a BD está vazia.
+> A partir daí, a fonte de verdade é a BD (gerida em `/admin`).
 
-Cada modpack é um ficheiro `modpacks/<id>.json` (ver `modpacks/tcmine-official.json` e
-[`../docs/modpack-manifest.md`](../docs/modpack-manifest.md)). Endpoints:
+## Administração (`/admin`)
+
+Interface web (Blazor Server) para gerir tudo sem editar ficheiros:
+
+- **Novidades** — criar/editar/eliminar/publicar (servidas em `/news`).
+- **Modpacks** — criar/editar, com as listas de mods e servidores (servidos em
+  `/modpacks` e `/modpacks/{id}`, no mesmo formato de antes).
+- **Releases** — fazer upload dos artefactos do `vpk pack` (ver abaixo).
+
+Entra em `/admin` com a `ADMIN_PASSWORD`. Os endpoints públicos mantêm o contrato:
 
 ```
+GET /news             → novidades publicadas
 GET /modpacks         → lista (resumo de cada modpack)
 GET /modpacks/{id}    → manifesto completo (mods + servidores)
 ```
 
-O launcher mostra-os na aba **Modpacks**; ao instalar, cria uma instância com os mods
-e escreve os servidores no `servers.dat` (aparecem na lista multijogador do jogo).
-
-## Novidades
-
-O ficheiro `news.json` (ou `NEWS_FILE`) é um array de notícias servido em `GET /news`,
-lido pela aba **Novidades** do launcher:
-
-```json
-[
-  { "tag": "MODPACK", "title": "...", "date": "07 jun 2026", "summary": "..." }
-]
-```
+O launcher continua a consumir estes endpoints tal como antes — **não muda nada do lado dele**.
 
 ## Auto-update do launcher (Velopack)
 
 O servidor serve o feed de releases do launcher em **`/updates`** (pasta `UPDATES_DIR`).
 O launcher (Velopack) lê esse feed, descarrega e aplica a atualização sozinho.
-Ver o processo de gerar e publicar releases em
-[`../docs/release-process.md`](../docs/release-process.md).
+Em vez de copiar ficheiros à mão, faz **upload dos artefactos do `vpk pack` em
+`/admin` → Releases**. Ver [`../docs/release-process.md`](../docs/release-process.md).
 
 ## Deploy
 

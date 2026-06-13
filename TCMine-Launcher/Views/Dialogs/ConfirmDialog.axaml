@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
         x:Class="TCMine_Launcher.Views.ConfirmDialog"
         Title="Confirmar"
         Width="430" Height="200"
@@ -9,8 +10,7 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Border Background="{StaticResource BgPanel}" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
-            CornerRadius="14" Padding="26">
+    <views:WindowChrome Background="{StaticResource BgPanel}" Padding="26">
         <DockPanel>
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="12"
                         HorizontalAlignment="Right" Margin="0,22,0,0">
@@ -30,5 +30,5 @@
                            TextWrapping="Wrap" />
             </StackPanel>
         </DockPanel>
-    </Border>
+    </views:WindowChrome>
 </Window>

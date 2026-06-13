@@ -1,0 +1,119 @@
+@page "/admin"
+@page "/admin/news"
+@layout AdminLayout
+@rendermode InteractiveServer
+@inject IDbContextFactory<AppDbContext> DbFactory
+
+<h1>Novidades</h1>
+<p class="muted">Geridas aqui e servidas em <code>/news</code>.</p>
+
+<div class="grid-2">
+    <section class="panel">
+        <h2>@(_form.Id == 0 ? "Nova novidade" : $"Editar #{_form.Id}")</h2>
+
+        <label class="field-label">ETIQUETA</label>
+        <input class="input" @bind="_form.Tag" placeholder="MODPACK / LAUNCHER / SERVIDOR" />
+
+        <label class="field-label">TÍTULO</label>
+        <input class="input" @bind="_form.Title" />
+
+        <label class="field-label">RESUMO</label>
+        <textarea class="input" rows="3" @bind="_form.Summary"></textarea>
+
+        <div class="row">
+            <div>
+                <label class="field-label">DATA</label>
+                <input class="input" type="date" @bind="_form.PublishedAt" @bind:format="yyyy-MM-dd" />
+            </div>
+            <label class="check">
+                <input type="checkbox" @bind="_form.IsPublished" /> Publicada
+            </label>
+        </div>
+
+        <div class="actions">
+            <button class="btn primary" @onclick="SaveAsync">Guardar</button>
+            @if (_form.Id != 0)
+            {
+                <button class="btn ghost" @onclick="NewForm">Cancelar</button>
+            }
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Existentes (@_items.Count)</h2>
+        @if (_items.Count == 0)
+        {
+            <p class="muted">Ainda não há novidades.</p>
+        }
+        else
+        {
+            <ul class="list">
+                @foreach (var n in _items)
+                {
+                    <li>
+                        <div>
+                            <span class="tag">@n.Tag</span>
+                            <strong>@n.Title</strong>
+                            @if (!n.IsPublished)
+                            {
+                                <span class="muted">(rascunho)</span>
+                            }
+                            <div class="muted small">@n.PublishedAt.ToString("yyyy-MM-dd")</div>
+                        </div>
+                        <div class="row-actions">
+                            <button class="btn small" @onclick="() => Edit(n)">Editar</button>
+                            <button class="btn small danger" @onclick="() => DeleteAsync(n)">Eliminar</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+@code {
+    private List<NewsEntity> _items = new();
+    private NewsEntity _form = CreateForm();
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _items = await db.News.OrderByDescending(n => n.PublishedAt).ToListAsync();
+    }
+
+    private static NewsEntity CreateForm() => new() { PublishedAt = DateTime.UtcNow, IsPublished = true };
+
+    private void NewForm() => _form = CreateForm();
+
+    private void Edit(NewsEntity n) => _form = new NewsEntity
+    {
+        Id = n.Id, Tag = n.Tag, Title = n.Title, Summary = n.Summary,
+        PublishedAt = n.PublishedAt, IsPublished = n.IsPublished
+    };
+
+    private async Task SaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_form.Title)) return;
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        if (_form.Id == 0)
+            db.News.Add(_form);
+        else
+            db.News.Update(_form);
+        await db.SaveChangesAsync();
+
+        NewForm();
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync(NewsEntity n)
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        db.News.Remove(n);
+        await db.SaveChangesAsync();
+        if (_form.Id == n.Id) NewForm();
+        await LoadAsync();
+    }
+}

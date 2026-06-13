@@ -1,0 +1,7 @@
+// Copia este ficheiro para "appsettings.local.json" (ignorado pelo git) e
+// preenche os valores. É lido em runtime; as variáveis de ambiente, quando
+// definidas (Docker/produção), têm prioridade sobre este ficheiro.
+{
+  "CF_API_KEY": "a-tua-key-do-curseforge",
+  "ADMIN_PASSWORD": "uma-senha-de-admin"
+}

@@ -1,7 +1,8 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
         x:Class="TCMine_Launcher.Views.SplashWindow"
-        Width="380" Height="230"
+        Width="600" Height="300"
         CanResize="False"
         WindowStartupLocation="CenterScreen"
         WindowDecorations="None"
@@ -10,13 +11,13 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Border CornerRadius="16" ClipToBounds="True" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1">
-        <Border.Background>
+    <views:WindowChrome>
+        <views:WindowChrome.Background>
             <RadialGradientBrush Center="50%,0%" GradientOrigin="50%,0%" RadiusX="80%" RadiusY="80%">
                 <GradientStop Color="#161018" Offset="0" />
                 <GradientStop Color="#0B0B14" Offset="1" />
             </RadialGradientBrush>
-        </Border.Background>
+        </views:WindowChrome.Background>
 
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14">
             <Image Source="{StaticResource AppLogo}" Width="64" Height="64" HorizontalAlignment="Center" />
@@ -28,5 +29,5 @@
                 <TextBlock Text="A iniciar..." Classes="muted" VerticalAlignment="Center" />
             </StackPanel>
         </StackPanel>
-    </Border>
+    </views:WindowChrome>
 </Window>

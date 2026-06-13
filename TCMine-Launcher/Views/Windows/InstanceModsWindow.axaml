@@ -4,22 +4,21 @@
         xmlns:vm="using:TCMine_Launcher.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="680"
+        mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="680"
         x:Class="TCMine_Launcher.Views.InstanceModsWindow"
         x:DataType="vm:InstanceModsPageViewModel"
         Title="Gerir instância"
         Icon="/Assets/icon.ico"
-        Width="800" Height="700"
-        MinWidth="640" MinHeight="520"
+        Width="700" Height="680"
         WindowStartupLocation="CenterOwner"
         WindowDecorations="None"
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Border Background="{StaticResource BgWindow}" CornerRadius="12" ClipToBounds="True">
+    <views:WindowChrome>
         <Grid RowDefinitions="45,*">
             <views:TitleBar Grid.Row="0" Title="Gerir instância" ShowMinimize="False" />
-            <views:InstanceModsPageView Grid.Row="1" />
+            <views:InstanceModsPageView Margin="20" Grid.Row="1" />
         </Grid>
-    </Border>
+    </views:WindowChrome>
 </Window>

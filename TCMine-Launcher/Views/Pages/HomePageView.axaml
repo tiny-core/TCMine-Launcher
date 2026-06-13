@@ -3,6 +3,7 @@
              xmlns:vm="using:TCMine_Launcher.ViewModels"
              xmlns:bh="using:TCMine_Launcher.Behaviors"
              xmlns:conv="using:TCMine_Launcher.Converters"
+             xmlns:ctl="using:TCMine_Launcher.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
@@ -178,28 +179,7 @@
                                 <ItemsControl ItemsSource="{Binding Servers}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="vm:ServerStatusItem">
-                                            <StackPanel Spacing="4" Margin="12,9">
-                                                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                                                    <TextBlock Grid.Column="0" Text="{Binding Name}"
-                                                               FontSize="12.5"
-                                                               Foreground="{StaticResource TextPrimary}"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               VerticalAlignment="Center" />
-                                                    <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                                                Spacing="6" VerticalAlignment="Center">
-                                                        <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                                                                 Fill="{Binding StatusColor, Converter={StaticResource StringToBrush}}" />
-                                                        <TextBlock Text="{Binding StatusText}" FontSize="11"
-                                                                   Foreground="{StaticResource TextSecondary}"
-                                                                   VerticalAlignment="Center" />
-                                                    </StackPanel>
-                                                </Grid>
-                                                <TextBlock Text="{Binding Motd}"
-                                                           FontSize="10.5" Foreground="{StaticResource TextDim}"
-                                                           TextWrapping="Wrap"
-                                                           MaxLines="2" TextTrimming="CharacterEllipsis"
-                                                           IsVisible="{Binding Motd, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                                            </StackPanel>
+                                            <ctl:ServerStatusRow />
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>

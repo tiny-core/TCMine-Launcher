@@ -1,0 +1,161 @@
+@page "/admin/releases"
+@layout AdminLayout
+@rendermode InteractiveServer
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject IConfiguration Config
+@inject IWebHostEnvironment Env
+
+<h1>Releases do launcher</h1>
+<p class="muted">
+    Carrega aqui os artefactos do <code>vpk pack</code> (Setup.exe, *-full.nupkg,
+    *-delta.nupkg, releases.win.json). São servidos em <code>/updates</code> e o
+    launcher (Velopack) atualiza-se a partir daí.
+</p>
+
+<div class="grid-2">
+    <section class="panel">
+        <h2>Nova release</h2>
+        <label class="field-label">VERSÃO</label>
+        <input class="input" @bind="_version" placeholder="1.1.0" />
+        <label class="field-label">NOTAS (changelog)</label>
+        <textarea class="input" rows="3" @bind="_notes"></textarea>
+        <label class="field-label">ARTEFACTOS</label>
+        <InputFile OnChange="OnFilesSelected" multiple />
+        @if (_selected.Count > 0)
+        {
+            <ul class="files">
+                @foreach (var f in _selected)
+                {
+                    <li>@f.Name <span class="muted small">(@(f.Size / 1024) KB)</span></li>
+                }
+            </ul>
+        }
+        @if (_message is not null)
+        {
+            <p class="@(_isError ? "error" : "ok")">@_message</p>
+        }
+        <div class="actions">
+            <button class="btn primary" @onclick="PublishAsync" disabled="@_busy">
+                @(_busy ? "A publicar…" : "Publicar")
+            </button>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Histórico (@_items.Count)</h2>
+        @if (_items.Count == 0)
+        {
+            <p class="muted">Ainda não há releases.</p>
+        }
+        else
+        {
+            <ul class="list">
+                @foreach (var r in _items)
+                {
+                    <li>
+                        <div>
+                            <strong>v@(r.Version)</strong>
+                            <span class="muted small">@r.Channel · @r.PublishedAt.ToString("yyyy-MM-dd HH:mm")</span>
+                            @if (!string.IsNullOrWhiteSpace(r.Notes))
+                            {
+                                <div class="muted small">@r.Notes</div>
+                            }
+                        </div>
+                        <div class="row-actions">
+                            <button class="btn small danger" @onclick="() => DeleteAsync(r)">Remover do histórico</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>
+
+@code {
+    private List<ReleaseEntity> _items = new();
+    private readonly List<IBrowserFile> _selected = new();
+    private string _version = string.Empty;
+    private string _notes = string.Empty;
+    private bool _busy;
+    private bool _isError;
+    private string? _message;
+
+    private string UpdatesDir => Config["UPDATES_DIR"]
+                                 ?? Path.Combine(Env.ContentRootPath, "updates");
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _items = await db.Releases.OrderByDescending(r => r.PublishedAt).ToListAsync();
+    }
+
+    private void OnFilesSelected(InputFileChangeEventArgs e)
+    {
+        _selected.Clear();
+        _selected.AddRange(e.GetMultipleFiles(maximumFileCount: 50));
+    }
+
+    private async Task PublishAsync()
+    {
+        _message = null;
+        if (string.IsNullOrWhiteSpace(_version) || _selected.Count == 0)
+        {
+            _isError = true;
+            _message = "Indica a versão e seleciona pelo menos um ficheiro.";
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            Directory.CreateDirectory(UpdatesDir);
+            var names = new List<string>();
+            foreach (var file in _selected)
+            {
+                var safe = Path.GetFileName(file.Name);
+                var dest = Path.Combine(UpdatesDir, safe);
+                await using var input = file.OpenReadStream(maxAllowedSize: 1_000_000_000);
+                await using var output = File.Create(dest);
+                await input.CopyToAsync(output);
+                names.Add(safe);
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+            db.Releases.Add(new ReleaseEntity
+            {
+                Version = _version.Trim(),
+                Notes = _notes.Trim(),
+                Channel = "win",
+                PublishedAt = DateTime.UtcNow,
+                Files = string.Join('\n', names)
+            });
+            await db.SaveChangesAsync();
+
+            _selected.Clear();
+            _version = string.Empty;
+            _notes = string.Empty;
+            _isError = false;
+            _message = $"Release publicada ({names.Count} ficheiro(s)).";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _message = "Falha: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private async Task DeleteAsync(ReleaseEntity r)
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        db.Releases.Remove(r);
+        await db.SaveChangesAsync();
+        await LoadAsync();
+    }
+}

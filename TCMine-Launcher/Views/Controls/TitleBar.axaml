@@ -5,8 +5,7 @@
              mc:Ignorable="d" d:DesignWidth="600"
              x:Class="TCMine_Launcher.Views.TitleBar"
              x:Name="Root"
-             x:CompileBindings="False"
-             Height="45">
+             x:CompileBindings="False">
 
     <!-- Barra de título reutilizável (janela sem chrome nativo). Resolve a
          janela-pai via TopLevel — arrastar, minimizar e fechar. -->

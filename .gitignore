@@ -47,6 +47,11 @@ appsettings.*.local.json
 .env
 .env.*
 
+# ------ Base de dados local (SQLite do servidor) ------
+*.db
+*.db-shm
+*.db-wal
+
 # ------ Lixo do SO ------
 .DS_Store
 Thumbs.db

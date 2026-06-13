@@ -1,0 +1,391 @@
+@page "/admin/modpacks/{Id}"
+@layout AdminLayout
+@rendermode InteractiveServer
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject CurseForgeService Cf
+@inject NavigationManager Nav
+
+@if (_m is null)
+{
+    <p class="muted">A carregar…</p>
+}
+else
+{
+    <h1>@_m.Name</h1>
+    <p class="muted">Modpack <code>@_m.Id</code> · servido em <code>/modpacks/@_m.Id</code></p>
+
+    <section class="panel">
+        <h2>Detalhes</h2>
+        <label class="field-label">NOME</label>
+        <input class="input" @bind="_m.Name" />
+        <div class="row">
+            <div class="grow">
+                <label class="field-label">VERSÃO</label>
+                <input class="input" @bind="_m.Version" placeholder="1.0.0" />
+            </div>
+            <div class="grow">
+                <label class="field-label">MINECRAFT</label>
+                <input class="input" @bind="_m.Minecraft" placeholder="1.21.1" />
+            </div>
+            <div class="grow">
+                <label class="field-label">NEOFORGE</label>
+                <input class="input" @bind="_m.Neoforge" placeholder="21.1.172" />
+            </div>
+        </div>
+        <label class="field-label">DESCRIÇÃO</label>
+        <textarea class="input" rows="2" @bind="_m.Description"></textarea>
+        <label class="check">
+            <input type="checkbox" @bind="_m.IsPublished" /> Publicado
+        </label>
+    </section>
+
+    @if (Cf.IsConfigured)
+    {
+        <section class="panel">
+            <h2>Importar do CurseForge</h2>
+            <p class="muted small">
+                Substitui o <strong>nome, versões, descrição e a lista de mods</strong> deste
+                modpack pelos do CurseForge. Os servidores configurados são mantidos.
+            </p>
+
+            <div class="row">
+                <input class="input" @bind="_packQuery" @bind:event="oninput"
+                       placeholder="Nome do modpack…" @onkeydown="OnPackSearchKey" />
+                <button class="btn" @onclick="SearchPacks" disabled="@_packBusy">Procurar</button>
+            </div>
+
+            @if (_packError is not null)
+            {
+                <p class="error">@_packError</p>
+            }
+            @if (_importDone)
+            {
+                <p class="ok">Importado — revê os mods e clica em Guardar.</p>
+            }
+
+            @if (_pendingImport is not null)
+            {
+                <div class="warn-box">
+                    <strong>Substituir a configuração atual?</strong>
+                    <p class="muted small">
+                        Importar “@_pendingImport.Name” vai <strong>apagar os mods e versões</strong>
+                        já configurados neste modpack. Esta ação só fica gravada quando clicares em Guardar.
+                    </p>
+                    <div class="actions">
+                        <button class="btn danger" @onclick="ConfirmImport" disabled="@_packBusy">
+                            @(_packBusy ? "A importar…" : "Sim, substituir")
+                        </button>
+                        <button class="btn ghost" @onclick="() => _pendingImport = null">Cancelar</button>
+                    </div>
+                </div>
+            }
+            else if (_packResults.Count > 0)
+            {
+                <ul class="list cf-results">
+                    @foreach (var r in _packResults)
+                    {
+                        <li>
+                            <div class="cf-mod">
+                                @if (!string.IsNullOrEmpty(r.LogoUrl))
+                                {
+                                    <img src="@r.LogoUrl" class="cf-logo" alt="" />
+                                }
+                                <div>
+                                    <strong>@r.Name</strong>
+                                    <div class="muted small">@r.Summary</div>
+                                </div>
+                            </div>
+                            <button class="btn small" @onclick="() => _pendingImport = r">Importar</button>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Mods (@_m.Mods.Count)</h2>
+            <button class="btn small" @onclick="AddMod">+ Mod manual</button>
+        </div>
+
+        <!-- Procurar no CurseForge: preenche ficheiro + URL automaticamente -->
+        @if (Cf.IsConfigured)
+        {
+            <div class="row">
+                <input class="input" @bind="_modQuery" @bind:event="oninput"
+                       placeholder="Procurar mod no CurseForge…" @onkeydown="OnModSearchKey" />
+                <button class="btn" @onclick="SearchMods" disabled="@_modBusy">Procurar</button>
+            </div>
+            @if (_modError is not null)
+            {
+                <p class="error">@_modError</p>
+            }
+            @if (_modResults.Count > 0)
+            {
+                <ul class="list cf-results">
+                    @foreach (var r in _modResults)
+                    {
+                        <li>
+                            <div class="cf-mod">
+                                @if (!string.IsNullOrEmpty(r.LogoUrl))
+                                {
+                                    <img src="@r.LogoUrl" class="cf-logo" alt="" />
+                                }
+                                <div>
+                                    <strong>@r.Name</strong>
+                                    <div class="muted small">@r.Summary</div>
+                                </div>
+                            </div>
+                            <button class="btn small" @onclick="() => AddFromCf(r)" disabled="@_modBusy">
+                                @(_addingId == r.Id ? "A adicionar…" : "Adicionar")
+                            </button>
+                        </li>
+                    }
+                </ul>
+            }
+        }
+
+        @foreach (var mod in _m.Mods)
+        {
+            <div class="row mod-row">
+                <input class="input" @bind="mod.Name" placeholder="Nome" />
+                <input class="input narrow" type="number" @bind="mod.CurseModId" placeholder="modId" />
+                <input class="input narrow" type="number" @bind="mod.FileId" placeholder="fileId" />
+                <input class="input" @bind="mod.FileName" placeholder="ficheiro.jar" />
+                <input class="input" @bind="mod.DownloadUrl" placeholder="https://…" />
+                <button class="btn small danger" @onclick="() => _m.Mods.Remove(mod)">✕</button>
+            </div>
+        }
+    </section>
+
+    <section class="panel">
+        <div class="panel-head">
+            <h2>Servidores (@_m.Servers.Count)</h2>
+            <button class="btn small" @onclick="AddServer">+ Servidor</button>
+        </div>
+        @foreach (var srv in _m.Servers)
+        {
+            <div class="row mod-row">
+                <input class="input" @bind="srv.Name" placeholder="Nome" />
+                <input class="input" @bind="srv.Address" placeholder="endereço.servidor.net" />
+                <input class="input narrow" type="number" @bind="srv.Port" placeholder="25565" />
+                <button class="btn small danger" @onclick="() => _m.Servers.Remove(srv)">✕</button>
+            </div>
+        }
+    </section>
+
+    <div class="actions sticky">
+        <button class="btn primary" @onclick="SaveAsync">Guardar</button>
+        <button class="btn ghost" @onclick="Back">Voltar</button>
+        @if (_saved)
+        {
+            <span class="ok">Guardado ✓</span>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string Id { get; set; } = string.Empty;
+
+    private ModpackEntity? _m;
+    private bool _saved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _m = await db.Modpacks
+            .Include(m => m.Mods)
+            .Include(m => m.Servers)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == Id);
+    }
+
+    // Pesquisa de mods (CurseForge)
+    private string _modQuery = string.Empty;
+    private List<CfMod> _modResults = new();
+    private bool _modBusy;
+    private long _addingId;
+    private string? _modError;
+
+    // Importação de modpack (CurseForge) — substitui a configuração atual
+    private string _packQuery = string.Empty;
+    private List<CfMod> _packResults = new();
+    private bool _packBusy;
+    private CfMod? _pendingImport;
+    private string? _packError;
+    private bool _importDone;
+
+    private async Task OnPackSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SearchPacks();
+    }
+
+    private async Task SearchPacks()
+    {
+        _packError = null;
+        _importDone = false;
+        _packBusy = true;
+        try
+        {
+            _packResults = await Cf.SearchModpacksAsync(_packQuery);
+        }
+        catch (Exception ex)
+        {
+            _packError = "Falha na pesquisa: " + ex.Message;
+        }
+        finally
+        {
+            _packBusy = false;
+        }
+    }
+
+    private async Task ConfirmImport()
+    {
+        if (_m is null || _pendingImport is null) return;
+
+        _packBusy = true;
+        _packError = null;
+        try
+        {
+            var imported = await Cf.ImportModpackAsync(_pendingImport.Id);
+            if (imported is null)
+            {
+                _packError = "Não foi possível importar este modpack.";
+                return;
+            }
+
+            // Substitui metadados + mods; mantém os servidores configurados.
+            _m.Name = imported.Name;
+            _m.Version = imported.Version;
+            _m.Minecraft = imported.Minecraft;
+            _m.Neoforge = imported.Neoforge;
+            _m.Description = _pendingImport.Summary ?? string.Empty;
+            _m.Mods = imported.Mods.Select(x => new ModEntryEntity
+            {
+                CurseModId = x.ModId, FileId = x.FileId, Name = x.Name,
+                FileName = x.FileName, DownloadUrl = x.DownloadUrl
+            }).ToList();
+
+            _pendingImport = null;
+            _packResults.Clear();
+            _importDone = true;
+        }
+        catch (Exception ex)
+        {
+            _packError = "Falha na importação: " + ex.Message;
+        }
+        finally
+        {
+            _packBusy = false;
+        }
+    }
+
+    private void Back() => Nav.NavigateTo("/admin/modpacks");
+
+    private void AddMod() => _m?.Mods.Add(new ModEntryEntity());
+
+    private async Task OnModSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SearchMods();
+    }
+
+    private async Task SearchMods()
+    {
+        _modError = null;
+        _modBusy = true;
+        try
+        {
+            var version = string.IsNullOrWhiteSpace(_m?.Minecraft) ? null : _m!.Minecraft;
+            _modResults = await Cf.SearchModsAsync(_modQuery, version);
+        }
+        catch (Exception ex)
+        {
+            _modError = "Falha na pesquisa: " + ex.Message;
+        }
+        finally
+        {
+            _modBusy = false;
+        }
+    }
+
+    private async Task AddFromCf(CfMod mod)
+    {
+        if (_m is null) return;
+
+        _modError = null;
+        _modBusy = true;
+        _addingId = mod.Id;
+        try
+        {
+            var version = string.IsNullOrWhiteSpace(_m.Minecraft) ? null : _m.Minecraft;
+
+            // Tenta o ficheiro mais recente para a versão MC + NeoForge; cai para o
+            // mais recente sem filtro se não houver correspondência exata.
+            var files = await Cf.GetModFilesAsync(mod.Id, version, CurseForgeService.LoaderNeoForge);
+            if (files.Count == 0)
+                files = await Cf.GetModFilesAsync(mod.Id, null, null);
+
+            var file = files.FirstOrDefault();
+            if (file is null)
+            {
+                _modError = $"Sem ficheiros para \"{mod.Name}\".";
+                return;
+            }
+
+            _m.Mods.Add(new ModEntryEntity
+            {
+                CurseModId = mod.Id,
+                FileId = file.Id,
+                Name = mod.Name,
+                FileName = file.FileName,
+                DownloadUrl = CurseForgeService.ResolveDownloadUrl(file) ?? string.Empty
+            });
+        }
+        catch (Exception ex)
+        {
+            _modError = "Falha ao adicionar: " + ex.Message;
+        }
+        finally
+        {
+            _modBusy = false;
+            _addingId = 0;
+        }
+    }
+    private void AddServer() => _m?.Servers.Add(new ServerEntryEntity { Port = 25565 });
+
+    private async Task SaveAsync()
+    {
+        if (_m is null) return;
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var tracked = await db.Modpacks
+            .Include(m => m.Mods)
+            .Include(m => m.Servers)
+            .FirstOrDefaultAsync(m => m.Id == Id);
+        if (tracked is null) return;
+
+        tracked.Name = _m.Name;
+        tracked.Version = _m.Version;
+        tracked.Minecraft = _m.Minecraft;
+        tracked.Neoforge = _m.Neoforge;
+        tracked.Description = _m.Description;
+        tracked.IsPublished = _m.IsPublished;
+
+        // Reconcilia as listas (substitui tudo pelo estado do formulário).
+        db.Mods.RemoveRange(tracked.Mods);
+        db.Servers.RemoveRange(tracked.Servers);
+        tracked.Mods = _m.Mods.Select(x => new ModEntryEntity
+        {
+            CurseModId = x.CurseModId, FileId = x.FileId, Name = x.Name,
+            FileName = x.FileName, DownloadUrl = x.DownloadUrl
+        }).ToList();
+        tracked.Servers = _m.Servers.Select(x => new ServerEntryEntity
+        {
+            Name = x.Name, Address = x.Address, Port = x.Port
+        }).ToList();
+
+        await db.SaveChangesAsync();
+        _saved = true;
+    }
+}

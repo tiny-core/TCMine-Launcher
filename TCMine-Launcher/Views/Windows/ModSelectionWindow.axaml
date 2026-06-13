@@ -4,21 +4,20 @@
         xmlns:vm="using:TCMine_Launcher.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="600"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="750"
         x:Class="TCMine_Launcher.Views.ModSelectionWindow"
         x:DataType="vm:ModSelectionViewModel"
         Title="Gerir mods"
         Icon="/Assets/icon.ico"
-        Width="600" Height="640"
-        MinWidth="460" MinHeight="420"
+        Width="600" Height="750"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
         WindowDecorations="None"
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Border Background="{StaticResource BgWindow}" CornerRadius="12" ClipToBounds="True">
-        <Grid RowDefinitions="45,*">
+    <views:WindowChrome>
+        <Grid RowDefinitions="Auto,*">
             <views:TitleBar Grid.Row="0" Title="Gerir mods" ShowMinimize="False" />
 
             <Grid Grid.Row="1" Margin="22" RowDefinitions="Auto,*,Auto">
@@ -37,5 +36,5 @@
                 </Button>
             </Grid>
         </Grid>
-    </Border>
+    </views:WindowChrome>
 </Window>

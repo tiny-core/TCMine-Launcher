@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:ctl="using:TCMine_Launcher.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
@@ -35,28 +36,14 @@
                                  Foreground="{StaticResource TextPrimary}" />
 
                         <Grid ColumnDefinitions="*,16,*" Margin="0,16,0,0">
-                            <StackPanel Grid.Column="0">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Grid.Column="0" Classes="section-label" Text="VERSÃO MINECRAFT" />
-                                    <Ellipse Grid.Column="1" Classes="spinner" Width="12" Height="12"
-                                             Margin="0,0,4,6"
-                                             IsVisible="{Binding IsLoadingMinecraft}" />
-                                </Grid>
-                                <ComboBox Classes="version-select"
-                                          ItemsSource="{Binding MinecraftVersions}"
-                                          SelectedItem="{Binding SelectedMinecraftVersion}" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Grid.Column="0" Classes="section-label" Text="NEOFORGE" />
-                                    <Ellipse Grid.Column="1" Classes="spinner" Width="12" Height="12"
-                                             Margin="0,0,4,6"
-                                             IsVisible="{Binding IsLoadingNeoForge}" />
-                                </Grid>
-                                <ComboBox Classes="version-select"
-                                          ItemsSource="{Binding NeoForgeVersions}"
-                                          SelectedItem="{Binding SelectedNeoForgeVersion}" />
-                            </StackPanel>
+                            <ctl:VersionSelector Grid.Column="0" Label="VERSÃO MINECRAFT"
+                                                 ItemsSource="{Binding MinecraftVersions}"
+                                                 SelectedItem="{Binding SelectedMinecraftVersion}"
+                                                 IsLoading="{Binding IsLoadingMinecraft}" />
+                            <ctl:VersionSelector Grid.Column="2" Label="NEOFORGE"
+                                                 ItemsSource="{Binding NeoForgeVersions}"
+                                                 SelectedItem="{Binding SelectedNeoForgeVersion}"
+                                                 IsLoading="{Binding IsLoadingNeoForge}" />
                         </Grid>
 
                         <TextBlock Classes="muted" FontSize="11" Margin="2,10,0,0"

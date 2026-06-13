@@ -1,0 +1,24 @@
+@page "/admin/login"
+
+<div class="login-wrap">
+    <form class="login-card" method="post" action="/auth/login">
+        <div class="brand big">TCMine <span>Admin</span></div>
+        <p class="muted">Introduz a senha de administração.</p>
+
+        @if (HasError)
+        {
+            <p class="error">Senha incorreta.</p>
+        }
+
+        <input class="input" type="password" name="password" placeholder="Senha" autofocus/>
+        <button class="btn primary" type="submit">Entrar</button>
+    </form>
+</div>
+
+@code {
+
+    [SupplyParameterFromQuery(Name = "error")]
+    private string? Error { get; set; }
+
+    private bool HasError => !string.IsNullOrEmpty(Error);
+}

@@ -1,0 +1,252 @@
+@page "/admin/modpacks"
+@layout AdminLayout
+@rendermode InteractiveServer
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject CurseForgeService Cf
+@inject NavigationManager Nav
+
+<h1>Modpacks</h1>
+<p class="muted">Geridos aqui e servidos em <code>/modpacks</code>.</p>
+
+<div class="grid-2">
+    <section class="panel">
+        <h2>Importar do CurseForge</h2>
+        <p class="muted small">Pesquisa um modpack; os mods são resolvidos automaticamente.</p>
+
+        @if (!Cf.IsConfigured)
+        {
+            <p class="error">CF_API_KEY não configurada — pesquisa indisponível.</p>
+        }
+        else
+        {
+            <div class="row">
+                <input class="input" @bind="_cfQuery" @bind:event="oninput"
+                       placeholder="Nome do modpack…" @onkeydown="OnSearchKey" />
+                <button class="btn" @onclick="SearchCf" disabled="@_cfBusy">Procurar</button>
+            </div>
+
+            @if (_cfBusy)
+            {
+                <p class="muted small">A procurar…</p>
+            }
+            @if (_importError is not null)
+            {
+                <p class="error">@_importError</p>
+            }
+
+            <ul class="list cf-results">
+                @foreach (var m in _cfResults)
+                {
+                    <li>
+                        <div class="cf-mod">
+                            @if (!string.IsNullOrEmpty(m.LogoUrl))
+                            {
+                                <img src="@m.LogoUrl" class="cf-logo" alt="" />
+                            }
+                            <div>
+                                <strong>@m.Name</strong>
+                                <div class="muted small">@m.Summary</div>
+                            </div>
+                        </div>
+                        <button class="btn small" @onclick="() => ImportCf(m)" disabled="@_cfBusy">
+                            @(_importingId == m.Id ? "A importar…" : "Importar")
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="panel">
+        <h2>Novo modpack (manual)</h2>
+        <label class="field-label">ID (slug)</label>
+        <input class="input" @bind="_newId" placeholder="ex.: tcmine-official" />
+        <label class="field-label">NOME</label>
+        <input class="input" @bind="_newName" />
+        @if (_error is not null)
+        {
+            <p class="error">@_error</p>
+        }
+        <div class="actions">
+            <button class="btn primary" @onclick="CreateAsync">Criar</button>
+        </div>
+    </section>
+</div>
+
+<section class="panel">
+    <h2>Existentes (@_items.Count)</h2>
+    @if (_items.Count == 0)
+    {
+        <p class="muted">Ainda não há modpacks.</p>
+    }
+    else
+    {
+        <ul class="list">
+            @foreach (var m in _items)
+            {
+                <li>
+                    <div>
+                        <strong>@m.Name</strong>
+                        <span class="muted">@m.Id</span>
+                        @if (!m.IsPublished)
+                        {
+                            <span class="muted">(rascunho)</span>
+                        }
+                        <div class="muted small">v@(m.Version) · MC @m.Minecraft · @m.Mods.Count mod(s) · @m.Servers.Count servidor(es)</div>
+                    </div>
+                    <div class="row-actions">
+                        <button class="btn small" @onclick="() => Edit(m)">Editar</button>
+                        <button class="btn small danger" @onclick="() => DeleteAsync(m)">Eliminar</button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@code {
+    private List<ModpackEntity> _items = new();
+    private string _newId = string.Empty;
+    private string _newName = string.Empty;
+    private string? _error;
+
+    // Importação CurseForge
+    private string _cfQuery = string.Empty;
+    private List<CfMod> _cfResults = new();
+    private bool _cfBusy;
+    private long _importingId;
+    private string? _importError;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private void Edit(ModpackEntity m) => Nav.NavigateTo($"/admin/modpacks/{m.Id}");
+
+    private async Task LoadAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        _items = await db.Modpacks
+            .Include(m => m.Mods)
+            .Include(m => m.Servers)
+            .OrderBy(m => m.Name)
+            .ToListAsync();
+    }
+
+    private async Task OnSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SearchCf();
+    }
+
+    private async Task SearchCf()
+    {
+        _importError = null;
+        _cfBusy = true;
+        try
+        {
+            _cfResults = await Cf.SearchModpacksAsync(_cfQuery);
+        }
+        catch (Exception ex)
+        {
+            _importError = "Falha na pesquisa: " + ex.Message;
+        }
+        finally
+        {
+            _cfBusy = false;
+        }
+    }
+
+    private async Task ImportCf(CfMod m)
+    {
+        _importError = null;
+        _cfBusy = true;
+        _importingId = m.Id;
+        try
+        {
+            var imported = await Cf.ImportModpackAsync(m.Id);
+            if (imported is null)
+            {
+                _importError = "Não foi possível importar este modpack.";
+                return;
+            }
+
+            await using var db = await DbFactory.CreateDbContextAsync();
+            var slug = await UniqueSlugAsync(db, imported.Name);
+            db.Modpacks.Add(new ModpackEntity
+            {
+                Id = slug,
+                Name = imported.Name,
+                Version = imported.Version,
+                Minecraft = imported.Minecraft,
+                Neoforge = imported.Neoforge,
+                Description = m.Summary ?? string.Empty,
+                IsPublished = false, // entra como rascunho para revisão
+                Mods = imported.Mods.Select(x => new ModEntryEntity
+                {
+                    CurseModId = x.ModId, FileId = x.FileId, Name = x.Name,
+                    FileName = x.FileName, DownloadUrl = x.DownloadUrl
+                }).ToList()
+            });
+            await db.SaveChangesAsync();
+            Nav.NavigateTo($"/admin/modpacks/{slug}");
+        }
+        catch (Exception ex)
+        {
+            _importError = "Falha na importação: " + ex.Message;
+        }
+        finally
+        {
+            _cfBusy = false;
+            _importingId = 0;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        _error = null;
+        var id = _newId.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(_newName))
+        {
+            _error = "Preenche o id e o nome.";
+            return;
+        }
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        if (await db.Modpacks.AnyAsync(m => m.Id == id))
+        {
+            _error = "Já existe um modpack com esse id.";
+            return;
+        }
+
+        db.Modpacks.Add(new ModpackEntity { Id = id, Name = _newName.Trim(), IsPublished = true });
+        await db.SaveChangesAsync();
+        Nav.NavigateTo($"/admin/modpacks/{id}");
+    }
+
+    private async Task DeleteAsync(ModpackEntity m)
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        db.Modpacks.Remove(m);
+        await db.SaveChangesAsync();
+        await LoadAsync();
+    }
+
+    private static async Task<string> UniqueSlugAsync(AppDbContext db, string name)
+    {
+        var baseSlug = Slugify(name);
+        var slug = baseSlug;
+        var n = 2;
+        while (await db.Modpacks.AnyAsync(m => m.Id == slug))
+            slug = $"{baseSlug}-{n++}";
+        return slug;
+    }
+
+    private static string Slugify(string s)
+    {
+        var chars = s.Trim().ToLowerInvariant()
+            .Select(c => char.IsLetterOrDigit(c) ? c : '-')
+            .ToArray();
+        var slug = new string(chars);
+        while (slug.Contains("--")) slug = slug.Replace("--", "-");
+        slug = slug.Trim('-');
+        return string.IsNullOrEmpty(slug) ? "modpack" : slug;
+    }
+}
