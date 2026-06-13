@@ -27,7 +27,21 @@ public partial class MainWindow : Window
         // DataContext é o único "ponto de ligação" entre View e ViewModel.
         // A View nunca acede a métodos ou propriedades do ViewModel directamente
         // (só via bindings no AXAML).
-        DataContext = new MainWindowViewModel();
+        var vm = new MainWindowViewModel();
+
+        // Abrir uma janela secundária é responsabilidade da camada View; o ViewModel
+        // apenas pede (sem referenciar tipos de janela).
+        vm.OpenModsWindowRequested = OpenInstanceModsWindow;
+
+        DataContext = vm;
+    }
+
+    private void OpenInstanceModsWindow(InstanceModsPageViewModel modsViewModel)
+    {
+        var window = new InstanceModsWindow { DataContext = modsViewModel };
+        // Ao fechar, atualiza a lista de instâncias (nome/versões podem ter mudado).
+        window.Closed += (_, _) => (DataContext as MainWindowViewModel)?.RefreshInstancesDisplay();
+        _ = window.ShowDialog(this);
     }
 
     // ── Lógica de janela OS (único código legítimo aqui) ─────────

@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
              xmlns:m="using:TCMine_Launcher.Models"
+             xmlns:conv="using:TCMine_Launcher.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
@@ -39,7 +40,14 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="m:MinecraftInstance">
-                        <Border Classes="modpack-card" Width="304" Margin="0,0,18,18" Padding="22">
+                        <Border Classes="modpack-card" Width="304" Margin="0,0,18,18" Padding="22"
+                                BorderThickness="1.5">
+                            <Border.BorderBrush>
+                                <MultiBinding Converter="{x:Static conv:ActiveBorderConverter.Instance}">
+                                    <Binding Path="Id" />
+                                    <Binding Path="DataContext.ActiveInstanceId" ElementName="PageRoot" />
+                                </MultiBinding>
+                            </Border.BorderBrush>
                             <StackPanel Spacing="0">
 
                                 <!-- Cabeçalho do cartão: ícone + nome + tag -->
@@ -85,7 +93,7 @@
                                                 IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
                                                 Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).ManageModsCommand}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="Mods" FontSize="12" />
+                                            <TextBlock Text="Gerir" FontSize="12" />
                                         </Button>
                                         <Button Grid.Column="2" Classes="outline-btn" Height="34"
                                                 HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,6 +46,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public ModInstaller ModInstaller { get; }
     public ManifestService Manifest { get; }
     public NewsService NewsFeed { get; }
+    private readonly UpdateService _updates;
+
+    // ── Auto-update do launcher ──────────────────────────────────
+    [ObservableProperty] private bool _updateAvailable;
+    [ObservableProperty] private string _latestVersion = string.Empty;
+    private string? _updateUrl;
 
     /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
     public ObservableCollection<MinecraftInstance> Instances { get; } = new();
@@ -105,6 +112,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ModInstaller = new ModInstaller(CurseForge);
         Manifest = new ManifestService(() => _game.ServerUrl);
         NewsFeed = new NewsService(() => _game.ServerUrl);
+        _updates = new UpdateService(() => _game.ServerUrl);
 
         LoadInstances();
 
@@ -120,6 +128,49 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // Tenta entrar automaticamente se houver uma sessão em cache.
         _ = TrySilentLoginAsync();
+
+        // Verifica se há uma versão mais recente do launcher.
+        _ = CheckForUpdateAsync();
+    }
+
+    /// <summary>Versão atual do launcher (assembly).</summary>
+    public string CurrentVersion =>
+        System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+
+    private async Task CheckForUpdateAsync()
+    {
+        try
+        {
+            var latest = await _updates.GetLatestAsync();
+            if (latest is null || string.IsNullOrWhiteSpace(latest.Version)) return;
+
+            if (Version.TryParse(latest.Version, out var remote)
+                && Version.TryParse(CurrentVersion, out var current)
+                && remote > current)
+            {
+                LatestVersion = latest.Version;
+                _updateUrl = latest.Url;
+                UpdateAvailable = true;
+            }
+        }
+        catch
+        {
+            // Sem rede / sem servidor — ignora.
+        }
+    }
+
+    [RelayCommand]
+    private void OpenUpdate()
+    {
+        if (string.IsNullOrWhiteSpace(_updateUrl)) return;
+        try
+        {
+            Process.Start(new ProcessStartInfo(_updateUrl) { UseShellExecute = true });
+        }
+        catch
+        {
+            // ignora falhas a abrir o browser
+        }
     }
 
     // ── Páginas (criadas uma vez, reutilizadas) ──────────────────
@@ -328,11 +379,14 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentPage = CreateInstancePage;
     }
 
-    /// <summary>Abre a página de gestão de mods de uma instância.</summary>
-    public void ShowInstanceMods(MinecraftInstance instance)
+    /// <summary>Pedido para abrir a janela de gestão de instância (ligado pela View).</summary>
+    public Action<InstanceModsPageViewModel>? OpenModsWindowRequested { get; set; }
+
+    /// <summary>Abre a gestão de mods/instância numa janela separada.</summary>
+    public void ShowInstanceMods(MinecraftInstance instance, bool isNew = false)
     {
-        InstanceModsPage.Begin(instance);
-        CurrentPage = InstanceModsPage;
+        InstanceModsPage.Begin(instance, isNew);
+        OpenModsWindowRequested?.Invoke(InstanceModsPage);
     }
 
     /// <summary>Volta das páginas de criação/mods para a lista de instâncias.</summary>
@@ -364,12 +418,32 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    ///     Cria uma cópia editável (Manual) de uma instância — útil para
-    ///     personalizar a partir de um modpack oficial sem o alterar.
+    ///     Recarrega as instâncias do disco (após edição numa janela) para os cartões
+    ///     refletirem nome/versões atualizados. Preserva a instância ativa pelo Id.
+    /// </summary>
+    public void RefreshInstancesDisplay()
+    {
+        var activeId = ActiveInstance?.Id;
+        Instances.Clear();
+        foreach (var instance in _instances.LoadAll())
+            Instances.Add(instance);
+
+        ActiveInstance = Instances.FirstOrDefault(i => i.Id == activeId)
+                         ?? Instances.FirstOrDefault();
+
+        Home.NotifyInstanceChanged();
+        InstancesPage.NotifyActiveChanged();
+    }
+
+    /// <summary>
+    ///     Cria uma cópia editável (Manual) de uma instância como <b>rascunho</b> em
+    ///     memória — NÃO grava em disco nem aparece na lista até ser concluída
+    ///     (<see cref="CommitInstance" />). Útil para personalizar a partir de um
+    ///     modpack oficial sem o alterar.
     /// </summary>
     public MinecraftInstance DuplicateInstance(MinecraftInstance source)
     {
-        var copy = new MinecraftInstance
+        return new MinecraftInstance
         {
             Name = source.Name + " (cópia)",
             MinecraftVersion = source.MinecraftVersion,
@@ -386,11 +460,22 @@ public partial class MainWindowViewModel : ViewModelBase
                 .Select(s => new ServerEntry { Name = s.Name, Address = s.Address, Port = s.Port })
                 .ToList()
         };
+    }
 
-        _instances.Save(copy);
-        Instances.Insert(0, copy);
-        SelectInstance(copy);
-        return copy;
+    /// <summary>
+    ///     Persiste uma instância editada na janela. Para um rascunho novo
+    ///     (<paramref name="isNew" />), grava-o, adiciona-o à lista e seleciona-o.
+    /// </summary>
+    public void CommitInstance(MinecraftInstance instance, bool isNew)
+    {
+        _instances.Save(instance);
+
+        if (isNew)
+        {
+            if (!Instances.Contains(instance))
+                Instances.Insert(0, instance);
+            SelectInstance(instance);
+        }
     }
 
     /// <summary>Elimina uma instância (e a sua pasta). Garante que sobra sempre uma ativa.</summary>

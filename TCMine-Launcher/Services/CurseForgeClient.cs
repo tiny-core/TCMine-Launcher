@@ -74,17 +74,32 @@ public class CurseForgeClient
         return resp?.Data?.FirstOrDefault(f => !string.IsNullOrEmpty(f.DownloadUrl));
     }
 
-    /// <summary>Descarrega um ficheiro do CDN para o caminho indicado.</summary>
-    public async Task DownloadAsync(string downloadUrl, string destPath, CancellationToken ct = default)
+    /// <summary>
+    ///     Descarrega um ficheiro do CDN para o caminho indicado, reportando a
+    ///     fração concluída (0..1) quando o tamanho é conhecido.
+    /// </summary>
+    public async Task DownloadAsync(
+        string downloadUrl, string destPath,
+        IProgress<double>? fileProgress = null, CancellationToken ct = default)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
 
         using var response = await _http.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, ct);
         response.EnsureSuccessStatusCode();
 
+        var total = response.Content.Headers.ContentLength ?? -1;
         await using var source = await response.Content.ReadAsStreamAsync(ct);
         await using var file = File.Create(destPath);
-        await source.CopyToAsync(file, ct);
+
+        var buffer = new byte[81920];
+        long received = 0;
+        int read;
+        while ((read = await source.ReadAsync(buffer, ct)) > 0)
+        {
+            await file.WriteAsync(buffer.AsMemory(0, read), ct);
+            received += read;
+            if (total > 0) fileProgress?.Report((double)received / total);
+        }
     }
 
     private void EnsureConfigured()

@@ -120,60 +120,93 @@
         <!--  DIREITA: painel de perfil + configuração             -->
         <!-- ════════════════════════════════════════════════════ -->
         <Border Grid.Column="2" Classes="panel">
-            <StackPanel Spacing="0">
+            <DockPanel>
 
-                <!-- Avatar realocado para aqui -->
-                <Border Classes="avatar" Width="72" Height="72">
-                    <TextBlock Text="{Binding AvatarInitials}" FontSize="24" />
-                </Border>
-                <TextBlock Text="{Binding PlayerName}"
-                           FontSize="16" FontWeight="Bold" Foreground="#E8E8F0"
-                           HorizontalAlignment="Center" Margin="0,12,0,0" />
-                <TextBlock Text="{Binding AccountLabel}"
-                           Classes="muted" FontSize="11"
-                           HorizontalAlignment="Center" Margin="0,3,0,0" />
-
-                <Grid ColumnDefinitions="*,Auto" Margin="2,8,2,0">
-                    <TextBlock Grid.Column="0" Classes="section-label" Text="IDENTIFICADOR" Margin="0" />
-                    <TextBlock Grid.Column="1" Text="{Binding PlayerUuidShort}"
-                               FontFamily="Cascadia Code,Consolas,monospace"
-                               FontSize="11" Foreground="#94A3B8" />
-                </Grid>
-
-                <!-- Estado do servidor (instâncias com servidor) -->
-                <StackPanel IsVisible="{Binding HasServer}" Margin="0,16,0,0" Spacing="6">
-                    <TextBlock Classes="section-label" Text="SERVIDOR" Margin="0" />
-                    <Border Background="#0A0A16" BorderBrush="#1A1A28" BorderThickness="1"
-                            CornerRadius="8" Padding="12,10">
-                        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                            <TextBlock Grid.Column="0" Text="{Binding ServerName}"
-                                       FontSize="12.5" Foreground="#E8E8F0"
-                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
-                                        VerticalAlignment="Center">
-                                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
-                                         Fill="{Binding ServerStatusColor, Converter={StaticResource StringToBrush}}" />
-                                <TextBlock Text="{Binding ServerStatusText}" FontSize="11.5"
-                                           Foreground="#94A3B8" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+                <!-- Memória — sempre fixada no fundo do painel -->
+                <StackPanel DockPanel.Dock="Bottom" Spacing="0">
+                    <Border Height="1" Background="#16161F" Margin="0,16" />
+                    <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA"
+                                   Margin="0" VerticalAlignment="Center" />
+                        <NumericUpDown Grid.Column="1"
+                                       Value="{Binding RamMbDecimal}"
+                                       Minimum="1024" Maximum="16384" Increment="1024"
+                                       FormatString="0 'MB'"
+                                       ShowButtonSpinner="False"
+                                       Width="104" Height="30"
+                                       Background="#0A0A16" BorderBrush="#1A1A28"
+                                       Foreground="#F97316"
+                                       IsEnabled="{Binding !IsLaunching}" />
+                    </Grid>
+                    <Slider Minimum="1024" Maximum="16384"
+                            TickFrequency="1024" IsSnapToTickEnabled="True"
+                            Value="{Binding InstanceRam}"
+                            IsEnabled="{Binding !IsLaunching}"
+                            Margin="0,6,0,0" />
                 </StackPanel>
 
-                <Border Height="1" Background="#16161F" Margin="0,20" />
+                <!-- Conteúdo (topo) -->
+                <StackPanel Spacing="0">
 
-                <!-- Slider de memória da instância -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA" Margin="0" />
-                    <TextBlock Grid.Column="1" Text="{Binding RamDisplay}"
-                               FontSize="11" FontWeight="SemiBold" Foreground="#F97316" />
-                </Grid>
-                <Slider Minimum="1024" Maximum="16384"
-                        TickFrequency="512" IsSnapToTickEnabled="True"
-                        Value="{Binding InstanceRam}"
-                        IsEnabled="{Binding !IsLaunching}"
-                        Margin="0,2,0,0" />
-            </StackPanel>
+                    <Border Classes="avatar" Width="72" Height="72">
+                        <TextBlock Text="{Binding AvatarInitials}" FontSize="24" />
+                    </Border>
+                    <TextBlock Text="{Binding PlayerName}"
+                               FontSize="16" FontWeight="Bold" Foreground="#E8E8F0"
+                               HorizontalAlignment="Center" Margin="0,12,0,0" />
+                    <TextBlock Text="{Binding AccountLabel}"
+                               Classes="muted" FontSize="11"
+                               HorizontalAlignment="Center" Margin="0,3,0,0" />
+
+                    <Border Height="1" Background="#16161F" Margin="0,20" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="section-label" Text="IDENTIFICADOR" Margin="0" />
+                        <Border Background="#0A0A16" BorderBrush="#1A1A28" BorderThickness="1"
+                                CornerRadius="8" Padding="12,10">
+                            <TextBlock Text="{Binding PlayerUuid}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontFamily="Cascadia Code,Consolas,monospace"
+                                       FontSize="11" Foreground="#94A3B8" />
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Servidores do modpack (lista com scroll) -->
+                    <StackPanel IsVisible="{Binding HasServer}" Margin="0,16,0,0" Spacing="6">
+                        <TextBlock Classes="section-label" Text="SERVIDORES" Margin="0" />
+                        <Border Background="#0A0A16" BorderBrush="#1A1A28" BorderThickness="1"
+                                CornerRadius="8">
+                            <ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding Servers}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="vm:ServerStatusItem">
+                                            <StackPanel Spacing="4" Margin="12,9">
+                                                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                                               FontSize="12.5" Foreground="#E8E8F0"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                                                Spacing="6" VerticalAlignment="Center">
+                                                        <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                                                                 Fill="{Binding StatusColor, Converter={StaticResource StringToBrush}}" />
+                                                        <TextBlock Text="{Binding StatusText}" FontSize="11"
+                                                                   Foreground="#94A3B8" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Grid>
+                                                <TextBlock Text="{Binding Motd}"
+                                                           FontSize="10.5" Foreground="#6A6A8A" TextWrapping="Wrap"
+                                                           MaxLines="2" TextTrimming="CharacterEllipsis"
+                                                           IsVisible="{Binding Motd, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
         </Border>
     </Grid>
 </UserControl>

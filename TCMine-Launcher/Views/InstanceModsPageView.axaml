@@ -1,30 +1,126 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:m="using:TCMine_Launcher.Models"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
              x:Class="TCMine_Launcher.Views.InstanceModsPageView"
-             x:DataType="vm:InstanceModsPageViewModel">
+             x:DataType="vm:InstanceModsPageViewModel"
+             x:Name="PageRoot">
 
     <Grid Margin="26" RowDefinitions="Auto,*">
 
         <!-- Cabeçalho com voltar -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-            <Button Classes="ghost-btn" Command="{Binding BackCommand}" Padding="4">
-                <TextBlock Text="←" FontSize="20" Foreground="#94A3B8" />
-            </Button>
             <StackPanel>
-                <TextBlock Classes="page-title" Text="Gerir mods" />
-                <TextBlock Classes="muted" Text="{Binding InstanceName}" Margin="0,4,0,0" />
+                <TextBlock Classes="page-title" Text="Gerir instância" />
+                <TextBlock Classes="muted" Text="Nome, versões e mods" Margin="0,4,0,0" />
             </StackPanel>
         </StackPanel>
 
-        <!-- Componente de seleção de mods -->
         <ScrollViewer Grid.Row="1" Margin="0,20,0,0" HorizontalScrollBarVisibility="Disabled">
-            <Border Classes="panel" Width="600" HorizontalAlignment="Center">
-                <ContentControl Content="{Binding ModSelection}" />
-            </Border>
+            <StackPanel Spacing="18" Width="600" HorizontalAlignment="Center">
+
+                <!-- Nome + versões -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="0">
+                        <TextBlock Classes="section-label" Text="NOME" />
+                        <TextBox Text="{Binding Name}"
+                                 Background="#0A0A16" BorderBrush="#1A1A28"
+                                 CornerRadius="7" Foreground="#E8E8F0" Padding="11,8" />
+
+                        <Grid ColumnDefinitions="*,16,*" Margin="0,16,0,0">
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Classes="section-label" Text="VERSÃO MINECRAFT" />
+                                <ComboBox Classes="version-select"
+                                          ItemsSource="{Binding MinecraftVersions}"
+                                          SelectedItem="{Binding SelectedMinecraftVersion}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Classes="section-label" Text="NEOFORGE" />
+                                    <Ellipse Grid.Column="1" Classes="spinner" Width="12" Height="12"
+                                             Margin="0,0,4,6" IsVisible="{Binding IsLoadingNeoForge}" />
+                                </Grid>
+                                <ComboBox Classes="version-select"
+                                          ItemsSource="{Binding NeoForgeVersions}"
+                                          SelectedItem="{Binding SelectedNeoForgeVersion}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Classes="muted" FontSize="11" Margin="2,10,0,0"
+                                   Text="Mudar a versão exige reinstalar ao jogar a seguir." />
+                    </StackPanel>
+                </Border>
+
+                <!-- Servidores -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="section-label" Text="SERVIDORES" Margin="0" />
+
+                        <ItemsControl ItemsSource="{Binding Servers}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="m:ServerEntry">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,3"
+                                          Background="Transparent">
+                                        <StackPanel Grid.Column="0" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontSize="12.5" Foreground="#E8E8F0" />
+                                            <TextBlock Text="{Binding Ip}" FontSize="11" Foreground="#7A7A9A" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Classes="ghost-btn"
+                                                Command="{Binding #PageRoot.((vm:InstanceModsPageViewModel)DataContext).RemoveServerCommand}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="✕" FontSize="12" Foreground="#F87171" />
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="muted" FontSize="11" Text="Sem servidores."
+                                   IsVisible="{Binding !Servers.Count}" />
+
+                        <!-- Adicionar servidor -->
+                        <Grid ColumnDefinitions="*,8,1.4*,8,Auto,8,Auto" Margin="0,6,0,0">
+                            <TextBox Grid.Column="0" Text="{Binding NewServerName}"
+                                     PlaceholderText="Nome"
+                                     Background="#0A0A16" BorderBrush="#1A1A28"
+                                     CornerRadius="7" Foreground="#E8E8F0" Padding="9,7" />
+                            <TextBox Grid.Column="2" Text="{Binding NewServerAddress}"
+                                     PlaceholderText="endereço.servidor.net"
+                                     Background="#0A0A16" BorderBrush="#1A1A28"
+                                     CornerRadius="7" Foreground="#E8E8F0" Padding="9,7" />
+                            <TextBox Grid.Column="4" Text="{Binding NewServerPort}"
+                                     PlaceholderText="Porta" Width="64"
+                                     Background="#0A0A16" BorderBrush="#1A1A28"
+                                     CornerRadius="7" Foreground="#E8E8F0" Padding="9,7" />
+                            <Button Grid.Column="6" Classes="outline-btn" Height="36"
+                                    Command="{Binding AddServerCommand}">
+                                <TextBlock Text="Adicionar" FontSize="12" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mods -->
+                <Border Classes="panel">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="section-label" Text="MODS" Margin="0" />
+                        <ContentControl Content="{Binding ModSelection}" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+                    <Button Classes="ghost-btn" Command="{Binding CancelCommand}">
+                        <TextBlock Text="Cancelar" FontSize="13" />
+                    </Button>
+                    <Button Classes="play-btn" Height="40" Width="150"
+                            HorizontalContentAlignment="Center"
+                            Command="{Binding ConcludeCommand}">
+                        <TextBlock Text="Concluído" FontSize="13" FontWeight="Bold" />
+                    </Button>
+                </StackPanel>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </UserControl>

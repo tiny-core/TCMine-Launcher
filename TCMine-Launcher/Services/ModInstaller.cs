@@ -30,22 +30,35 @@ public class ModInstaller
         Directory.CreateDirectory(modsDir);
 
         var total = instance.Mods.Count;
-        var done = 0;
+        var completed = 0;
 
         foreach (var mod in instance.Mods)
         {
             ct.ThrowIfCancellationRequested();
-            done++;
 
             var dest = Path.Combine(modsDir, mod.FileName);
             if (File.Exists(dest) || string.IsNullOrEmpty(mod.DownloadUrl))
+            {
+                completed++;
                 continue;
+            }
 
-            var pct = (double)done / total * 100;
+            // Progresso global = (mods concluídos + fração do atual) / total.
+            var index = completed;
+            var fileProgress = new Progress<double>(fraction =>
+            {
+                var overall = (index + fraction) / total * 100;
+                progress.Report(new LaunchProgress(
+                    LaunchState.DownloadingAssets, overall,
+                    $"A descarregar mod ({index + 1}/{total}): {mod.Name}"));
+            });
+
             progress.Report(new LaunchProgress(
-                LaunchState.DownloadingAssets, pct, $"A descarregar mod: {mod.Name}"));
+                LaunchState.DownloadingAssets, (double)index / total * 100,
+                $"A descarregar mod ({index + 1}/{total}): {mod.Name}"));
 
-            await _client.DownloadAsync(mod.DownloadUrl!, dest, ct);
+            await _client.DownloadAsync(mod.DownloadUrl!, dest, fileProgress, ct);
+            completed++;
         }
     }
 }

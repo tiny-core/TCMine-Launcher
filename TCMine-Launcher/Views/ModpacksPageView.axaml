@@ -42,7 +42,7 @@
                 </ItemsControl.ItemsPanel>
 
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="m:ModpackManifest">
+                    <DataTemplate DataType="vm:ModpackListItem">
                         <Border Classes="modpack-card" Width="290" Margin="0,0,18,18">
                             <StackPanel>
                                 <!-- Banner -->
@@ -53,10 +53,18 @@
                                             <GradientStop Color="#2A1206" Offset="1" />
                                         </LinearGradientBrush>
                                     </Border.Background>
-                                    <Border Classes="tag" VerticalAlignment="Top"
-                                            HorizontalAlignment="Left" Margin="12">
-                                        <TextBlock Text="OFICIAL" />
-                                    </Border>
+                                    <Grid Margin="12">
+                                        <Border Classes="tag" VerticalAlignment="Top"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="OFICIAL" />
+                                        </Border>
+                                        <Border CornerRadius="5" Padding="7,3" Background="#3A2A06"
+                                                VerticalAlignment="Top" HorizontalAlignment="Right"
+                                                IsVisible="{Binding UpdateAvailable}">
+                                            <TextBlock Text="ATUALIZAÇÃO" FontSize="9.5" FontWeight="Bold"
+                                                       Foreground="#FBBF24" />
+                                        </Border>
+                                    </Grid>
                                 </Border>
 
                                 <StackPanel Margin="18,15,18,18" Spacing="0">
@@ -88,7 +96,7 @@
                                             Margin="0,14,0,0"
                                             Command="{Binding #PageRoot.((vm:ModpacksPageViewModel)DataContext).InstallCommand}"
                                             CommandParameter="{Binding}">
-                                        <TextBlock Text="Instalar" FontSize="12.5" FontWeight="Bold" />
+                                        <TextBlock Text="{Binding InstallLabel}" FontSize="12.5" FontWeight="Bold" />
                                     </Button>
                                 </StackPanel>
                             </StackPanel>

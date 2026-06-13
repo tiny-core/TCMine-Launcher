@@ -20,26 +20,21 @@ public partial class HomePageViewModel : ViewModelBase
 {
     private readonly GameProfile _game;
     private readonly GameLauncher _launcher = new();
+    private readonly MinecraftServerPinger _pinger = new();
     private readonly PlayerProfile _player;
-    private readonly ServerStatusService _serverStatus = new();
     private readonly MainWindowViewModel _shell;
 
-    private CancellationTokenSource? _launchCts;
-    private bool _suppressRam;
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))] [NotifyPropertyChangedFor(nameof(RamMbDecimal))]
+    private double _instanceRam = 4096;
 
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleLabel))]
     private bool _isLogExpanded;
 
+    private CancellationTokenSource? _launchCts;
+
     [ObservableProperty] private double _launchProgress;
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
-
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))]
-    private double _instanceRam = 4096;
-
-    // ── Estado do servidor (instâncias com servidor) ─────────────
-    [ObservableProperty] private string _serverName = string.Empty;
-    [ObservableProperty] private string _serverStatusText = string.Empty;
-    [ObservableProperty] private string _serverStatusColor = "#6B7280";
+    private bool _suppressRam;
 
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
@@ -50,8 +45,22 @@ public partial class HomePageViewModel : ViewModelBase
         _instanceRam = Active?.RamOverrideMb ?? _game.AllocatedRamMb;
         LaunchStatus = DefaultStatus();
 
+        RebuildServers();
         _ = ServerStatusLoopAsync();
     }
+
+    /// <summary>RAM em MB para o campo numérico editável (NumericUpDown usa decimal).</summary>
+    public decimal? RamMbDecimal
+    {
+        get => (decimal)InstanceRam;
+        set
+        {
+            if (value is decimal mb) InstanceRam = (double)mb;
+        }
+    }
+
+    /// <summary>Estado (online/offline + jogadores + MOTD) de cada servidor do modpack.</summary>
+    public ObservableCollection<ServerStatusItem> Servers { get; } = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
@@ -63,9 +72,11 @@ public partial class HomePageViewModel : ViewModelBase
     // ── Hero (derivado da instância ativa) ───────────────────────
     public string InstanceName => Active?.Name ?? "—";
     public string InstanceTag => Active?.SourceLabel ?? "";
+
     public string InstanceSubtitle => Active is { IsOfficial: true }
         ? "Modpack oficial do servidor TCMine"
         : "Instância personalizada";
+
     public string InstanceSummary => Active?.VersionSummary ?? "";
 
     // ── Estado de instalação / execução ──────────────────────────
@@ -73,13 +84,17 @@ public partial class HomePageViewModel : ViewModelBase
 
     public string PlayLabel => _shell.IsGameRunning
         ? "EM EXECUÇÃO"
-        : IsInstalled ? "JOGAR" : "INSTALAR";
+        : IsInstalled
+            ? "JOGAR"
+            : "INSTALAR";
 
     public string PlayIcon => _shell.IsGameRunning ? "■" : IsInstalled ? "▶" : "⬇";
 
     public string StateLabel => _shell.IsGameRunning
         ? "Em execução"
-        : IsInstalled ? "Instalada" : "Por instalar";
+        : IsInstalled
+            ? "Instalada"
+            : "Por instalar";
 
     /// <summary>Cor do indicador de estado (verde/âmbar/azul/roxo).</summary>
     public string StatusColor =>
@@ -89,7 +104,7 @@ public partial class HomePageViewModel : ViewModelBase
         "#F59E0B";
 
     // ── Servidor da instância ────────────────────────────────────
-    public bool HasServer => Active is { Servers.Count: > 0 };
+    public bool HasServer => Servers.Count > 0;
 
     public ObservableCollection<string> LaunchLog { get; } = new();
     public string LogToggleLabel => IsLogExpanded ? "▾ Ocultar registo" : "▸ Mostrar registo";
@@ -101,7 +116,13 @@ public partial class HomePageViewModel : ViewModelBase
 
     public string PlayerUuidShort => string.IsNullOrEmpty(_player.Uuid)
         ? "—"
-        : _player.Uuid.Length > 12 ? _player.Uuid[..12] + "…" : _player.Uuid;
+        : _player.Uuid.Length > 12
+            ? _player.Uuid[..12] + "…"
+            : _player.Uuid;
+
+    public string PlayerUuid => string.IsNullOrEmpty(_player.Uuid)
+        ? "_"
+        : _player.Uuid;
 
     public string RamDisplay => $"{(int)InstanceRam} MB";
 
@@ -123,12 +144,12 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(InstanceTag));
         OnPropertyChanged(nameof(InstanceSubtitle));
         OnPropertyChanged(nameof(InstanceSummary));
-        OnPropertyChanged(nameof(HasServer));
         RefreshInstallState();
 
         if (!IsLaunching) LaunchStatus = DefaultStatus();
 
-        _ = RefreshServerStatusAsync();
+        RebuildServers();
+        _ = RefreshServersAsync();
     }
 
     public void NotifyGameRunningChanged()
@@ -155,38 +176,47 @@ public partial class HomePageViewModel : ViewModelBase
         return IsInstalled ? "Pronto para jogar" : "Instância por instalar";
     }
 
-    // ── Ping periódico do servidor ───────────────────────────────
+    // ── Ping periódico dos servidores ────────────────────────────
+    private void RebuildServers()
+    {
+        Servers.Clear();
+        if (Active is not null)
+            foreach (var server in Active.Servers)
+                Servers.Add(new ServerStatusItem(server));
+        OnPropertyChanged(nameof(HasServer));
+    }
+
     private async Task ServerStatusLoopAsync()
     {
         while (true)
         {
-            await RefreshServerStatusAsync();
+            await RefreshServersAsync();
             await Task.Delay(TimeSpan.FromSeconds(30));
         }
     }
 
-    private async Task RefreshServerStatusAsync()
+    private async Task RefreshServersAsync()
     {
-        var server = Active?.Servers.FirstOrDefault();
-        if (server is null)
+        foreach (var item in Servers.ToList())
         {
-            ServerName = string.Empty;
-            ServerStatusText = string.Empty;
-            ServerStatusColor = "#6B7280";
-            return;
+            var status = await _pinger.PingAsync(item.Server.Address, item.Server.Port);
+
+            // O item pode ter saído da lista durante o ping (troca de instância).
+            if (!Servers.Contains(item)) continue;
+
+            if (status.Online)
+            {
+                item.StatusText = $"Online · {status.PlayersOnline}/{status.PlayersMax}";
+                item.StatusColor = "#22C55E";
+                item.Motd = status.Motd;
+            }
+            else
+            {
+                item.StatusText = "Offline";
+                item.StatusColor = "#EF4444";
+                item.Motd = string.Empty;
+            }
         }
-
-        ServerName = server.Name;
-        ServerStatusText = "A verificar...";
-        ServerStatusColor = "#6B7280";
-
-        var online = await _serverStatus.IsOnlineAsync(server.Address, server.Port);
-
-        // A instância pode ter mudado durante o ping.
-        if (Active?.Servers.FirstOrDefault() != server) return;
-
-        ServerStatusText = online ? "Online" : "Offline";
-        ServerStatusColor = online ? "#22C55E" : "#EF4444";
     }
 
     partial void OnInstanceRamChanged(double value)
@@ -196,7 +226,10 @@ public partial class HomePageViewModel : ViewModelBase
         _shell.SaveInstance(Active);
     }
 
-    private bool CanPlay() => !IsLaunching && !_shell.IsGameRunning;
+    private bool CanPlay()
+    {
+        return !IsLaunching && !_shell.IsGameRunning;
+    }
 
     [RelayCommand(CanExecute = nameof(CanPlay))]
     private async Task PlayAsync()
@@ -294,8 +327,14 @@ public partial class HomePageViewModel : ViewModelBase
         LaunchStatus = DefaultStatus();
         RefreshInstallState();
 
-        try { process.Dispose(); }
-        catch { /* noop */ }
+        try
+        {
+            process.Dispose();
+        }
+        catch
+        {
+            /* noop */
+        }
     }
 
     [RelayCommand]
@@ -303,4 +342,21 @@ public partial class HomePageViewModel : ViewModelBase
     {
         _launchCts?.Cancel();
     }
+}
+
+/// <summary>Estado de um servidor do modpack (para a lista na tela principal).</summary>
+public partial class ServerStatusItem : ViewModelBase
+{
+    [ObservableProperty] private string _motd = string.Empty;
+    [ObservableProperty] private string _statusColor = "#6B7280";
+    [ObservableProperty] private string _statusText = "A verificar...";
+
+    public ServerStatusItem(ServerEntry server)
+    {
+        Server = server;
+        Name = server.Name;
+    }
+
+    public ServerEntry Server { get; }
+    public string Name { get; }
 }

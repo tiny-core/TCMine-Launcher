@@ -1,0 +1,18 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:vm="using:TCMine_Launcher.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="780" d:DesignHeight="680"
+        x:Class="TCMine_Launcher.Views.InstanceModsWindow"
+        x:DataType="vm:InstanceModsPageViewModel"
+        Title="Gerir instância"
+        Icon="/Assets/icon.ico"
+        Width="800" Height="700"
+        MinWidth="640" MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        Background="#0B0B14">
+
+    <views:InstanceModsPageView />
+</Window>

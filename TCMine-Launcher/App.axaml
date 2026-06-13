@@ -286,6 +286,21 @@
             <Setter Property="Background" Value="#15151F" />
             <Setter Property="BorderBrush" Value="#F97316" />
         </Style>
+        <!-- Pílula de atualização (barra de estado) -->
+        <Style Selector="Button.update-pill">
+            <Setter Property="Background" Value="#2A1206" />
+            <Setter Property="BorderBrush" Value="#F97316" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="11" />
+            <Setter Property="Foreground" Value="#F97316" />
+            <Setter Property="Padding" Value="10,2" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.update-pill:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#3A1A08" />
+        </Style>
+
         <!-- Estado "selecionado" do botão de mod (Remover) -->
         <Style Selector="Button.mod-toggle.selected">
             <Setter Property="Foreground" Value="#F87171" />

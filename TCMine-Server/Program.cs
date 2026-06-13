@@ -162,4 +162,13 @@ app.MapGet("/news", () =>
         ? Results.Content(File.ReadAllText(newsFile), "application/json")
         : Results.Json(Array.Empty<object>()));
 
+// ── Versão mais recente do launcher (auto-update) ────────────────────────────
+var launcherFile = app.Configuration["LAUNCHER_FILE"]
+                   ?? Path.Combine(app.Environment.ContentRootPath, "launcher.json");
+
+app.MapGet("/launcher/latest", () =>
+    File.Exists(launcherFile)
+        ? Results.Content(File.ReadAllText(launcherFile), "application/json")
+        : Results.NotFound());
+
 app.Run();

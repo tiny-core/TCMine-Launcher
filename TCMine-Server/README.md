@@ -63,6 +63,7 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
 | `MODPACKS_DIR` | não | Pasta dos manifestos de modpacks (default `./modpacks`). |
 | `NEWS_FILE` | não | Ficheiro JSON das novidades (default `./news.json`). |
+| `LAUNCHER_FILE` | não | Ficheiro JSON da versão do launcher (default `./launcher.json`). |
 
 ## Modpacks oficiais
 
@@ -86,6 +87,16 @@ lido pela aba **Novidades** do launcher:
 [
   { "tag": "MODPACK", "title": "...", "date": "07 jun 2026", "summary": "..." }
 ]
+```
+
+## Auto-update do launcher
+
+`launcher.json` (ou `LAUNCHER_FILE`) descreve a versão mais recente, servida em
+`GET /launcher/latest`. O launcher compara com a sua versão e, se for mais recente,
+mostra um aviso "Atualizar" que abre o `url`:
+
+```json
+{ "version": "1.1.0", "url": "https://tcmine.net/download", "notes": "..." }
 ```
 
 ## Deploy

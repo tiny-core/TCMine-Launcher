@@ -62,8 +62,9 @@ public partial class InstancesPageViewModel : ViewModelBase
     [RelayCommand]
     private void Duplicate(MinecraftInstance instance)
     {
-        // Cria uma cópia editável (útil para personalizar a partir de um modpack oficial).
-        _shell.DuplicateInstance(instance);
+        // Cria um rascunho da cópia e abre a janela; só grava ao concluir.
+        var copy = _shell.DuplicateInstance(instance);
+        _shell.ShowInstanceMods(copy, isNew: true);
     }
 
     [RelayCommand]

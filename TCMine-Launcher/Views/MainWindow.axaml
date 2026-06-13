@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1040" d:DesignHeight="640"
         x:Class="TCMine_Launcher.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/icon.ico"
         Title="TCMine Launcher"
         Width="1040" Height="640"
         MinWidth="1000" MinHeight="600"
@@ -163,7 +163,7 @@
                     Background="#070710"
                     BorderBrush="#141420"
                     BorderThickness="0,1,0,0">
-                <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
+                <Grid ColumnDefinitions="Auto,*,Auto,12,Auto" Margin="16,0">
                     <StackPanel Grid.Column="0"
                                 Orientation="Horizontal"
                                 Spacing="7"
@@ -176,7 +176,16 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <TextBlock Grid.Column="2"
+                    <!-- Aviso de atualização do launcher -->
+                    <Button Grid.Column="2" Classes="update-pill"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding UpdateAvailable}"
+                            Command="{Binding OpenUpdateCommand}">
+                        <TextBlock Text="{Binding LatestVersion, StringFormat='⬆ Atualizar para {0}'}"
+                                   FontSize="10.5" FontWeight="SemiBold" />
+                    </Button>
+
+                    <TextBlock Grid.Column="4"
                                Text="beta v1"
                                FontSize="11" Foreground="#2A2A40"
                                VerticalAlignment="Center" />
