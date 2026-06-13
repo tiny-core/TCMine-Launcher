@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CmlLib.Core.Auth;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using TCMine_Launcher.Models;
 using TCMine_Launcher.Services;
 
@@ -143,6 +144,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             LatestVersion = _updater.LatestVersion ?? string.Empty;
             UpdateAvailable = true;
+            Log.Information("Atualização disponível: {Version}", LatestVersion);
         }
     }
 
@@ -231,6 +233,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Warning(ex, "Falha no login Microsoft");
             var detail = Flatten(ex);
             LoginError = detail.Contains("403") || detail.Contains("Forbidden")
                 ? "Autenticaste com sucesso, mas a aplicação do Azure ainda não tem permissão " +
@@ -305,6 +308,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _player.Name = session.Username ?? "Player";
         _player.Uuid = session.UUID ?? string.Empty;
         _player.AccountType = type;
+        Log.Information("Sessão iniciada: {User} ({Uuid})", _player.Name, _player.Uuid);
     }
 
     private void EnterApp(string status)

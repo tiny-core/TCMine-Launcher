@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TCMine_Launcher.Views.SplashWindow"
+        Width="380" Height="230"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        WindowDecorations="None"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <Border CornerRadius="16" ClipToBounds="True" BorderBrush="#1A1A2A" BorderThickness="1">
+        <Border.Background>
+            <RadialGradientBrush Center="50%,0%" GradientOrigin="50%,0%" RadiusX="80%" RadiusY="80%">
+                <GradientStop Color="#161018" Offset="0" />
+                <GradientStop Color="#0B0B14" Offset="1" />
+            </RadialGradientBrush>
+        </Border.Background>
+
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14">
+            <TextBlock Text="⬡" FontSize="54" Foreground="#F97316" HorizontalAlignment="Center" />
+            <TextBlock Text="TCMine Launcher" FontSize="18" FontWeight="Bold"
+                       Foreground="#E8E8F0" HorizontalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center"
+                        Margin="0,6,0,0">
+                <Ellipse Classes="spinner" Width="16" Height="16" />
+                <TextBlock Text="A iniciar..." Classes="muted" VerticalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

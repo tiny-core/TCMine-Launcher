@@ -1,8 +1,10 @@
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using TCMine_Launcher.Services;
 using TCMine_Launcher.ViewModels;
 
 namespace TCMine_Launcher.Views;
@@ -39,6 +41,42 @@ public partial class MainWindow : Window
         vm.OpenFileRequested = OpenZipAsync;
 
         DataContext = vm;
+
+        RestoreWindowState();
+        Closing += (_, _) => SaveWindowState();
+    }
+
+    private void RestoreWindowState()
+    {
+        var saved = WindowStateStore.Load();
+        if (saved is null) return;
+
+        if (saved.Maximized)
+        {
+            WindowState = WindowState.Maximized;
+        }
+        else if (saved.HasPosition)
+        {
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Width = saved.Width;
+            Height = saved.Height;
+            Position = new PixelPoint(saved.X, saved.Y);
+        }
+    }
+
+    private void SaveWindowState()
+    {
+        var state = WindowStateStore.Load() ?? new LauncherWindowState();
+        state.Maximized = WindowState == WindowState.Maximized;
+        if (!state.Maximized)
+        {
+            state.Width = Width;
+            state.Height = Height;
+            state.X = Position.X;
+            state.Y = Position.Y;
+            state.HasPosition = true;
+        }
+        WindowStateStore.Save(state);
     }
 
     private static readonly FilePickerFileType ZipType = new("Instância TCMine (zip)")

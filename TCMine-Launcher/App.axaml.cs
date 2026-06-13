@@ -16,8 +16,19 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
             // O DataContext (e o handler de janelas) é criado no construtor da MainWindow.
-            desktop.MainWindow = new MainWindow();
+            var main = new MainWindow();
+            desktop.MainWindow = main;
+            main.Show();
+
+            // Splash por cima, fechado após um momento.
+            var splash = new SplashWindow();
+            splash.Show();
+            Avalonia.Threading.DispatcherTimer.RunOnce(
+                () => splash.Close(),
+                System.TimeSpan.FromMilliseconds(1200));
+        }
 
         base.OnFrameworkInitializationCompleted();
     }

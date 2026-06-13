@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Serilog;
 using TCMine_Launcher.Models;
 using TCMine_Launcher.Services;
 
@@ -273,6 +274,8 @@ public partial class HomePageViewModel : ViewModelBase
         LaunchLog.Clear();
         LaunchLog.Add($"Instância: {instance.Name} ({instance.VersionSummary})");
         _launchCts = new CancellationTokenSource();
+        Log.Information("A lançar instância {Name} ({Mc}/{Neo})",
+            instance.Name, instance.MinecraftVersion, instance.NeoForgeVersion);
 
         var progress = new Progress<LaunchProgress>(p =>
         {
@@ -326,6 +329,7 @@ public partial class HomePageViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            Log.Error(ex, "Falha no launch da instância {Name}", instance.Name);
             LaunchStatus = "Falha no launch";
             LaunchLog.Add("ERRO: " + ex.Message);
         }
@@ -357,6 +361,7 @@ public partial class HomePageViewModel : ViewModelBase
 
         if (exitCode != 0)
         {
+            Log.Warning("Minecraft terminou com erro (código {Code})", exitCode);
             LaunchStatus = "Minecraft terminou com erro";
             LaunchLog.Add($"⚠ Saída com código {exitCode}. Log: {logCapture.LogPath}");
             foreach (var line in logCapture.Tail()) LaunchLog.Add(line);
