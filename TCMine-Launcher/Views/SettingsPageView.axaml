@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:bh="using:TCMine_Launcher.Behaviors"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
@@ -21,8 +22,14 @@
                 <Border Classes="panel">
                     <Grid ColumnDefinitions="Auto,16,*,Auto">
                         <Border Grid.Column="0" Classes="avatar" Width="52" Height="52"
-                                VerticalAlignment="Center">
-                            <TextBlock Text="{Binding AvatarInitials}" FontSize="18" />
+                                VerticalAlignment="Center" ClipToBounds="True">
+                            <Panel>
+                                <TextBlock Text="{Binding AvatarInitials}" FontSize="18"
+                                           Foreground="White" FontWeight="Bold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Image bh:ImageLoader.SourceUrl="{Binding PlayerHeadUrl}"
+                                       Stretch="UniformToFill" />
+                            </Panel>
                         </Border>
                         <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
                             <TextBlock Text="{Binding PlayerName}"

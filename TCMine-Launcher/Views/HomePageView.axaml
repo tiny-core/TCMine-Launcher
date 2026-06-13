@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:bh="using:TCMine_Launcher.Behaviors"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
@@ -63,6 +64,10 @@
                             <TextBlock Text="{Binding LaunchProgress, StringFormat='{}{0:0}%'}"
                                        Foreground="#F97316" FontSize="13" FontWeight="Bold"
                                        HorizontalAlignment="Center" />
+                            <Button Classes="ghost-btn" Command="{Binding CancelLaunchCommand}"
+                                    HorizontalAlignment="Center" Margin="0,4,0,0">
+                                <TextBlock Text="Cancelar" FontSize="12.5" Foreground="#F87171" />
+                            </Button>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -148,8 +153,14 @@
                 <!-- Conteúdo (topo) -->
                 <StackPanel Spacing="0">
 
-                    <Border Classes="avatar" Width="72" Height="72">
-                        <TextBlock Text="{Binding AvatarInitials}" FontSize="24" />
+                    <Border Classes="avatar" Width="72" Height="72" ClipToBounds="True">
+                        <Panel>
+                            <TextBlock Text="{Binding AvatarInitials}" FontSize="24"
+                                       Foreground="White" FontWeight="Bold"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Image bh:ImageLoader.SourceUrl="{Binding PlayerHeadUrl}"
+                                   Stretch="UniformToFill" />
+                        </Panel>
                     </Border>
                     <TextBlock Text="{Binding PlayerName}"
                                FontSize="16" FontWeight="Bold" Foreground="#E8E8F0"

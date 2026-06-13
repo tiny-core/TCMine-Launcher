@@ -1,10 +1,11 @@
+using System.Collections.Concurrent;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using TCMine_Launcher.Services;
 
 namespace TCMine_Launcher.Behaviors;
 
@@ -16,7 +17,7 @@ namespace TCMine_Launcher.Behaviors;
 /// </summary>
 public static class ImageLoader
 {
-    private static readonly HttpClient Http = new();
+    private static readonly ConcurrentDictionary<string, Bitmap> Cache = new();
 
     public static readonly AttachedProperty<string?> SourceUrlProperty =
         AvaloniaProperty.RegisterAttached<Image, string?>("SourceUrl", typeof(ImageLoader));
@@ -38,11 +39,19 @@ public static class ImageLoader
         image.Source = null;
         if (string.IsNullOrWhiteSpace(url)) return;
 
+        // Cache: evita voltar a descarregar a mesma imagem (logos de mods, skins).
+        if (Cache.TryGetValue(url, out var cached))
+        {
+            image.Source = cached;
+            return;
+        }
+
         try
         {
-            var bytes = await Http.GetByteArrayAsync(url);
+            var bytes = await HttpClientProvider.Shared.GetByteArrayAsync(url);
             using var stream = new MemoryStream(bytes);
             var bitmap = new Bitmap(stream);
+            Cache[url] = bitmap;
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

@@ -32,6 +32,7 @@ public partial class MainWindow : Window
         // Abrir uma janela secundária é responsabilidade da camada View; o ViewModel
         // apenas pede (sem referenciar tipos de janela).
         vm.OpenModsWindowRequested = OpenInstanceModsWindow;
+        vm.ConfirmRequested = ShowConfirmAsync;
 
         DataContext = vm;
     }
@@ -42,6 +43,12 @@ public partial class MainWindow : Window
         // Ao fechar, atualiza a lista de instâncias (nome/versões podem ter mudado).
         window.Closed += (_, _) => (DataContext as MainWindowViewModel)?.RefreshInstancesDisplay();
         _ = window.ShowDialog(this);
+    }
+
+    private async System.Threading.Tasks.Task<bool> ShowConfirmAsync(string title, string message)
+    {
+        var dialog = new ConfirmDialog(title, message);
+        return await dialog.ShowDialog<bool>(this);
     }
 
     // ── Lógica de janela OS (único código legítimo aqui) ─────────

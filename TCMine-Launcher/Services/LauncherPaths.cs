@@ -29,6 +29,9 @@ public static class LauncherPaths
     /// <summary>Diretório <c>.minecraft</c> isolado de uma instância (mods, saves, config).</summary>
     public static string InstanceGameDir(string id) => Path.Combine(InstanceDir(id), "minecraft");
 
+    /// <summary>Ficheiro de log da última execução do jogo desta instância.</summary>
+    public static string InstanceLogFile(string id) => Path.Combine(InstanceDir(id), "logs", "latest.log");
+
     /// <summary>Garante que a raiz existe antes de escrever.</summary>
     public static void EnsureRoot()
     {

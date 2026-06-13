@@ -186,6 +186,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public string PlayerName => _player.Name;
     public string AvatarInitials => _player.ComputeInitials();
     public string AccountLabel => _player.AccountLabel;
+    public string? PlayerHeadUrl => _player.HeadUrl;
 
     // ── Realce da aba activa (bind via Classes.active) ───────────
     public bool IsHomeSelected => SelectedTab == AppTab.Home;
@@ -382,6 +383,13 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Pedido para abrir a janela de gestão de instância (ligado pela View).</summary>
     public Action<InstanceModsPageViewModel>? OpenModsWindowRequested { get; set; }
 
+    /// <summary>Pedido de confirmação (ligado pela View; abre um diálogo modal).</summary>
+    public Func<string, string, Task<bool>>? ConfirmRequested { get; set; }
+
+    /// <summary>Mostra um diálogo de confirmação. Sem handler, assume "sim".</summary>
+    public Task<bool> ConfirmAsync(string title, string message) =>
+        ConfirmRequested?.Invoke(title, message) ?? Task.FromResult(true);
+
     /// <summary>Abre a gestão de mods/instância numa janela separada.</summary>
     public void ShowInstanceMods(MinecraftInstance instance, bool isNew = false)
     {
@@ -555,6 +563,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlayerName));
         OnPropertyChanged(nameof(AvatarInitials));
         OnPropertyChanged(nameof(AccountLabel));
+        OnPropertyChanged(nameof(PlayerHeadUrl));
         Home.NotifyPlayerChanged();
         Settings.NotifyPlayerChanged();
     }

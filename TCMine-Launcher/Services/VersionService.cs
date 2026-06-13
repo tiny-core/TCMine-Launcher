@@ -14,7 +14,7 @@ namespace TCMine_Launcher.Services;
 /// </summary>
 public class VersionService
 {
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http = HttpClientProvider.Shared;
 
     /// <summary>Lista apenas as <b>releases</b> do Minecraft (exclui snapshots/betas).</summary>
     public async Task<List<string>> GetMinecraftReleasesAsync()

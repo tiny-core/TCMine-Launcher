@@ -18,7 +18,7 @@ public class NewsService
     };
 
     private readonly Func<string?> _baseUrlProvider;
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http = HttpClientProvider.Shared;
 
     public NewsService(Func<string?> baseUrlProvider)
     {

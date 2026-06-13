@@ -34,6 +34,7 @@ public partial class SettingsPageViewModel : ViewModelBase
     public string PlayerName => _player.Name;
     public string AvatarInitials => _player.ComputeInitials();
     public string AccountLabel => _player.AccountLabel;
+    public string? PlayerHeadUrl => _player.HeadUrl;
 
     public string RamDisplay => $"{(int)RamMb} MB";
 
@@ -42,6 +43,7 @@ public partial class SettingsPageViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlayerName));
         OnPropertyChanged(nameof(AvatarInitials));
         OnPropertyChanged(nameof(AccountLabel));
+        OnPropertyChanged(nameof(PlayerHeadUrl));
     }
 
     partial void OnRamMbChanged(double value)

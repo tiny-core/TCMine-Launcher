@@ -22,6 +22,10 @@ public class PlayerProfile
         _ => "Conta local · Offline"
     };
 
+    /// <summary>URL da cabeça da skin (mc-heads). Null em contas sem UUID.</summary>
+    public string? HeadUrl =>
+        string.IsNullOrEmpty(Uuid) ? null : $"https://mc-heads.net/avatar/{Uuid}/128";
+
     // ── Lógica de domínio pura (não é formatação de UI) ──────────
     /// <summary>Até 2 iniciais em maiúsculas para o avatar circular.</summary>
     public string ComputeInitials()

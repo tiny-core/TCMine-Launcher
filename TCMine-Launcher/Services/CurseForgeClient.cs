@@ -27,7 +27,7 @@ public class CurseForgeClient
     };
 
     private readonly Func<string?> _baseUrlProvider;
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http = HttpClientProvider.Shared;
 
     public CurseForgeClient(Func<string?> baseUrlProvider)
     {

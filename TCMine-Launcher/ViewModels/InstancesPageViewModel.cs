@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using TCMine_Launcher.Models;
 
@@ -68,10 +69,16 @@ public partial class InstancesPageViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void Delete(MinecraftInstance instance)
+    private async Task Delete(MinecraftInstance instance)
     {
         // Instâncias oficiais não podem ser eliminadas pela UI.
-        if (!instance.IsOfficial)
+        if (instance.IsOfficial) return;
+
+        var confirmed = await _shell.ConfirmAsync(
+            "Eliminar instância",
+            $"Eliminar \"{instance.Name}\"? Isto remove a pasta (mods, mundos) e é irreversível.");
+
+        if (confirmed)
             _shell.DeleteInstance(instance);
     }
 }

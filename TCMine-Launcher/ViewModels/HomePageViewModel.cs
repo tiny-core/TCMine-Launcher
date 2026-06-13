@@ -124,6 +124,9 @@ public partial class HomePageViewModel : ViewModelBase
         ? "_"
         : _player.Uuid;
 
+    /// <summary>URL da cabeça da skin (para o avatar).</summary>
+    public string? PlayerHeadUrl => _player.HeadUrl;
+
     public string RamDisplay => $"{(int)InstanceRam} MB";
 
     public void NotifyPlayerChanged()
@@ -132,6 +135,8 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(AvatarInitials));
         OnPropertyChanged(nameof(AccountLabel));
         OnPropertyChanged(nameof(PlayerUuidShort));
+        OnPropertyChanged(nameof(PlayerUuid));
+        OnPropertyChanged(nameof(PlayerHeadUrl));
     }
 
     public void NotifyInstanceChanged()
@@ -219,11 +224,26 @@ public partial class HomePageViewModel : ViewModelBase
         }
     }
 
+    private CancellationTokenSource? _ramSaveCts;
+
     partial void OnInstanceRamChanged(double value)
     {
         if (_suppressRam || Active is null) return;
         Active.RamOverrideMb = (int)value;
-        _shell.SaveInstance(Active);
+        DebounceSaveRam(Active); // evita gravar a cada "tick" do slider
+    }
+
+    private void DebounceSaveRam(MinecraftInstance instance)
+    {
+        _ramSaveCts?.Cancel();
+        _ramSaveCts = new CancellationTokenSource();
+        var ct = _ramSaveCts.Token;
+        _ = Task.Run(async () =>
+        {
+            try { await Task.Delay(600, ct); }
+            catch { return; }
+            if (!ct.IsCancellationRequested) _shell.SaveInstance(instance);
+        }, ct);
     }
 
     private bool CanPlay()
@@ -280,7 +300,15 @@ public partial class HomePageViewModel : ViewModelBase
 
             await _shell.ModInstaller.EnsureModsAsync(instance, progress, _launchCts.Token);
 
+            // Captura a saída do jogo para ficheiro (e deteção de crash).
+            var logCapture = new GameLogCapture(LauncherPaths.InstanceLogFile(instance.Id));
+            process.OutputDataReceived += (_, e) => logCapture.Append(e.Data);
+            process.ErrorDataReceived += (_, e) => logCapture.Append(e.Data);
+
             process.Start();
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
             instance.LastPlayedAt = DateTimeOffset.Now;
             _shell.SaveInstance(instance);
 
@@ -288,7 +316,7 @@ public partial class HomePageViewModel : ViewModelBase
             LaunchStatus = "Minecraft em execução";
             LaunchLog.Add("Minecraft iniciado.");
 
-            _ = MonitorGameAsync(process);
+            _ = MonitorGameAsync(process, logCapture);
         }
         catch (OperationCanceledException)
         {
@@ -311,11 +339,13 @@ public partial class HomePageViewModel : ViewModelBase
         }
     }
 
-    private async Task MonitorGameAsync(Process process)
+    private async Task MonitorGameAsync(Process process, GameLogCapture logCapture)
     {
+        var exitCode = 0;
         try
         {
             await process.WaitForExitAsync();
+            exitCode = process.ExitCode;
         }
         catch
         {
@@ -323,18 +353,25 @@ public partial class HomePageViewModel : ViewModelBase
         }
 
         _shell.IsGameRunning = false;
-        LaunchLog.Add("Minecraft fechado.");
-        LaunchStatus = DefaultStatus();
-        RefreshInstallState();
 
-        try
+        if (exitCode != 0)
         {
-            process.Dispose();
+            LaunchStatus = "Minecraft terminou com erro";
+            LaunchLog.Add($"⚠ Saída com código {exitCode}. Log: {logCapture.LogPath}");
+            foreach (var line in logCapture.Tail()) LaunchLog.Add(line);
+            IsLogExpanded = true;
         }
-        catch
+        else
         {
-            /* noop */
+            LaunchLog.Add("Minecraft fechado.");
+            LaunchStatus = DefaultStatus();
         }
+
+        RefreshInstallState();
+        logCapture.Dispose();
+
+        try { process.Dispose(); }
+        catch { /* noop */ }
     }
 
     [RelayCommand]

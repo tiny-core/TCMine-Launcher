@@ -93,6 +93,10 @@ public class GameLauncher
 
             var process = await launcher.InstallAndBuildProcessAsync(versionName, launchOption);
 
+            // Captura o stdout/stderr do jogo (log + deteção de crash).
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+
             progress.Report(new LaunchProgress(
                 LaunchState.Launching, 100, "A iniciar o Minecraft..."));
             return process;

@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:TCMine_Launcher.ViewModels"
         xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:bh="using:TCMine_Launcher.Behaviors"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1040" d:DesignHeight="640"
@@ -129,8 +130,14 @@
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Settings}"
                                         ToolTip.Tip="{Binding PlayerName}">
-                                    <Border Classes="avatar" Width="34" Height="34">
-                                        <TextBlock Text="{Binding AvatarInitials}" FontSize="13" />
+                                    <Border Classes="avatar" Width="34" Height="34" ClipToBounds="True">
+                                        <Panel>
+                                            <TextBlock Text="{Binding AvatarInitials}" FontSize="13"
+                                                       Foreground="White" FontWeight="Bold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <Image bh:ImageLoader.SourceUrl="{Binding PlayerHeadUrl}"
+                                                   Stretch="UniformToFill" />
+                                        </Panel>
                                     </Border>
                                 </Button>
 

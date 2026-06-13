@@ -17,7 +17,7 @@ public class UpdateService
     };
 
     private readonly Func<string?> _baseUrlProvider;
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http = HttpClientProvider.Shared;
 
     public UpdateService(Func<string?> baseUrlProvider)
     {
