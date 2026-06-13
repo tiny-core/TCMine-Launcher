@@ -37,6 +37,17 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors();
 
+// Feed de updates do launcher (Velopack): serve os ficheiros de release em /updates.
+var updatesDir = app.Configuration["UPDATES_DIR"]
+                 ?? Path.Combine(app.Environment.ContentRootPath, "updates");
+Directory.CreateDirectory(updatesDir);
+app.UseStaticFiles(new Microsoft.AspNetCore.Builder.StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(updatesDir),
+    RequestPath = "/updates",
+    ServeUnknownFileTypes = true // .nupkg / RELEASES
+});
+
 var apiKey = app.Configuration["CF_API_KEY"];
 var cacheMinutes = double.TryParse(app.Configuration["CF_CACHE_MINUTES"], out var m) ? m : 5;
 
@@ -161,14 +172,5 @@ app.MapGet("/news", () =>
     File.Exists(newsFile)
         ? Results.Content(File.ReadAllText(newsFile), "application/json")
         : Results.Json(Array.Empty<object>()));
-
-// ── Versão mais recente do launcher (auto-update) ────────────────────────────
-var launcherFile = app.Configuration["LAUNCHER_FILE"]
-                   ?? Path.Combine(app.Environment.ContentRootPath, "launcher.json");
-
-app.MapGet("/launcher/latest", () =>
-    File.Exists(launcherFile)
-        ? Results.Content(File.ReadAllText(launcherFile), "application/json")
-        : Results.NotFound());
 
 app.Run();

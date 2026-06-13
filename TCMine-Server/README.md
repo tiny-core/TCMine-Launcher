@@ -63,7 +63,7 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
 | `MODPACKS_DIR` | não | Pasta dos manifestos de modpacks (default `./modpacks`). |
 | `NEWS_FILE` | não | Ficheiro JSON das novidades (default `./news.json`). |
-| `LAUNCHER_FILE` | não | Ficheiro JSON da versão do launcher (default `./launcher.json`). |
+| `UPDATES_DIR` | não | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
 
 ## Modpacks oficiais
 
@@ -89,15 +89,12 @@ lido pela aba **Novidades** do launcher:
 ]
 ```
 
-## Auto-update do launcher
+## Auto-update do launcher (Velopack)
 
-`launcher.json` (ou `LAUNCHER_FILE`) descreve a versão mais recente, servida em
-`GET /launcher/latest`. O launcher compara com a sua versão e, se for mais recente,
-mostra um aviso "Atualizar" que abre o `url`:
-
-```json
-{ "version": "1.1.0", "url": "https://tcmine.net/download", "notes": "..." }
-```
+O servidor serve o feed de releases do launcher em **`/updates`** (pasta `UPDATES_DIR`).
+O launcher (Velopack) lê esse feed, descarrega e aplica a atualização sozinho.
+Ver o processo de gerar e publicar releases em
+[`../docs/release-process.md`](../docs/release-process.md).
 
 ## Deploy
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Avalonia;
+using Velopack;
 
 namespace TCMine_Launcher;
 
@@ -11,6 +12,9 @@ internal sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // Velopack: trata hooks de instalação/atualização. TEM de ser o primeiro a correr.
+        VelopackApp.Build().Run();
+
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }

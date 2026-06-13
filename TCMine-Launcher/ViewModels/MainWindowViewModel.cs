@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,12 +47,11 @@ public partial class MainWindowViewModel : ViewModelBase
     public ModInstaller ModInstaller { get; }
     public ManifestService Manifest { get; }
     public NewsService NewsFeed { get; }
-    private readonly UpdateService _updates;
+    private readonly AppUpdater _updater;
 
     // ── Auto-update do launcher ──────────────────────────────────
     [ObservableProperty] private bool _updateAvailable;
     [ObservableProperty] private string _latestVersion = string.Empty;
-    private string? _updateUrl;
 
     /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
     public ObservableCollection<MinecraftInstance> Instances { get; } = new();
@@ -112,7 +112,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ModInstaller = new ModInstaller(CurseForge);
         Manifest = new ManifestService(() => _game.ServerUrl);
         NewsFeed = new NewsService(() => _game.ServerUrl);
-        _updates = new UpdateService(() => _game.ServerUrl);
+        _updater = new AppUpdater(() => _game.ServerUrl);
 
         LoadInstances();
 
@@ -139,38 +139,19 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private async Task CheckForUpdateAsync()
     {
-        try
+        if (await _updater.CheckAsync())
         {
-            var latest = await _updates.GetLatestAsync();
-            if (latest is null || string.IsNullOrWhiteSpace(latest.Version)) return;
-
-            if (Version.TryParse(latest.Version, out var remote)
-                && Version.TryParse(CurrentVersion, out var current)
-                && remote > current)
-            {
-                LatestVersion = latest.Version;
-                _updateUrl = latest.Url;
-                UpdateAvailable = true;
-            }
-        }
-        catch
-        {
-            // Sem rede / sem servidor — ignora.
+            LatestVersion = _updater.LatestVersion ?? string.Empty;
+            UpdateAvailable = true;
         }
     }
 
     [RelayCommand]
-    private void OpenUpdate()
+    private async Task OpenUpdate()
     {
-        if (string.IsNullOrWhiteSpace(_updateUrl)) return;
-        try
-        {
-            Process.Start(new ProcessStartInfo(_updateUrl) { UseShellExecute = true });
-        }
-        catch
-        {
-            // ignora falhas a abrir o browser
-        }
+        if (!UpdateAvailable) return;
+        StatusMessage = "A atualizar o launcher...";
+        await _updater.ApplyAndRestartAsync();
     }
 
     // ── Páginas (criadas uma vez, reutilizadas) ──────────────────
@@ -389,6 +370,46 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Mostra um diálogo de confirmação. Sem handler, assume "sim".</summary>
     public Task<bool> ConfirmAsync(string title, string message) =>
         ConfirmRequested?.Invoke(title, message) ?? Task.FromResult(true);
+
+    // ── Pickers de ficheiro (ligados pela View) ──────────────────
+    public Func<string, Task<string?>>? SaveFileRequested { get; set; }
+    public Func<Task<string?>>? OpenFileRequested { get; set; }
+
+    public Task<string?> SaveFileAsync(string suggestedName) =>
+        SaveFileRequested?.Invoke(suggestedName) ?? Task.FromResult<string?>(null);
+
+    public Task<string?> OpenFileAsync() =>
+        OpenFileRequested?.Invoke() ?? Task.FromResult<string?>(null);
+
+    /// <summary>Abre a pasta do jogo da instância no explorador de ficheiros.</summary>
+    public void OpenInstanceFolder(MinecraftInstance instance)
+    {
+        var dir = LauncherPaths.InstanceGameDir(instance.Id);
+        Directory.CreateDirectory(dir);
+        try
+        {
+            Process.Start(new ProcessStartInfo(dir) { UseShellExecute = true });
+        }
+        catch
+        {
+            // ignora falhas a abrir o explorador
+        }
+    }
+
+    /// <summary>Exporta uma instância para um zip.</summary>
+    public void ExportInstance(MinecraftInstance instance, string zipPath)
+    {
+        _instances.Export(instance, zipPath);
+    }
+
+    /// <summary>Importa uma instância de um zip, adiciona-a e seleciona-a.</summary>
+    public MinecraftInstance ImportInstance(string zipPath)
+    {
+        var instance = _instances.Import(zipPath);
+        Instances.Insert(0, instance);
+        SelectInstance(instance);
+        return instance;
+    }
 
     /// <summary>Abre a gestão de mods/instância numa janela separada.</summary>
     public void ShowInstanceMods(MinecraftInstance instance, bool isNew = false)

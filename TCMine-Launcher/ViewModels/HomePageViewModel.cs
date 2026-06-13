@@ -298,7 +298,8 @@ public partial class HomePageViewModel : ViewModelBase
                 instance.Servers,
                 autoJoin);
 
-            await _shell.ModInstaller.EnsureModsAsync(instance, progress, _launchCts.Token);
+            await _shell.ModInstaller.EnsureModsAsync(
+                instance, progress, _launchCts.Token, prune: instance.IsOfficial);
 
             // Captura a saída do jogo para ficheiro (e deteção de crash).
             var logCapture = new GameLogCapture(LauncherPaths.InstanceLogFile(instance.Id));

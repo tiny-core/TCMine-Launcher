@@ -23,13 +23,17 @@ public class ModInstaller
     }
 
     public async Task EnsureModsAsync(
-        MinecraftInstance instance, IProgress<LaunchProgress> progress, CancellationToken ct = default)
+        MinecraftInstance instance, IProgress<LaunchProgress> progress,
+        CancellationToken ct = default, bool prune = false)
     {
-        var pending = instance.Mods.Where(m => !string.IsNullOrEmpty(m.DownloadUrl)).ToList();
-        if (pending.Count == 0) return;
-
         var modsDir = Path.Combine(LauncherPaths.InstanceGameDir(instance.Id), "mods");
         Directory.CreateDirectory(modsDir);
+
+        // Diff: remove jars que já não fazem parte do modpack (só em instâncias geridas).
+        if (prune) PruneUnlisted(instance, modsDir);
+
+        var pending = instance.Mods.Where(m => !string.IsNullOrEmpty(m.DownloadUrl)).ToList();
+        if (pending.Count == 0) return;
 
         var total = pending.Count;
         var completed = 0;
@@ -68,6 +72,18 @@ public class ModInstaller
         });
 
         await Task.WhenAll(tasks);
+    }
+
+    /// <summary>Apaga jars na pasta mods que não constam da lista da instância.</summary>
+    private static void PruneUnlisted(MinecraftInstance instance, string modsDir)
+    {
+        var wanted = instance.Mods
+            .Select(m => m.FileName)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var jar in Directory.EnumerateFiles(modsDir, "*.jar"))
+            if (!wanted.Contains(Path.GetFileName(jar)))
+                TryDelete(jar);
     }
 
     /// <summary>Existe e (se houver hash) o SHA-1 confere.</summary>

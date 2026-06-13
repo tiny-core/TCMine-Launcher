@@ -69,6 +69,28 @@ public partial class InstancesPageViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void OpenFolder(MinecraftInstance instance)
+    {
+        _shell.OpenInstanceFolder(instance);
+    }
+
+    [RelayCommand]
+    private async Task Export(MinecraftInstance instance)
+    {
+        var path = await _shell.SaveFileAsync($"{instance.Name}.zip");
+        if (!string.IsNullOrEmpty(path))
+            _shell.ExportInstance(instance, path);
+    }
+
+    [RelayCommand]
+    private async Task Import()
+    {
+        var path = await _shell.OpenFileAsync();
+        if (!string.IsNullOrEmpty(path))
+            _shell.ImportInstance(path);
+    }
+
+    [RelayCommand]
     private async Task Delete(MinecraftInstance instance)
     {
         // Instâncias oficiais não podem ser eliminadas pela UI.

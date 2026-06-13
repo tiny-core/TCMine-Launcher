@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
 using TCMine_Launcher.Models;
@@ -91,5 +92,45 @@ public class InstanceService
     {
         var versionsDir = Path.Combine(LauncherPaths.InstanceGameDir(instance.Id), "versions");
         return Directory.Exists(versionsDir) && Directory.EnumerateDirectories(versionsDir).Any();
+    }
+
+    /// <summary>Exporta a instância (config + jogo) para um ficheiro zip.</summary>
+    public void Export(MinecraftInstance instance, string zipPath)
+    {
+        if (File.Exists(zipPath)) File.Delete(zipPath);
+        ZipFile.CreateFromDirectory(LauncherPaths.InstanceDir(instance.Id), zipPath);
+    }
+
+    /// <summary>
+    ///     Importa uma instância de um zip: extrai para uma nova pasta, atribui um
+    ///     novo Id e torna-a Manual (editável). Devolve a instância criada.
+    /// </summary>
+    public MinecraftInstance Import(string zipPath)
+    {
+        var newId = Guid.NewGuid().ToString("N");
+        var dir = LauncherPaths.InstanceDir(newId);
+        Directory.CreateDirectory(dir);
+        ZipFile.ExtractToDirectory(zipPath, dir);
+
+        var configFile = Path.Combine(dir, "instance.json");
+        if (!File.Exists(configFile))
+        {
+            Directory.Delete(dir, true);
+            throw new InvalidDataException("Zip inválido: não contém instance.json.");
+        }
+
+        var instance = JsonSerializer.Deserialize<MinecraftInstance>(
+            File.ReadAllText(configFile), Options)
+            ?? throw new InvalidDataException("instance.json inválido.");
+
+        instance.Id = newId;
+        instance.Source = InstanceSource.Manual;
+        instance.ModpackId = null;
+        instance.ManifestVersion = null;
+        if (!instance.Name.Contains("(importada)"))
+            instance.Name += " (importada)";
+
+        Save(instance);
+        return instance;
     }
 }

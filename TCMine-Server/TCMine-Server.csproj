@@ -15,7 +15,6 @@
       <!-- Manifestos + novidades copiados para o output (Docker/publish). -->
       <Content Update="modpacks\**\*.json" CopyToOutputDirectory="PreserveNewest" />
       <Content Update="news.json" CopyToOutputDirectory="PreserveNewest" />
-      <Content Update="launcher.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>
