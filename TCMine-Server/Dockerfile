@@ -18,11 +18,16 @@ ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./TCMine-Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
-# Pasta persistente para a BD SQLite e o feed de updates (volume /data),
+# Pasta persistente para a BD SQLite, updates e overrides (volume /data),
 # gravável pelo utilizador não-root da imagem.
 USER root
 RUN mkdir -p /data && chown $APP_UID:0 /data
 USER $APP_UID
 WORKDIR /app
+# Defaults para /data — assim no deploy basta montar /data e definir
+# CF_API_KEY + ADMIN_PASSWORD (estas variáveis ficam opcionais).
+ENV DB_PATH=/data/tcmine.db \
+    UPDATES_DIR=/data/updates \
+    OVERRIDES_DIR=/data/overrides
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TCMine-Server.dll"]

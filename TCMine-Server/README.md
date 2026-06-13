@@ -81,6 +81,13 @@ A partir daí a pesquisa e instalação de mods funcionam.
 | `UPDATES_DIR` | não | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
 | `OVERRIDES_DIR` | não | Pasta dos bundles de overrides dos modpacks (default `./overrides`). |
 
+> **Segredos persistentes (automático):** na primeira arranque, `CF_API_KEY` e
+> `ADMIN_PASSWORD` são guardados em `<dados>/secrets/` e, a partir daí, lidos do ficheiro,
+> ignorando a env. Isto protege contra ambientes que corrompem `$` a cada reinício (ex.: a
+> key do CurseForge no ZimaOS/compose). Para mudar um segredo, apaga o ficheiro em
+> `secrets/` e arranca com a nova env. Override manual: `CF_API_KEY_FILE` /
+> `ADMIN_PASSWORD_FILE` apontam para um ficheiro próprio.
+
 ## Administração (`/admin`)
 
 Interface web (Blazor Server) para gerir tudo sem editar ficheiros:

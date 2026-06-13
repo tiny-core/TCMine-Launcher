@@ -53,9 +53,7 @@ services:
     environment:
       - CF_API_KEY=a-tua-key-curseforge
       - ADMIN_PASSWORD=uma-senha-forte
-      - DB_PATH=/data/tcmine.db
-      - UPDATES_DIR=/data/updates
-      - OVERRIDES_DIR=/data/overrides
+      # DB_PATH/UPDATES_DIR/OVERRIDES_DIR já têm default /data na imagem — não é preciso definir.
       # - CF_ALLOWED_ORIGINS=https://o-teu-dominio   # opcional, se exposto publicamente
     volumes:
       - tcmine-data:/data    # persiste BD + updates + overrides
@@ -80,6 +78,21 @@ Notas:
 > do volume nomeado, o utilizador não-root não consegue escrever lá e verás
 > `SQLite Error 14: unable to open database file`. Nesse caso, corre como root acrescentando
 > `user: "0:0"` ao serviço, ou faz `chown` da pasta do host para o UID do container.
+
+## 2.1 API key do CurseForge e o problema do `$` (automático)
+
+A key Eternal do CurseForge tem `$` (ex.: `$2a$10$…`). O ZimaOS/compose faz *escaping* do
+`$` (duplica para `$$`) e **volta a duplicar a cada reinício**, corrompendo a key → **403**.
+
+**Não precisas de fazer nada de especial.** Defines `CF_API_KEY` (e `ADMIN_PASSWORD`)
+normalmente nas variáveis de ambiente. Na **primeira arranque**, com a env ainda limpa, o
+servidor guarda os valores em `/data/secrets/` e, a partir daí, lê **sempre do ficheiro** —
+ignorando a env mesmo que o ZimaOS a corrompa nos reinícios seguintes.
+
+- **Mudar um segredo mais tarde:** apaga o ficheiro correspondente em `/data/secrets/`
+  (`cf_api_key` ou `admin_password`) e recria o container com a nova env.
+- **Override explícito (opcional):** se preferires gerir o ficheiro à mão, aponta
+  `CF_API_KEY_FILE` / `ADMIN_PASSWORD_FILE` para o caminho de um ficheiro com o valor.
 
 ## 3. Usar
 

@@ -28,6 +28,37 @@ builder.Configuration.AddEnvironmentVariables();
 // ── Base de dados (SQLite via EF Core) ───────────────────────────────────────
 var dbPath = builder.Configuration["DB_PATH"]
              ?? Path.Combine(builder.Environment.ContentRootPath, "tcmine.db");
+var dataDir = Path.GetDirectoryName(Path.GetFullPath(dbPath))!;
+
+// ── Segredos persistentes (CF_API_KEY / ADMIN_PASSWORD) ──────────────────────
+// O ZimaOS/compose corrompe valores com '$' (ex.: a API key do CurseForge, formato
+// bcrypt) — faz escaping a cada reinício. Solução automática: na PRIMEIRA arranque
+// guardamos o valor da env num ficheiro em <dados>/secrets/ (o ficheiro não passa pela
+// interpolação do compose) e, a partir daí, lemos sempre do ficheiro, ignorando a env
+// (já corrompida). Não é preciso criar nada à mão. Para MUDAR um segredo, apaga o
+// respetivo ficheiro e arranca com a nova env. Override explícito: CF_API_KEY_FILE /
+// ADMIN_PASSWORD_FILE apontam para um ficheiro próprio (lido tal como está).
+var secretsDir = Path.Combine(dataDir, "secrets");
+foreach (var name in new[] { "CF_API_KEY", "ADMIN_PASSWORD" })
+{
+    var explicitFile = builder.Configuration[$"{name}_FILE"];
+    var path = string.IsNullOrWhiteSpace(explicitFile)
+        ? Path.Combine(secretsDir, name.ToLowerInvariant())
+        : explicitFile;
+
+    if (File.Exists(path))
+    {
+        // Ficheiro manda: imune à corrupção da env entre reinícios.
+        builder.Configuration[name] = File.ReadAllText(path).Trim();
+    }
+    else if (!string.IsNullOrWhiteSpace(builder.Configuration[name]))
+    {
+        // Primeira arranque com a env ainda limpa: persiste para os próximos reinícios.
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+        File.WriteAllText(path, builder.Configuration[name]!.Trim());
+    }
+}
+
 builder.Services.AddDbContextFactory<AppDbContext>(o => o.UseSqlite($"Data Source={dbPath}"));
 builder.Services.AddScoped<ContentService>();
 builder.Services.AddScoped<CurseForgeService>();
@@ -35,7 +66,7 @@ builder.Services.AddSingleton<OverridesStore>();
 
 // Persiste as chaves de Data Protection no volume (junto da BD) para que os cookies
 // de admin e os tokens antiforgery sobrevivam a reinícios/atualizações do container.
-var keysDir = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(dbPath))!, "keys");
+var keysDir = Path.Combine(dataDir, "keys");
 Directory.CreateDirectory(keysDir);
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(keysDir))
