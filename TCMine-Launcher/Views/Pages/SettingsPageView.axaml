@@ -80,15 +80,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Sobre -->
-                <Border Classes="panel">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Sobre" Classes="panel-heading" />
-                        <TextBlock Text="TCMine Launcher · beta v1" Classes="muted" />
-                        <TextBlock Text="Launcher do servidor TCMine — NeoForge + modpack custom."
-                                   Classes="muted" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

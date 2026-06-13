@@ -30,7 +30,7 @@
             <!-- ═══════════════════════════════════════════════════ -->
             <!--  BARRA DE TÍTULO (componente reutilizável)          -->
             <!-- ═══════════════════════════════════════════════════ -->
-            <views:TitleBar Grid.Row="0" Title="TCMine Launcher" />
+            <views:TitleBar Grid.Row="0" Title="TCMine Launcher" ShowAbout="True" />
 
             <!-- ═══════════════════════════════════════════════════ -->
             <!--  CORPO — Login (deslogado) OU Shell (logado)        -->

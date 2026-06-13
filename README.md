@@ -18,9 +18,10 @@ Login com a Microsoft, gestão de versões e um modpack próprio — tudo numa i
 
 ## ✨ Visão geral
 
-O **TCMine Launcher** é um launcher desktop construído com **Avalonia UI** (.NET 10) que instala e lança o **modpack
-custom do servidor TCMine** sobre **NeoForge**. Foca-se numa experiência simples: entra com a tua conta Microsoft,
-escolhe o modpack e joga.
+O **TCMine Launcher** é um launcher desktop construído com **Avalonia UI** (.NET 10) que instala e lança
+**modpacks NeoForge** a partir de um **servidor configurável** (o TCMine por omissão, mas podes apontar para o teu
+em Definições). Foca-se numa experiência simples: entra com a tua conta Microsoft, escolhe o modpack e joga —
+com instâncias isoladas, auto-update e conteúdo gerido pelo servidor.
 
 <div align="center">
 
@@ -31,11 +32,12 @@ escolhe o modpack e joga.
 ## 🚀 Funcionalidades
 
 - 🔐 **Login com a Microsoft** (navegador do sistema) — obtém o teu perfil, nome e UUID reais
-- 🧩 **Modpack oficial** com seleção de versão de Minecraft e NeoForge
-- 🗂️ **Navegação por separadores**: Jogar, Modpacks, Novidades e Definições
-- 📊 **Progresso e registo de launch** com consola integrada
-- ⚙️ **Definições**: memória JVM, caminho do Java e gestão de conta
-- 🎨 Interface escura moderna, janela sem decorações nativas e transições suaves
+- 🧩 **Modpacks oficiais** do servidor — instala mods, resource packs/shaders e servidores, aplica as configs (overrides) e a RAM recomendada
+- 🗂️ **Instâncias isoladas** — cria, importa/exporta e gere várias instalações independentes
+- ▶️ **Launch real do Minecraft (NeoForge)** com progresso e janela de **registo de eventos**
+- ⬆️ **Auto-update** do próprio launcher (Velopack)
+- ⚙️ **Definições**: memória JVM, caminho do Java e URL do servidor
+- 🎨 Interface escura moderna (janela sem decorações nativas, componentes e temas centralizados)
 
 <div align="center">
 

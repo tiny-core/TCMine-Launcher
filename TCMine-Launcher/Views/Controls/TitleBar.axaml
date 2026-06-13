@@ -22,6 +22,10 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Classes="wnd-btn" Click="OnAbout"
+                        IsVisible="{Binding #Root.ShowAbout}" ToolTip.Tip="Sobre">
+                    <PathIcon Data="{StaticResource IconInfo}" Width="15" Height="15" />
+                </Button>
                 <Button Classes="wnd-btn" Click="OnMinimize"
                         IsVisible="{Binding #Root.ShowMinimize}">
                     <PathIcon Data="{StaticResource IconMinimize}" Width="13" Height="13" />

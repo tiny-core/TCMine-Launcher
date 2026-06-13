@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="420" d:DesignHeight="520"
+        x:Class="TCMine_Launcher.Views.AboutWindow"
+        Title="Sobre"
+        Icon="/Assets/icon.ico"
+        Width="420" Height="520"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <views:WindowChrome>
+        <Grid RowDefinitions="45,*">
+            <views:TitleBar Grid.Row="0" Title="Sobre" ShowMinimize="False" />
+
+            <StackPanel Grid.Row="1" Margin="32,4,32,28" Spacing="0">
+                <Image Source="{StaticResource AppLogo}" Width="76" Height="76"
+                       HorizontalAlignment="Center" Margin="0,10,0,0" />
+                <TextBlock Text="TCMine Launcher" Classes="page-title"
+                           HorizontalAlignment="Center" Margin="0,14,0,0" />
+                <TextBlock x:Name="VersionText" Classes="muted"
+                           HorizontalAlignment="Center" Margin="0,4,0,0" />
+
+                <TextBlock Classes="muted" TextAlignment="Center" TextWrapping="Wrap" Margin="0,16,0,0"
+                           Text="Launcher para modpacks NeoForge — instala e lança mods, resource packs e servidores a partir de um servidor configurável, e atualiza-se automaticamente." />
+
+                <Separator Classes="divider" Margin="0,22" />
+
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" RowDefinitions="Auto,Auto" RowSpacing="12">
+                    <TextBlock Grid.Row="0" Grid.Column="0" Classes="section-label" Text="AUTOR"
+                               Margin="0" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="Jocian de Souza Mendonça"
+                               Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Classes="section-label" Text="EMPRESA"
+                               Margin="0" VerticalAlignment="Center" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="Tiny Core"
+                               Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" />
+                </Grid>
+
+                <Button Classes="ms-btn" Margin="0,24,0,0" Click="Github_Click"
+                        ToolTip.Tip="https://github.com/tiny-core/TCMine-Launcher">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <PathIcon Data="{StaticResource IconGithub}" Width="16" Height="16" VerticalAlignment="Center" />
+                        <TextBlock Text="Ver no GitHub" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <TextBlock Classes="muted" FontSize="11" HorizontalAlignment="Center" Margin="0,18,0,0"
+                           Text="© 2026 Tiny Core · GPL-3.0" />
+            </StackPanel>
+        </Grid>
+    </views:WindowChrome>
+</Window>

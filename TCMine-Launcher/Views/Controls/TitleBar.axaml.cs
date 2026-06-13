@@ -22,6 +22,10 @@ public partial class TitleBar : UserControl
     public static readonly StyledProperty<bool> ShowMinimizeProperty =
         AvaloniaProperty.Register<TitleBar, bool>(nameof(ShowMinimize), true);
 
+    /// <summary>Mostra o botão "Sobre" (info) — só na janela principal.</summary>
+    public static readonly StyledProperty<bool> ShowAboutProperty =
+        AvaloniaProperty.Register<TitleBar, bool>(nameof(ShowAbout));
+
     public TitleBar()
     {
         InitializeComponent();
@@ -39,7 +43,18 @@ public partial class TitleBar : UserControl
         set => SetValue(ShowMinimizeProperty, value);
     }
 
+    public bool ShowAbout
+    {
+        get => GetValue(ShowAboutProperty);
+        set => SetValue(ShowAboutProperty, value);
+    }
+
     private Window? Host => TopLevel.GetTopLevel(this) as Window;
+
+    private void OnAbout(object? sender, RoutedEventArgs e)
+    {
+        if (Host is { } window) new AboutWindow().ShowDialog(window);
+    }
 
     private void OnDrag(object? sender, PointerPressedEventArgs e)
     {
