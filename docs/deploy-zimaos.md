@@ -58,19 +58,28 @@ services:
       - OVERRIDES_DIR=/data/overrides
       # - CF_ALLOWED_ORIGINS=https://o-teu-dominio   # opcional, se exposto publicamente
     volumes:
-      - /DATA/AppData/tcmine:/data    # persiste BD + updates + overrides
+      - tcmine-data:/data    # persiste BD + updates + overrides
     restart: unless-stopped
     x-casaos:
       webui_port: 8080
       scheme: http
+
+volumes:
+  tcmine-data:
 ```
 
 Notas:
 
 - **Porta** — o container escuta em `8080` (imagem ASP.NET); mapeado para `8080` no host.
-- **Volume `/data`** — guarda a BD SQLite, o feed de updates e os overrides. A pasta já é
-  criada e fica gravável pelo utilizador não-root da imagem.
+- **Volume `/data`** — guarda a BD SQLite, o feed de updates e os overrides. Usa um
+  **volume nomeado** (`tcmine-data`): o container corre como utilizador **não-root** e o
+  Docker cria o volume já com as permissões certas.
 - **Obrigatórias** — `CF_API_KEY` (proxy de mods) e `ADMIN_PASSWORD` (login do `/admin`).
+
+> **Se preferires um caminho do host** (bind mount, ex.: `/DATA/AppData/tcmine:/data`) em vez
+> do volume nomeado, o utilizador não-root não consegue escrever lá e verás
+> `SQLite Error 14: unable to open database file`. Nesse caso, corre como root acrescentando
+> `user: "0:0"` ao serviço, ou faz `chown` da pasta do host para o UID do container.
 
 ## 3. Usar
 
