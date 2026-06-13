@@ -2,6 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCMine-Launcher", "TCMine-Launcher\TCMine-Launcher.csproj", "{A029FF69-8A35-430B-9571-B80ACDF2673D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TCMine-Server", "TCMine-Server\TCMine-Server.csproj", "{B836CEF3-624E-462B-96D4-17A373046FEB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{725CCF02-27EF-41C6-BD95-37AEE2367C0B}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +19,9 @@ Global
 		{A029FF69-8A35-430B-9571-B80ACDF2673D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A029FF69-8A35-430B-9571-B80ACDF2673D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A029FF69-8A35-430B-9571-B80ACDF2673D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B836CEF3-624E-462B-96D4-17A373046FEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B836CEF3-624E-462B-96D4-17A373046FEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B836CEF3-624E-462B-96D4-17A373046FEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B836CEF3-624E-462B-96D4-17A373046FEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

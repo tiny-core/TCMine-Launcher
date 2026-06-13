@@ -1,0 +1,24 @@
+{
+  "id": "tcmine-official",
+  "name": "TCMine Modpack",
+  "version": "1.0.0",
+  "minecraft": "1.21.1",
+  "neoforge": "21.1.172",
+  "description": "O modpack oficial do servidor TCMine — exploração, tecnologia e aventura.",
+  "mods": [
+    {
+      "modId": 238222,
+      "fileId": 5798904,
+      "name": "Just Enough Items (JEI)",
+      "fileName": "jei-1.21.1-neoforge-19.21.0.247.jar",
+      "downloadUrl": "https://edge.forgecdn.net/files/5798/904/jei-1.21.1-neoforge-19.21.0.247.jar"
+    }
+  ],
+  "servers": [
+    {
+      "name": "TCMine Survival",
+      "address": "play.tcmine.net",
+      "port": 25565
+    }
+  ]
+}

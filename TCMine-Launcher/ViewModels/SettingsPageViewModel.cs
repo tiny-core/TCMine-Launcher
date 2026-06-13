@@ -18,6 +18,8 @@ public partial class SettingsPageViewModel : ViewModelBase
 
     [ObservableProperty] private string _javaPath;
 
+    [ObservableProperty] private string _serverUrl;
+
     public SettingsPageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
         _player = player;
@@ -26,6 +28,7 @@ public partial class SettingsPageViewModel : ViewModelBase
 
         _ramMb = game.AllocatedRamMb;
         _javaPath = game.JavaPath ?? string.Empty;
+        _serverUrl = game.ServerUrl ?? string.Empty;
     }
 
     public string PlayerName => _player.Name;
@@ -50,6 +53,12 @@ public partial class SettingsPageViewModel : ViewModelBase
     partial void OnJavaPathChanged(string value)
     {
         _game.JavaPath = string.IsNullOrWhiteSpace(value) ? null : value;
+        _shell.PersistSettings();
+    }
+
+    partial void OnServerUrlChanged(string value)
+    {
+        _game.ServerUrl = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         _shell.PersistSettings();
     }
 

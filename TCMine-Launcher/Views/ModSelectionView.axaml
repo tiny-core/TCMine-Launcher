@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="420"
+             x:Class="TCMine_Launcher.Views.ModSelectionView"
+             x:DataType="vm:ModSelectionViewModel"
+             x:Name="ModRoot">
+
+    <StackPanel Spacing="12">
+
+        <!-- Barra de pesquisa -->
+        <Grid ColumnDefinitions="*,10,Auto">
+            <TextBox Grid.Column="0" Text="{Binding Query}"
+                     PlaceholderText="Pesquisar mods (CurseForge)..."
+                     Background="#0A0A16" BorderBrush="#1A1A28"
+                     CornerRadius="7" Foreground="#E8E8F0" Padding="11,8">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+            <Button Grid.Column="2" Classes="outline-btn" Height="38" Width="110"
+                    HorizontalContentAlignment="Center"
+                    Command="{Binding SearchCommand}"
+                    IsEnabled="{Binding !IsSearching}">
+                <Panel>
+                    <TextBlock Text="Pesquisar" FontSize="12.5"
+                               IsVisible="{Binding !IsSearching}" />
+                    <Ellipse Classes="spinner" Width="14" Height="14"
+                             IsVisible="{Binding IsSearching}" />
+                </Panel>
+            </Button>
+        </Grid>
+
+        <!-- Estado / mensagens -->
+        <TextBlock Text="{Binding StatusMessage}"
+                   Classes="muted" FontSize="11.5" TextWrapping="Wrap"
+                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <!-- Lista única (resultados + selecionados; o botão alterna) -->
+        <Border Background="#070710" BorderBrush="#16161F" BorderThickness="1"
+                CornerRadius="8" IsVisible="{Binding IsConfigured}">
+            <ScrollViewer Height="240" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Results}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:ModSearchItem">
+                            <Grid ColumnDefinitions="*,Auto" Margin="12,9">
+                                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="13" FontWeight="SemiBold" Foreground="#E8E8F0" />
+                                    <TextBlock Text="{Binding Summary}"
+                                               FontSize="11" Foreground="#7A7A9A"
+                                               TextTrimming="CharacterEllipsis"
+                                               IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Classes="outline-btn mod-toggle" Height="30"
+                                        Classes.selected="{Binding IsSelected}"
+                                        VerticalAlignment="Center" Margin="10,0,0,0"
+                                        Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ToggleCommand}"
+                                        CommandParameter="{Binding}">
+                                    <TextBlock Text="{Binding ActionLabel}" FontSize="11.5" />
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </StackPanel>
+</UserControl>

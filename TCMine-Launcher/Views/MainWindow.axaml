@@ -162,7 +162,7 @@
                     Background="#070710"
                     BorderBrush="#141420"
                     BorderThickness="0,1,0,0">
-                <Grid ColumnDefinitions="Auto,*,Auto,16,Auto" Margin="16,0">
+                <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
                     <StackPanel Grid.Column="0"
                                 Orientation="Horizontal"
                                 Spacing="7"
@@ -175,14 +175,7 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <!-- Progresso global (visível durante downloads/launch) -->
-                    <ProgressBar Grid.Column="2"
-                                 Classes="status-progress"
-                                 Value="{Binding GlobalProgress}"
-                                 IsVisible="{Binding IsBusy}"
-                                 VerticalAlignment="Center" />
-
-                    <TextBlock Grid.Column="4"
+                    <TextBlock Grid.Column="2"
                                Text="beta v1"
                                FontSize="11" Foreground="#2A2A40"
                                VerticalAlignment="Center" />

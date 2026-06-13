@@ -40,6 +40,11 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly SettingsService _settings = new();
     private readonly InstanceService _instances = new();
 
+    /// <summary>Cliente CurseForge (via proxy), instalador de mods e manifestos.</summary>
+    public CurseForgeClient CurseForge { get; }
+    public ModInstaller ModInstaller { get; }
+    public ManifestService Manifest { get; }
+
     /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
     public ObservableCollection<MinecraftInstance> Instances { get; } = new();
 
@@ -81,17 +86,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private double _globalProgress;
 
+    /// <summary>True enquanto há um Minecraft aberto — desativa ações nas páginas.</summary>
+    [ObservableProperty] private bool _isGameRunning;
+
+    partial void OnIsGameRunningChanged(bool value)
+    {
+        Home.NotifyGameRunningChanged();
+        InstancesPage.NotifyGameRunningChanged();
+    }
+
     public MainWindowViewModel()
     {
         _player = new PlayerProfile();
         _game = _settings.Load();
+
+        CurseForge = new CurseForgeClient(() => _game.ServerUrl);
+        ModInstaller = new ModInstaller(CurseForge);
+        Manifest = new ManifestService(() => _game.ServerUrl);
 
         LoadInstances();
 
         Home = new HomePageViewModel(_player, _game, this);
         InstancesPage = new InstancesPageViewModel(this);
         CreateInstancePage = new CreateInstancePageViewModel(_game, this);
-        Modpacks = new ModpacksPageViewModel();
+        InstanceModsPage = new InstanceModsPageViewModel(this);
+        Modpacks = new ModpacksPageViewModel(this, Manifest);
         News = new NewsPageViewModel();
         Settings = new SettingsPageViewModel(_player, _game, this);
 
@@ -105,6 +124,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public HomePageViewModel Home { get; }
     public InstancesPageViewModel InstancesPage { get; }
     public CreateInstancePageViewModel CreateInstancePage { get; }
+    public InstanceModsPageViewModel InstanceModsPage { get; }
     public ModpacksPageViewModel Modpacks { get; }
     public NewsPageViewModel News { get; }
     public SettingsPageViewModel Settings { get; }
@@ -140,6 +160,8 @@ public partial class MainWindowViewModel : ViewModelBase
             AppTab.Settings => Settings,
             _ => Home
         };
+
+        if (value == AppTab.Modpacks) Modpacks.Begin();
     }
 
     // ── Comandos de navegação ────────────────────────────────────
@@ -266,12 +288,12 @@ public partial class MainWindowViewModel : ViewModelBase
         foreach (var instance in _instances.LoadAll())
             Instances.Add(instance);
 
-        // Primeira execução: cria a instância oficial por defeito.
+        // Primeira execução: cria uma instância inicial (deletável). Os modpacks
+        // oficiais vêm do servidor, na aba Modpacks.
         if (Instances.Count == 0)
         {
             var seed = _instances.Create(
-                "TCMine Modpack", _game.MinecraftVersion, _game.NeoForgeVersion,
-                InstanceSource.OfficialManifest);
+                "Instância padrão", _game.MinecraftVersion, _game.NeoForgeVersion);
             Instances.Add(seed);
         }
 
@@ -303,7 +325,14 @@ public partial class MainWindowViewModel : ViewModelBase
         CurrentPage = CreateInstancePage;
     }
 
-    /// <summary>Volta da página de criação para a lista de instâncias.</summary>
+    /// <summary>Abre a página de gestão de mods de uma instância.</summary>
+    public void ShowInstanceMods(MinecraftInstance instance)
+    {
+        InstanceModsPage.Begin(instance);
+        CurrentPage = InstanceModsPage;
+    }
+
+    /// <summary>Volta das páginas de criação/mods para a lista de instâncias.</summary>
     public void BackToInstances()
     {
         SelectedTab = AppTab.Instances;
@@ -341,14 +370,51 @@ public partial class MainWindowViewModel : ViewModelBase
             SelectInstance(Instances.FirstOrDefault() ?? CreateSeedAfterDelete());
     }
 
-    /// <summary>Se o utilizador apagar a última instância, recria a oficial.</summary>
+    /// <summary>Se o utilizador apagar a última instância, recria uma inicial.</summary>
     private MinecraftInstance CreateSeedAfterDelete()
     {
         var seed = _instances.Create(
-            "TCMine Modpack", _game.MinecraftVersion, _game.NeoForgeVersion,
-            InstanceSource.OfficialManifest);
+            "Instância padrão", _game.MinecraftVersion, _game.NeoForgeVersion);
         Instances.Add(seed);
         return seed;
+    }
+
+    /// <summary>
+    ///     Instala (ou atualiza) uma instância a partir de um manifesto oficial:
+    ///     copia versões, mods e servidores. Se já existir uma instância desse
+    ///     modpack, atualiza-a em vez de duplicar. Seleciona-a no fim.
+    /// </summary>
+    public MinecraftInstance InstallFromManifest(ModpackManifest manifest)
+    {
+        var existing = Instances.FirstOrDefault(i => i.ModpackId == manifest.Id);
+        if (existing is not null)
+        {
+            existing.Name = manifest.Name;
+            existing.MinecraftVersion = manifest.Minecraft;
+            existing.NeoForgeVersion = manifest.Neoforge;
+            existing.ManifestVersion = manifest.Version;
+            existing.Mods = manifest.Mods;
+            existing.Servers = manifest.Servers;
+            _instances.Save(existing);
+            SelectInstance(existing);
+            return existing;
+        }
+
+        var instance = new MinecraftInstance
+        {
+            Name = manifest.Name,
+            MinecraftVersion = manifest.Minecraft,
+            NeoForgeVersion = manifest.Neoforge,
+            Source = InstanceSource.OfficialManifest,
+            ModpackId = manifest.Id,
+            ManifestVersion = manifest.Version,
+            Mods = manifest.Mods,
+            Servers = manifest.Servers
+        };
+        _instances.Save(instance);
+        Instances.Insert(0, instance);
+        SelectInstance(instance);
+        return instance;
     }
 
     /// <summary>Persiste o perfil de jogo no disco. Chamado pelas páginas ao mudar definições.</summary>

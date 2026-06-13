@@ -23,7 +23,7 @@
 
         <!-- Formulário -->
         <ScrollViewer Grid.Row="1" Margin="0,20,0,0" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="18" MaxWidth="560" HorizontalAlignment="Left">
+            <StackPanel Spacing="18" Width="600" HorizontalAlignment="Center">
 
                 <!-- Nome + versões -->
                 <Border Classes="panel">
@@ -64,17 +64,11 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Mods (em breve) -->
+                <!-- Mods (CurseForge) -->
                 <Border Classes="panel">
-                    <StackPanel Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Grid.Column="0" Classes="section-label" Text="MODS" Margin="0" />
-                            <Border Grid.Column="1" Classes="tag">
-                                <TextBlock Text="EM BREVE" />
-                            </Border>
-                        </Grid>
-                        <TextBlock Classes="muted" TextWrapping="Wrap"
-                                   Text="A seleção de mods chega na próxima fase, com a integração do CurseForge. Por agora a instância é criada apenas com NeoForge." />
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="section-label" Text="MODS (OPCIONAL)" Margin="0" />
+                        <ContentControl Content="{Binding ModSelection}" />
                     </StackPanel>
                 </Border>
 

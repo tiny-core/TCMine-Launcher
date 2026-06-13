@@ -70,9 +70,6 @@
 
             <!-- Barra de launch -->
             <StackPanel Grid.Row="1" Margin="0,18,0,0" Spacing="12">
-                <ProgressBar Classes="launch-progress"
-                             Value="{Binding LaunchProgress}"
-                             IsVisible="{Binding IsLaunching}" />
                 <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9"
                                 VerticalAlignment="Center">
@@ -136,28 +133,26 @@
                            Classes="muted" FontSize="11"
                            HorizontalAlignment="Center" Margin="0,3,0,0" />
 
+                <Grid ColumnDefinitions="*,Auto" Margin="2,8,2,0">
+                    <TextBlock Grid.Column="0" Classes="section-label" Text="IDENTIFICADOR" Margin="0" />
+                    <TextBlock Grid.Column="1" Text="{Binding PlayerUuidShort}"
+                               FontFamily="Cascadia Code,Consolas,monospace"
+                               FontSize="11" Foreground="#94A3B8" />
+                </Grid>
+
                 <Border Height="1" Background="#16161F" Margin="0,20" />
 
-                <TextBlock Classes="section-label" Text="INSTÂNCIA ATIVA" />
-                <TextBlock Text="{Binding InstanceName}"
-                           FontSize="14" FontWeight="SemiBold" Foreground="#E8E8F0"
-                           TextTrimming="CharacterEllipsis" Margin="2,0,0,0" />
-
-                <TextBlock Classes="section-label" Text="VERSÕES" Margin="2,16,0,7" />
-                <TextBlock Text="{Binding InstanceSummary}"
-                           FontSize="12" Foreground="#94A3B8" Margin="2,0,0,0" />
-
-                <Grid ColumnDefinitions="*,Auto" Margin="2,16,2,0">
-                    <TextBlock Grid.Column="0" Classes="section-label" Text="ESTADO" Margin="0" />
-                    <TextBlock Grid.Column="1" Text="{Binding StateLabel}"
-                               FontSize="11" Foreground="#94A3B8" />
-                </Grid>
-
-                <Grid ColumnDefinitions="*,Auto" Margin="2,12,2,0">
+                <!-- Slider de memória da instância -->
+                <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA" Margin="0" />
                     <TextBlock Grid.Column="1" Text="{Binding RamDisplay}"
-                               FontSize="11" Foreground="#94A3B8" />
+                               FontSize="11" FontWeight="SemiBold" Foreground="#F97316" />
                 </Grid>
+                <Slider Minimum="1024" Maximum="16384"
+                        TickFrequency="512" IsSnapToTickEnabled="True"
+                        Value="{Binding InstanceRam}"
+                        IsEnabled="{Binding !IsLaunching}"
+                        Margin="0,2,0,0" />
             </StackPanel>
         </Border>
     </Grid>

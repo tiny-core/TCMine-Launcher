@@ -41,19 +41,29 @@ public partial class CreateInstancePageViewModel : ViewModelBase
     [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
     private string? _selectedNeoForgeVersion;
 
+    private readonly ObservableCollection<ModEntry> _pendingMods = new();
+
     public CreateInstancePageViewModel(GameProfile game, MainWindowViewModel shell)
     {
         _game = game;
         _shell = shell;
+
+        ModSelection = new ModSelectionViewModel(
+            shell.CurseForge, _pendingMods, () => SelectedMinecraftVersion);
     }
 
     public ObservableCollection<string> MinecraftVersions { get; } = new();
     public ObservableCollection<string> NeoForgeVersions { get; } = new();
 
+    /// <summary>Seleção de mods inicial (anexada à instância ao criar).</summary>
+    public ModSelectionViewModel ModSelection { get; }
+
     /// <summary>Prepara o formulário ao abrir a página (recarrega versões).</summary>
     public void Begin()
     {
         Name = "Nova Instância";
+        _pendingMods.Clear();
+        ModSelection.Results.Clear();
         _ = LoadMinecraftVersionsAsync();
     }
 
@@ -122,7 +132,13 @@ public partial class CreateInstancePageViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanConfirm))]
     private void Confirm()
     {
-        _shell.CreateInstance(Name, SelectedMinecraftVersion!, SelectedNeoForgeVersion!);
+        var instance = _shell.CreateInstance(Name, SelectedMinecraftVersion!, SelectedNeoForgeVersion!);
+        if (_pendingMods.Count > 0)
+        {
+            instance.Mods = _pendingMods.ToList();
+            _shell.SaveInstance(instance);
+        }
+
         _shell.BackToInstances();
     }
 

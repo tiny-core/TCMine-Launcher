@@ -1,9 +1,14 @@
-# TCMine — Proxy CurseForge
+# TCMine — Servidor
 
-Servidor mínimo (ASP.NET Core) que reencaminha os pedidos do launcher para a API do
-CurseForge, injetando a `x-api-key`. A key fica **só no servidor**, nunca no launcher.
+Servidor mínimo (ASP.NET Core) com duas funções:
 
-Contrato consumido pelo launcher: [`../docs/curseforge-proxy.md`](../docs/curseforge-proxy.md).
+1. **Proxy CurseForge** — reencaminha `/v1/*` para `api.curseforge.com` injetando a
+   `x-api-key`. A key fica **só no servidor**, nunca no launcher.
+2. **Modpacks oficiais** — serve os manifestos dos modpacks em `/modpacks` e
+   `/modpacks/{id}`, a partir de ficheiros JSON na pasta `modpacks/`.
+
+Contratos: [`../docs/curseforge-proxy.md`](../docs/curseforge-proxy.md) (mods) e
+[`../docs/modpack-manifest.md`](../docs/modpack-manifest.md) (modpacks).
 
 ## 1. Obter uma API key do CurseForge
 
@@ -53,9 +58,23 @@ A partir daí a pesquisa e instalação de mods funcionam.
 
 | Variável | Obrigatória | Descrição |
 |---|---|---|
-| `CF_API_KEY` | **sim** | API key do CurseForge (Eternal). |
+| `CF_API_KEY` | **sim** (mods) | API key do CurseForge (Eternal). |
 | `CF_CACHE_MINUTES` | não | TTL da cache em memória (default `5`). |
 | `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
+| `MODPACKS_DIR` | não | Pasta dos manifestos de modpacks (default `./modpacks`). |
+
+## Modpacks oficiais
+
+Cada modpack é um ficheiro `modpacks/<id>.json` (ver `modpacks/tcmine-official.json` e
+[`../docs/modpack-manifest.md`](../docs/modpack-manifest.md)). Endpoints:
+
+```
+GET /modpacks         → lista (resumo de cada modpack)
+GET /modpacks/{id}    → manifesto completo (mods + servidores)
+```
+
+O launcher mostra-os na aba **Modpacks**; ao instalar, cria uma instância com os mods
+e escreve os servidores no `servers.dat` (aparecem na lista multijogador do jogo).
 
 ## Deploy
 

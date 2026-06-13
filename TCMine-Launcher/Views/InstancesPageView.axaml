@@ -21,6 +21,7 @@
 
             <Button Grid.Column="1" Classes="play-btn" Height="40"
                     VerticalAlignment="Center"
+                    IsEnabled="{Binding CanInteract}"
                     Command="{Binding OpenCreateCommand}">
                 <TextBlock Text="+ Nova instância" FontSize="12.5" FontWeight="Bold"
                            Margin="6,0" />
@@ -60,29 +61,42 @@
 
                                 <TextBlock Text="{Binding VersionSummary}"
                                            Foreground="#7A7A9A" FontSize="12.5" />
+                                <TextBlock Text="{Binding ModsLabel}"
+                                           Foreground="#5A5A7A" FontSize="11" Margin="0,5,0,0" />
 
                                 <!-- Ações -->
-                                <Grid ColumnDefinitions="*,10,Auto" Margin="0,18,0,0">
+                                <Grid ColumnDefinitions="*,10,Auto" Margin="0,16,0,0">
                                     <Button Grid.Column="0" Classes="play-btn" Height="40"
                                             HorizontalContentAlignment="Center"
+                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
                                             Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).PlayCommand}"
                                             CommandParameter="{Binding}">
                                         <TextBlock Text="▶ Jogar" FontSize="13" FontWeight="Bold" />
                                     </Button>
                                     <Button Grid.Column="2" Classes="outline-btn" Height="40"
+                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
                                             Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).SelectCommand}"
                                             CommandParameter="{Binding}">
                                         <TextBlock Text="Selecionar" FontSize="12.5" />
                                     </Button>
                                 </Grid>
 
-                                <Button Classes="ghost-btn" Margin="0,8,0,0"
-                                        HorizontalAlignment="Right"
-                                        IsVisible="{Binding !IsOfficial}"
-                                        Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DeleteCommand}"
-                                        CommandParameter="{Binding}">
-                                    <TextBlock Text="Eliminar" FontSize="12" Foreground="#F87171" />
-                                </Button>
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,8,0,0"
+                                            HorizontalAlignment="Right">
+                                    <Button Classes="ghost-btn"
+                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
+                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).ManageModsCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="Mods" FontSize="12" Foreground="#94A3B8" />
+                                    </Button>
+                                    <Button Classes="ghost-btn"
+                                            IsVisible="{Binding !IsOfficial}"
+                                            IsEnabled="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).CanInteract}"
+                                            Command="{Binding #PageRoot.((vm:InstancesPageViewModel)DataContext).DeleteCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="Eliminar" FontSize="12" Foreground="#F87171" />
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

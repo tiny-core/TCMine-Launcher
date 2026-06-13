@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace TCMine_Launcher.Models;
@@ -31,8 +32,17 @@ public class MinecraftInstance
     /// <summary>RAM específica desta instância; <c>null</c> = usa o default global.</summary>
     public int? RamOverrideMb { get; set; }
 
-    /// <summary>Versão do manifesto instalada (só para instâncias oficiais — fase 3).</summary>
+    /// <summary>Id do modpack oficial de origem (null se criada à mão).</summary>
+    public string? ModpackId { get; set; }
+
+    /// <summary>Versão do manifesto instalada (só para instâncias oficiais).</summary>
     public string? ManifestVersion { get; set; }
+
+    /// <summary>Mods (CurseForge) associados a esta instância.</summary>
+    public List<ModEntry> Mods { get; set; } = new();
+
+    /// <summary>Servidores associados — escritos no servers.dat ao instalar.</summary>
+    public List<ServerEntry> Servers { get; set; } = new();
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
     public DateTimeOffset? LastPlayedAt { get; set; }
@@ -56,4 +66,8 @@ public class MinecraftInstance
     /// <summary>Instâncias oficiais não podem ser editadas/eliminadas livremente.</summary>
     [JsonIgnore]
     public bool IsOfficial => Source == InstanceSource.OfficialManifest;
+
+    /// <summary>Resumo do número de mods para listas/cartões.</summary>
+    [JsonIgnore]
+    public string ModsLabel => Mods.Count == 0 ? "Sem mods" : $"{Mods.Count} mod(s)";
 }

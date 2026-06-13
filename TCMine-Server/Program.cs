@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,6 +93,60 @@ app.MapGet("/v1/{**path}", async (
         log.LogError(ex, "Falha a contactar o CurseForge.");
         return Results.Problem("Falha a contactar o CurseForge.", statusCode: 502);
     }
+});
+
+// ── Modpacks oficiais (manifestos servidos a partir de ficheiros JSON) ───────
+var modpacksDir = app.Configuration["MODPACKS_DIR"]
+                  ?? Path.Combine(app.Environment.ContentRootPath, "modpacks");
+
+static string? GetString(JsonElement e, string name) =>
+    e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+
+// Lista (resumo: sem mods, só a contagem).
+app.MapGet("/modpacks", () =>
+{
+    if (!Directory.Exists(modpacksDir))
+        return Results.Json(Array.Empty<object>());
+
+    var summaries = new List<object>();
+    foreach (var file in Directory.EnumerateFiles(modpacksDir, "*.json"))
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(file));
+            var root = doc.RootElement;
+            var modCount = root.TryGetProperty("mods", out var mods) && mods.ValueKind == JsonValueKind.Array
+                ? mods.GetArrayLength()
+                : 0;
+
+            summaries.Add(new
+            {
+                id = GetString(root, "id"),
+                name = GetString(root, "name"),
+                version = GetString(root, "version"),
+                minecraft = GetString(root, "minecraft"),
+                neoforge = GetString(root, "neoforge"),
+                description = GetString(root, "description"),
+                modCount
+            });
+        }
+        catch
+        {
+            // ficheiro inválido — ignora
+        }
+    }
+
+    return Results.Json(summaries);
+});
+
+// Detalhe (manifesto completo com mods + servidores).
+app.MapGet("/modpacks/{id}", (string id) =>
+{
+    var safe = Path.GetFileName(id); // evita path traversal
+    var file = Path.Combine(modpacksDir, safe + ".json");
+    return File.Exists(file)
+        ? Results.Content(File.ReadAllText(file), "application/json")
+        : Results.NotFound();
 });
 
 app.Run();

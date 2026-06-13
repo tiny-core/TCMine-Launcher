@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,8 +12,8 @@ namespace TCMine_Launcher.ViewModels;
 
 /// <summary>
 ///     Página "Jogar": hero da instância ativa + painel de perfil + launch real.
-///     O botão alterna entre <b>Instalar</b> (sem ficheiros) e <b>Jogar</b> (instalada).
-///     Instala NeoForge e arranca o jogo na pasta isolada da instância.
+///     O botão alterna entre <b>Instalar</b> (sem ficheiros), <b>Jogar</b> (instalada)
+///     e fica desativado enquanto o jogo está aberto. Deteta o fecho do processo.
 /// </summary>
 public partial class HomePageViewModel : ViewModelBase
 {
@@ -24,6 +25,9 @@ public partial class HomePageViewModel : ViewModelBase
     /// <summary>Permite cancelar uma instalação/launch em curso.</summary>
     private CancellationTokenSource? _launchCts;
 
+    /// <summary>Evita persistir a RAM ao trocar de instância (só na interação do utilizador).</summary>
+    private bool _suppressRam;
+
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(LogToggleLabel))]
     private bool _isLogExpanded;
 
@@ -31,12 +35,16 @@ public partial class HomePageViewModel : ViewModelBase
 
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
 
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))]
+    private double _instanceRam = 4096;
+
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
         _player = player;
         _game = game;
         _shell = shell;
 
+        _instanceRam = Active?.RamOverrideMb ?? _game.AllocatedRamMb;
         LaunchStatus = DefaultStatus();
     }
 
@@ -55,11 +63,18 @@ public partial class HomePageViewModel : ViewModelBase
         : "Instância personalizada";
     public string InstanceSummary => Active?.VersionSummary ?? "";
 
-    // ── Estado de instalação (define Instalar vs Jogar) ──────────
+    // ── Estado de instalação / execução ──────────────────────────
     public bool IsInstalled => Active is not null && _shell.IsInstanceInstalled(Active);
-    public string PlayLabel => IsInstalled ? "JOGAR" : "INSTALAR";
-    public string PlayIcon => IsInstalled ? "▶" : "⬇";
-    public string StateLabel => IsInstalled ? "Instalada" : "Por instalar";
+
+    public string PlayLabel => _shell.IsGameRunning
+        ? "EM EXECUÇÃO"
+        : IsInstalled ? "JOGAR" : "INSTALAR";
+
+    public string PlayIcon => _shell.IsGameRunning ? "■" : IsInstalled ? "▶" : "⬇";
+
+    public string StateLabel => _shell.IsGameRunning
+        ? "Em execução"
+        : IsInstalled ? "Instalada" : "Por instalar";
 
     /// <summary>Linhas do console de launch (registo).</summary>
     public ObservableCollection<string> LaunchLog { get; } = new();
@@ -71,8 +86,13 @@ public partial class HomePageViewModel : ViewModelBase
     public string AvatarInitials => _player.ComputeInitials();
     public string AccountLabel => _player.AccountLabel;
 
-    /// <summary>RAM efetiva: override da instância ou default global.</summary>
-    public string RamDisplay => $"{Active?.RamOverrideMb ?? _game.AllocatedRamMb} MB";
+    /// <summary>UUID abreviado do jogador (info extra no painel).</summary>
+    public string PlayerUuidShort => string.IsNullOrEmpty(_player.Uuid)
+        ? "—"
+        : _player.Uuid.Length > 12 ? _player.Uuid[..12] + "…" : _player.Uuid;
+
+    /// <summary>RAM efetiva mostrada junto ao slider.</summary>
+    public string RamDisplay => $"{(int)InstanceRam} MB";
 
     /// <summary>Chamado pelo shell quando o login muda o perfil.</summary>
     public void NotifyPlayerChanged()
@@ -80,19 +100,32 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlayerName));
         OnPropertyChanged(nameof(AvatarInitials));
         OnPropertyChanged(nameof(AccountLabel));
+        OnPropertyChanged(nameof(PlayerUuidShort));
     }
 
     /// <summary>Chamado pelo shell quando a instância ativa muda.</summary>
     public void NotifyInstanceChanged()
     {
+        _suppressRam = true;
+        InstanceRam = Active?.RamOverrideMb ?? _game.AllocatedRamMb;
+        _suppressRam = false;
+
         OnPropertyChanged(nameof(InstanceName));
         OnPropertyChanged(nameof(InstanceTag));
         OnPropertyChanged(nameof(InstanceSubtitle));
         OnPropertyChanged(nameof(InstanceSummary));
-        OnPropertyChanged(nameof(RamDisplay));
         RefreshInstallState();
 
         if (!IsLaunching) LaunchStatus = DefaultStatus();
+    }
+
+    /// <summary>Chamado pelo shell quando o jogo abre/fecha — atualiza botão e estado.</summary>
+    public void NotifyGameRunningChanged()
+    {
+        OnPropertyChanged(nameof(PlayLabel));
+        OnPropertyChanged(nameof(PlayIcon));
+        OnPropertyChanged(nameof(StateLabel));
+        PlayCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>Reavalia (a partir do disco) se a instância ativa está instalada.</summary>
@@ -106,12 +139,20 @@ public partial class HomePageViewModel : ViewModelBase
 
     private string DefaultStatus()
     {
+        if (_shell.IsGameRunning) return "Minecraft em execução";
         return IsInstalled ? "Pronto para jogar" : "Instância por instalar";
+    }
+
+    partial void OnInstanceRamChanged(double value)
+    {
+        if (_suppressRam || Active is null) return;
+        Active.RamOverrideMb = (int)value;
+        _shell.SaveInstance(Active);
     }
 
     private bool CanPlay()
     {
-        return !IsLaunching;
+        return !IsLaunching && !_shell.IsGameRunning;
     }
 
     [RelayCommand(CanExecute = nameof(CanPlay))]
@@ -148,6 +189,9 @@ public partial class HomePageViewModel : ViewModelBase
 
         try
         {
+            // Instâncias com servidor: escreve o servers.dat e entra direto no 1º.
+            var autoJoin = instance.Servers.Count > 0 ? instance.Servers[0] : null;
+
             var process = await _launcher.PrepareAsync(
                 LauncherPaths.InstanceGameDir(instance.Id),
                 instance.MinecraftVersion,
@@ -156,14 +200,23 @@ public partial class HomePageViewModel : ViewModelBase
                 instance.RamOverrideMb ?? _game.AllocatedRamMb,
                 _game.JavaPath,
                 progress,
-                _launchCts.Token);
+                _launchCts.Token,
+                instance.Servers,
+                autoJoin);
+
+            // Descarrega os mods em falta (CurseForge) antes de arrancar.
+            await _shell.ModInstaller.EnsureModsAsync(instance, progress, _launchCts.Token);
 
             process.Start();
             instance.LastPlayedAt = DateTimeOffset.Now;
             _shell.SaveInstance(instance);
 
-            LaunchLog.Add("Minecraft iniciado.");
+            _shell.IsGameRunning = true;
             LaunchStatus = "Minecraft em execução";
+            LaunchLog.Add("Minecraft iniciado.");
+
+            // Deteta o fecho do jogo para reativar os botões (resume na UI thread).
+            _ = MonitorGameAsync(process);
         }
         catch (OperationCanceledException)
         {
@@ -184,6 +237,27 @@ public partial class HomePageViewModel : ViewModelBase
             _shell.SetBusy(false, 0, "Pronto");
             RefreshInstallState(); // após instalar, o botão passa a "Jogar"
         }
+    }
+
+    /// <summary>Aguarda o fecho do Minecraft e repõe o estado da UI.</summary>
+    private async Task MonitorGameAsync(Process process)
+    {
+        try
+        {
+            await process.WaitForExitAsync();
+        }
+        catch
+        {
+            // ignora — o importante é reativar a UI a seguir
+        }
+
+        _shell.IsGameRunning = false;
+        LaunchLog.Add("Minecraft fechado.");
+        LaunchStatus = DefaultStatus();
+        RefreshInstallState();
+
+        try { process.Dispose(); }
+        catch { /* noop */ }
     }
 
     [RelayCommand]

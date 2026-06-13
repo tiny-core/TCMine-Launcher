@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TCMine_Launcher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
+             x:Class="TCMine_Launcher.Views.InstanceModsPageView"
+             x:DataType="vm:InstanceModsPageViewModel">
+
+    <Grid Margin="26" RowDefinitions="Auto,*">
+
+        <!-- Cabeçalho com voltar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+            <Button Classes="ghost-btn" Command="{Binding BackCommand}" Padding="4">
+                <TextBlock Text="←" FontSize="20" Foreground="#94A3B8" />
+            </Button>
+            <StackPanel>
+                <TextBlock Classes="page-title" Text="Gerir mods" />
+                <TextBlock Classes="muted" Text="{Binding InstanceName}" Margin="0,4,0,0" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Componente de seleção de mods -->
+        <ScrollViewer Grid.Row="1" Margin="0,20,0,0" HorizontalScrollBarVisibility="Disabled">
+            <Border Classes="panel" Width="600" HorizontalAlignment="Center">
+                <ContentControl Content="{Binding ModSelection}" />
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

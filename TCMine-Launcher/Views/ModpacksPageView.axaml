@@ -6,19 +6,34 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="940" d:DesignHeight="555"
              x:Class="TCMine_Launcher.Views.ModpacksPageView"
-             x:DataType="vm:ModpacksPageViewModel">
+             x:DataType="vm:ModpacksPageViewModel"
+             x:Name="PageRoot">
 
-    <Grid Margin="26" RowDefinitions="Auto,16,*">
+    <Grid Margin="26" RowDefinitions="Auto,16,Auto,*">
 
         <!-- Cabeçalho -->
-        <StackPanel Grid.Row="0">
-            <TextBlock Classes="page-title" Text="Modpacks" />
-            <TextBlock Classes="muted" Text="Escolhe e instala um pack para jogar"
-                       Margin="0,4,0,0" />
-        </StackPanel>
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0">
+                <TextBlock Classes="page-title" Text="Modpacks oficiais" />
+                <TextBlock Classes="muted" Text="Modpacks publicados pelo servidor TCMine"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="outline-btn" VerticalAlignment="Center"
+                    Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}">
+                <Panel>
+                    <TextBlock Text="↻ Atualizar" FontSize="12.5" IsVisible="{Binding !IsLoading}" />
+                    <Ellipse Classes="spinner" Width="14" Height="14" IsVisible="{Binding IsLoading}" />
+                </Panel>
+            </Button>
+        </Grid>
+
+        <!-- Estado / mensagens -->
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}"
+                   Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,12,0,0"
+                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
         <!-- Catálogo -->
-        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Grid.Row="3" Margin="0,12,0,0" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Modpacks}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -27,11 +42,11 @@
                 </ItemsControl.ItemsPanel>
 
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="m:Modpack">
-                        <Border Classes="modpack-card" Margin="0,0,16,16">
+                    <DataTemplate DataType="m:ModpackManifest">
+                        <Border Classes="modpack-card" Width="290" Margin="0,0,18,18">
                             <StackPanel>
                                 <!-- Banner -->
-                                <Border Height="92" CornerRadius="12,12,0,0" ClipToBounds="True">
+                                <Border Height="84" CornerRadius="12,12,0,0" ClipToBounds="True">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
                                             <GradientStop Color="#3B1D4D" Offset="0" />
@@ -40,28 +55,29 @@
                                     </Border.Background>
                                     <Border Classes="tag" VerticalAlignment="Top"
                                             HorizontalAlignment="Left" Margin="12">
-                                        <TextBlock Text="{Binding Tagline}" />
+                                        <TextBlock Text="OFICIAL" />
                                     </Border>
                                 </Border>
 
-                                <!-- Info -->
-                                <StackPanel Margin="16,14,16,16" Spacing="0">
+                                <StackPanel Margin="18,15,18,18" Spacing="0">
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="15" FontWeight="Bold" Foreground="#E8E8F0" />
-                                    <TextBlock Text="{Binding AuthorLabel}"
-                                               Classes="muted" FontSize="11" Margin="0,2,0,0" />
+                                               FontSize="16" FontWeight="Bold" Foreground="#E8E8F0" />
                                     <TextBlock Text="{Binding VersionSummary}"
-                                               Foreground="#5A5A7A" FontSize="11" Margin="0,8,0,0" />
+                                               Foreground="#5A5A7A" FontSize="11" Margin="0,6,0,0" />
+                                    <TextBlock Text="{Binding ModsSummary}"
+                                               Foreground="#7A7A9A" FontSize="11" Margin="0,3,0,0" />
                                     <TextBlock Text="{Binding Description}"
                                                Foreground="#7A7A9A" FontSize="12"
-                                               TextWrapping="Wrap" Height="34" Margin="0,8,0,0" />
+                                               TextWrapping="Wrap" Height="36" Margin="0,8,0,0"
+                                               TextTrimming="CharacterEllipsis" />
 
-                                    <Button Classes="outline-btn"
+                                    <Button Classes="play-btn" Height="38"
                                             HorizontalAlignment="Stretch"
                                             HorizontalContentAlignment="Center"
-                                            Margin="0,14,0,0">
-                                        <TextBlock Text="{Binding InstallLabel}"
-                                                   FontSize="12.5" FontWeight="SemiBold" />
+                                            Margin="0,14,0,0"
+                                            Command="{Binding #PageRoot.((vm:ModpacksPageViewModel)DataContext).InstallCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="Instalar" FontSize="12.5" FontWeight="Bold" />
                                     </Button>
                                 </StackPanel>
                             </StackPanel>

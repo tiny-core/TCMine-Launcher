@@ -23,6 +23,12 @@ public class GameProfile
     /// <summary>Id da última instância selecionada (restaurada no arranque).</summary>
     public string? SelectedInstanceId { get; set; }
 
+    /// <summary>
+    ///     URL base do servidor TCMine (vazio = não configurado). Serve o proxy
+    ///     CurseForge (<c>/v1/*</c>) e os manifestos de modpacks (<c>/modpacks</c>).
+    /// </summary>
+    public string? ServerUrl { get; set; }
+
     //    // ── Lógica de domínio pura (calculada — não persistir) ────────
     /// <summary>Descrição compacta do perfil para listas/menus.</summary>
     [JsonIgnore]

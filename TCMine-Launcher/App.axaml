@@ -281,6 +281,17 @@
             <Setter Property="Background" Value="#15151F" />
             <Setter Property="BorderBrush" Value="#F97316" />
         </Style>
+        <!-- Estado "selecionado" do botão de mod (Remover) -->
+        <Style Selector="Button.mod-toggle.selected">
+            <Setter Property="Foreground" Value="#F87171" />
+        </Style>
+        <Style Selector="Button.mod-toggle.selected /template/ ContentPresenter">
+            <Setter Property="BorderBrush" Value="#7F1D1D" />
+        </Style>
+        <Style Selector="Button.mod-toggle.selected:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#1A0E0E" />
+            <Setter Property="BorderBrush" Value="#F87171" />
+        </Style>
 
         <!-- ======================================================= -->
         <!--  CARTÃO DE MODPACK                                      -->

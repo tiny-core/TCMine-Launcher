@@ -24,16 +24,31 @@ public partial class InstancesPageViewModel : ViewModelBase
     /// <summary>Id da instância ativa — usado para realçar o cartão selecionado.</summary>
     public string? ActiveInstanceId => _shell.ActiveInstance?.Id;
 
+    /// <summary>Ações ficam bloqueadas enquanto há um jogo aberto.</summary>
+    public bool CanInteract => !_shell.IsGameRunning;
+
     /// <summary>Chamado pelo shell quando a instância ativa muda.</summary>
     public void NotifyActiveChanged()
     {
         OnPropertyChanged(nameof(ActiveInstanceId));
     }
 
+    /// <summary>Chamado pelo shell quando o jogo abre/fecha.</summary>
+    public void NotifyGameRunningChanged()
+    {
+        OnPropertyChanged(nameof(CanInteract));
+    }
+
     [RelayCommand]
     private void OpenCreate()
     {
         _shell.ShowCreateInstance();
+    }
+
+    [RelayCommand]
+    private void ManageMods(MinecraftInstance instance)
+    {
+        _shell.ShowInstanceMods(instance);
     }
 
     [RelayCommand]

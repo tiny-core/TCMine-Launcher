@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -34,9 +35,16 @@ public class GameLauncher
         int ramMb,
         string? javaPath,
         IProgress<LaunchProgress> progress,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        IReadOnlyList<ServerEntry>? servers = null,
+        ServerEntry? autoJoinServer = null)
     {
         Directory.CreateDirectory(gameDir);
+
+        // Garante que os servidores do modpack aparecem na lista multijogador.
+        if (servers is { Count: > 0 })
+            ServersDatWriter.Ensure(gameDir, servers);
+
         var launcher = new MinecraftLauncher(gameDir);
 
         // Normaliza o caminho do Java: vazio => deixa o CmlLib auto-detetar/instalar.
@@ -69,12 +77,21 @@ public class GameLauncher
             progress.Report(new LaunchProgress(
                 LaunchState.PreparingJvm, 95, "A preparar a JVM..."));
 
-            var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+            var launchOption = new MLaunchOption
             {
                 Session = session,
                 MaximumRamMb = ramMb,
                 JavaPath = resolvedJava
-            });
+            };
+
+            // Ligação direta ao servidor (entra logo no jogo).
+            if (autoJoinServer is not null)
+            {
+                launchOption.ServerIp = autoJoinServer.Address;
+                launchOption.ServerPort = autoJoinServer.Port;
+            }
+
+            var process = await launcher.InstallAndBuildProcessAsync(versionName, launchOption);
 
             progress.Report(new LaunchProgress(
                 LaunchState.Launching, 100, "A iniciar o Minecraft..."));

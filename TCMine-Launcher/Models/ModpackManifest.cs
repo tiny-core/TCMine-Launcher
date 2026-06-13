@@ -1,0 +1,34 @@
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
+namespace TCMine_Launcher.Models;
+
+/// <summary>
+///     Manifesto de um modpack oficial servido pelo servidor TCMine. Na lista
+///     (<c>/modpacks</c>) vem só o resumo (sem mods); no detalhe
+///     (<c>/modpacks/{id}</c>) traz os mods e servidores.
+/// </summary>
+public class ModpackManifest
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public string Minecraft { get; set; } = string.Empty;
+    public string Neoforge { get; set; } = string.Empty;
+    public string? Description { get; set; }
+
+    /// <summary>Nº de mods (preenchido no resumo da lista, quando Mods vem vazio).</summary>
+    public int ModCount { get; set; }
+
+    public List<ModEntry> Mods { get; set; } = new();
+    public List<ServerEntry> Servers { get; set; } = new();
+
+    [JsonIgnore]
+    public int TotalMods => Mods.Count > 0 ? Mods.Count : ModCount;
+
+    [JsonIgnore]
+    public string VersionSummary => $"MC {Minecraft} · NeoForge {Neoforge}";
+
+    [JsonIgnore]
+    public string ModsSummary => TotalMods == 0 ? "Sem mods" : $"{TotalMods} mod(s)";
+}
