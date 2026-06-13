@@ -19,7 +19,7 @@
         </Border.Background>
 
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14">
-            <TextBlock Text="⬡" FontSize="54" Foreground="{StaticResource Accent}" HorizontalAlignment="Center" />
+            <Image Source="{StaticResource AppLogo}" Width="64" Height="64" HorizontalAlignment="Center" />
             <TextBlock Text="TCMine Launcher" FontSize="18" FontWeight="Bold"
                        Foreground="{StaticResource TextPrimary}" HorizontalAlignment="Center" />
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center"

@@ -12,7 +12,8 @@
         <!-- Cabeçalho com voltar -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
             <Button Classes="ghost-btn" Command="{Binding CancelCommand}" Padding="4">
-                <TextBlock Text="←" FontSize="20" Foreground="{StaticResource TextSecondary}" />
+                <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18"
+                          Foreground="{StaticResource TextSecondary}" />
             </Button>
             <StackPanel>
                 <TextBlock Classes="page-title" Text="Nova instância" />

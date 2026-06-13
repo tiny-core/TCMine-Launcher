@@ -19,7 +19,10 @@
             <Button Grid.Column="1" Classes="outline-btn" VerticalAlignment="Center"
                     Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}">
                 <Panel>
-                    <TextBlock Text="↻ Atualizar" FontSize="12.5" IsVisible="{Binding !IsLoading}" />
+                    <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !IsLoading}">
+                        <PathIcon Data="{StaticResource IconRefresh}" Width="14" Height="14" VerticalAlignment="Center" />
+                        <TextBlock Text="Atualizar" FontSize="12.5" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Ellipse Classes="spinner" Width="14" Height="14" IsVisible="{Binding IsLoading}" />
                 </Panel>
             </Button>

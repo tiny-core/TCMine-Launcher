@@ -75,7 +75,8 @@
                                         <Button Grid.Column="1" Classes="ghost-btn"
                                                 Command="{Binding #PageRoot.((vm:InstanceModsPageViewModel)DataContext).RemoveServerCommand}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="✕" FontSize="12" Foreground="{StaticResource Danger}" />
+                                            <PathIcon Data="{StaticResource IconClose}" Width="12" Height="12"
+                                                      Foreground="{StaticResource Danger}" />
                                         </Button>
                                     </Grid>
                                 </DataTemplate>

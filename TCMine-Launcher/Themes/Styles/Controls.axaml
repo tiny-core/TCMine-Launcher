@@ -88,4 +88,11 @@
     <Style Selector="ToggleButton.log-toggle:checked /template/ ContentPresenter">
         <Setter Property="Background" Value="Transparent" />
     </Style>
+    <!-- Chevron aponta para baixo quando o registo está expandido -->
+    <Style Selector="ToggleButton.log-toggle PathIcon">
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    </Style>
+    <Style Selector="ToggleButton.log-toggle:checked PathIcon">
+        <Setter Property="RenderTransform" Value="rotate(90deg)" />
+    </Style>
 </Styles>

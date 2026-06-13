@@ -11,6 +11,7 @@
             <conv:StringToBrushConverter x:Key="StringToBrush" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="/Themes/Palette.axaml" />
+                <ResourceInclude Source="/Themes/Icons.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

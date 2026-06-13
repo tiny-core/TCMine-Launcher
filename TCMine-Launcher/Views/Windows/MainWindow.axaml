@@ -43,20 +43,18 @@
                                 Spacing="11"
                                 VerticalAlignment="Center"
                                 Margin="20,0,0,0">
-                        <TextBlock Text="⬡" FontSize="17" Foreground="{StaticResource Accent}"
-                                   VerticalAlignment="Center" />
+                        <Image Source="{StaticResource AppLogo}" Width="20" Height="20"
+                               VerticalAlignment="Center" />
                         <TextBlock Text="TCMine Launcher" FontSize="12.5" Foreground="#3A3A52"
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
                         <Button Classes="wnd-btn" Click="MinimizeButton_Click">
-                            <TextBlock Text="—" FontSize="13"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconMinimize}" Width="13" Height="13" />
                         </Button>
                         <Button Classes="wnd-btn wnd-btn-close" Click="CloseButton_Click">
-                            <TextBlock Text="✕" FontSize="13"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconClose}" Width="13" Height="13" />
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -88,36 +86,28 @@
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Home}"
                                         ToolTip.Tip="Jogar">
-                                    <TextBlock Text="▶" FontSize="17"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon Data="{StaticResource IconPlay}" Width="18" Height="18" />
                                 </Button>
                                 <Button Classes="nav-btn"
                                         Classes.active="{Binding IsInstancesSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Instances}"
                                         ToolTip.Tip="Instâncias">
-                                    <TextBlock Text="▦" FontSize="17"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon Data="{StaticResource IconInstances}" Width="18" Height="18" />
                                 </Button>
                                 <Button Classes="nav-btn"
                                         Classes.active="{Binding IsModpacksSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Modpacks}"
                                         ToolTip.Tip="Modpacks">
-                                    <TextBlock Text="⊞" FontSize="17"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon Data="{StaticResource IconModpacks}" Width="18" Height="18" />
                                 </Button>
                                 <Button Classes="nav-btn"
                                         Classes.active="{Binding IsNewsSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.News}"
                                         ToolTip.Tip="Novidades">
-                                    <TextBlock Text="☰" FontSize="17"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon Data="{StaticResource IconNews}" Width="18" Height="18" />
                                 </Button>
                             </StackPanel>
 
@@ -146,9 +136,7 @@
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Settings}"
                                         ToolTip.Tip="Definições">
-                                    <TextBlock Text="⚙" FontSize="17"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                    <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18" />
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -188,8 +176,11 @@
                             VerticalAlignment="Center"
                             IsVisible="{Binding UpdateAvailable}"
                             Command="{Binding OpenUpdateCommand}">
-                        <TextBlock Text="{Binding LatestVersion, StringFormat='⬆ Atualizar para {0}'}"
-                                   FontSize="10.5" FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource IconUpload}" Width="11" Height="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding LatestVersion, StringFormat='Atualizar para {0}'}"
+                                       FontSize="10.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
                     </Button>
 
                     <TextBlock Grid.Column="4"
