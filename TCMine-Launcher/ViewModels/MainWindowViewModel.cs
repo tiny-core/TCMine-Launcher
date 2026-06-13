@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -52,7 +53,9 @@ public partial class MainWindowViewModel : ViewModelBase
     // ── Estado de autenticação / navegação ───────────────────────
     [ObservableProperty] private ViewModelBase _currentPage;
 
-    [ObservableProperty] private bool _isLoggedIn;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditRam))]
+    private bool _isLoggedIn;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsHomeSelected))]
@@ -71,18 +74,85 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string? _loginError;
 
     // ── Progresso global (status bar) ────────────────────────────
-    [ObservableProperty] private bool _isBusy;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditRam))]
+    private bool _isBusy;
 
     [ObservableProperty] private double _globalProgress;
 
     /// <summary>True enquanto há um Minecraft aberto — desativa ações nas páginas.</summary>
-    [ObservableProperty] private bool _isGameRunning;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEditRam))]
+    private bool _isGameRunning;
 
     partial void OnIsGameRunningChanged(bool value)
     {
         Home.NotifyGameRunningChanged();
         InstancesPage.NotifyGameRunningChanged();
         Modpacks.NotifyGameRunningChanged();
+    }
+
+    // ── Memória da instância ativa (editável no footer) ─────────
+    // A RAM é por instância, mas o controlo vive na barra de estado (sempre acessível).
+    /// <summary>RAM máxima alocável (MB) = RAM física da máquina, arredondada ao GB.</summary>
+    public int RamMaximum { get; } = Math.Max(2048, SystemInfo.TotalPhysicalRamMb / 1024 * 1024);
+
+    /// <summary>Limita um valor de RAM ao intervalo permitido (1 GB … RAM física).</summary>
+    public int ClampRam(int mb) => Math.Clamp(mb, 1024, RamMaximum);
+
+    private bool _suppressRam;
+    private CancellationTokenSource? _ramSaveCts;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RamMbDecimal))]
+    [NotifyPropertyChangedFor(nameof(RamDisplay))]
+    private double _instanceRam = 4096;
+
+    /// <summary>RAM atual formatada (ex.: "4096 MB") — botão da barra de estado.</summary>
+    public string RamDisplay => $"{(int)InstanceRam} MB";
+
+    /// <summary>RAM em MB para o campo numérico (NumericUpDown usa decimal).</summary>
+    public decimal? RamMbDecimal
+    {
+        get => (decimal)InstanceRam;
+        set
+        {
+            if (value is decimal mb) InstanceRam = (double)mb;
+        }
+    }
+
+    /// <summary>A memória só é editável com sessão, instância ativa e sem instalar/jogar.</summary>
+    public bool CanEditRam => IsLoggedIn && !IsGameRunning && !IsBusy && ActiveInstance is not null;
+
+    partial void OnActiveInstanceChanged(MinecraftInstance? value)
+    {
+        _suppressRam = true;
+        InstanceRam = value is null
+            ? _game.AllocatedRamMb
+            : ClampRam(value.RamOverrideMb ?? _game.AllocatedRamMb);
+        _suppressRam = false;
+        OnPropertyChanged(nameof(CanEditRam));
+    }
+
+    partial void OnInstanceRamChanged(double value)
+    {
+        if (_suppressRam || ActiveInstance is null) return;
+        ActiveInstance.RamOverrideMb = (int)value;
+        DebounceSaveRam(ActiveInstance); // evita gravar a cada "tick" do slider
+    }
+
+    private void DebounceSaveRam(MinecraftInstance instance)
+    {
+        _ramSaveCts?.Cancel();
+        _ramSaveCts = new CancellationTokenSource();
+        var ct = _ramSaveCts.Token;
+        _ = Task.Run(async () =>
+        {
+            try { await Task.Delay(600, ct); }
+            catch { return; }
+
+            if (!ct.IsCancellationRequested) SaveInstance(instance);
+        }, ct);
     }
 
     /// <summary>Regista/limpa o jogo em execução (instância + PID) para deteção ao reabrir.</summary>
@@ -240,6 +310,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _ => Home
         };
 
+        if (value == AppTab.Home) Home.RefreshUpdateState();
         if (value == AppTab.Modpacks) Modpacks.Begin();
         if (value == AppTab.News) News.Begin();
     }
@@ -288,6 +359,13 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Comando do botão de registo na barra de estado (footer).</summary>
     [RelayCommand]
     private void OpenLog() => ShowLog();
+
+    /// <summary>Pedido para abrir a janela de configuração de memória (ligado pela View).</summary>
+    public Action? OpenMemoryWindowRequested { get; set; }
+
+    /// <summary>Comando do botão de memória na barra de estado (footer).</summary>
+    [RelayCommand]
+    private void OpenMemory() => OpenMemoryWindowRequested?.Invoke();
 
     /// <summary>Abre a janela (própria) de seleção de mods.</summary>
     public void ShowModSelection(ModSelectionViewModel selection)

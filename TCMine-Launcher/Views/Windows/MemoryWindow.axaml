@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:TCMine_Launcher.ViewModels"
+        xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="380" d:DesignHeight="240"
+        x:Class="TCMine_Launcher.Views.MemoryWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Memória"
+        Icon="/Assets/icon.ico"
+        Width="380" Height="240"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <views:WindowChrome>
+        <Grid RowDefinitions="45,*">
+            <views:TitleBar Grid.Row="0" Title="Memória" ShowMinimize="False" />
+
+            <StackPanel Grid.Row="1" Margin="28,4,28,24" Spacing="0">
+                <TextBlock Classes="muted" TextWrapping="Wrap"
+                           Text="Memória RAM alocada à instância ativa." />
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0" VerticalAlignment="Center">
+                    <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA" Margin="0"
+                               VerticalAlignment="Center" />
+                    <NumericUpDown Grid.Column="1"
+                                   Value="{Binding RamMbDecimal}"
+                                   Minimum="1024" Maximum="{Binding RamMaximum}" Increment="1024"
+                                   FormatString="0 'MB'"
+                                   ShowButtonSpinner="False"
+                                   IsEnabled="{Binding CanEditRam}"
+                                   Width="110" Height="32"
+                                   Background="{StaticResource BgInset}" BorderBrush="{StaticResource BorderInset}"
+                                   Foreground="{StaticResource Accent}" />
+                </Grid>
+
+                <Slider Minimum="1024" Maximum="{Binding RamMaximum}"
+                        TickFrequency="1024" IsSnapToTickEnabled="True"
+                        Value="{Binding InstanceRam}"
+                        IsEnabled="{Binding CanEditRam}"
+                        Margin="0,8,0,0" />
+
+                <TextBlock Classes="muted" FontSize="11" Margin="0,4,0,0"
+                           Text="{Binding RamMaximum, StringFormat='Máx.: {0} MB (RAM do sistema)'}" />
+            </StackPanel>
+        </Grid>
+    </views:WindowChrome>
+</Window>

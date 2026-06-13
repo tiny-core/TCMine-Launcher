@@ -187,6 +187,28 @@
         <Setter Property="Background" Value="{StaticResource BgHover}" />
     </Style>
 
+    <!-- ── Toggle compacto de entrada automática num servidor ──────── -->
+    <Style Selector="Button.autojoin-mini">
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource TextDim}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.autojoin-mini:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHoverSoft}" />
+    </Style>
+    <Style Selector="Button.autojoin-mini.active">
+        <Setter Property="Foreground" Value="{StaticResource Accent}" />
+    </Style>
+    <Style Selector="Button.autojoin-mini.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource AccentBg}" />
+    </Style>
+
     <!-- ── Estado "selecionado" do botão de mod (Remover) ──────────── -->
     <Style Selector="Button.mod-toggle.selected">
         <Setter Property="Foreground" Value="{StaticResource Danger}" />

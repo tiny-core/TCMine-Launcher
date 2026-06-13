@@ -236,7 +236,9 @@ public partial class MainWindowViewModel
             HasOverrides = manifest.HasOverrides,
             RamOverrideMb = manifest.RecommendedRamMb, // RAM recomendada pelo modpack
             Mods = manifest.Mods,
-            Servers = manifest.Servers
+            Servers = manifest.Servers,
+            // Por defeito entra no primeiro servidor do modpack (se houver).
+            AutoJoinServerName = manifest.Servers.FirstOrDefault()?.Name
         };
         _instances.Save(instance);
         Instances.Insert(0, instance);

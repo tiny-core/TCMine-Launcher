@@ -27,16 +27,27 @@ public partial class HomePageViewModel : ViewModelBase
     private readonly MainWindowViewModel _shell;
     private bool _acceptProgress;
 
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))] [NotifyPropertyChangedFor(nameof(RamMbDecimal))]
-    private double _instanceRam = 4096;
-
     private CancellationTokenSource? _launchCts;
 
     [ObservableProperty] private double _launchProgress;
     [ObservableProperty] private string _launchStatus = "Pronto para jogar";
 
-    private CancellationTokenSource? _ramSaveCts;
-    private bool _suppressRam;
+    /// <summary>Há uma versão mais recente do modpack oficial no servidor.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UpdateVersionsLabel))]
+    [NotifyCanExecuteChangedFor(nameof(UpdateModpackCommand))]
+    private bool _updateAvailable;
+
+    /// <summary>Versão disponível no servidor (para o rótulo do botão de atualizar).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UpdateVersionsLabel))]
+    private string _availableVersion = string.Empty;
+
+    /// <summary>Transição de versões para o banner (ex.: "v1.0 → v1.1").</summary>
+    public string UpdateVersionsLabel =>
+        string.IsNullOrWhiteSpace(Active?.ManifestVersion)
+            ? $"Nova versão v{AvailableVersion}"
+            : $"v{Active!.ManifestVersion} → v{AvailableVersion}";
 
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
@@ -44,20 +55,65 @@ public partial class HomePageViewModel : ViewModelBase
         _game = game;
         _shell = shell;
 
-        _instanceRam = Active?.RamOverrideMb ?? _game.AllocatedRamMb;
         LaunchStatus = DefaultStatus();
 
         RebuildServers();
         _ = ServerStatusLoopAsync();
+        RefreshUpdateState();
     }
 
-    /// <summary>RAM em MB para o campo numérico editável (NumericUpDown usa decimal).</summary>
-    public decimal? RamMbDecimal
+    /// <summary>
+    ///     Verifica (em segundo plano) se a instância oficial ativa tem uma versão mais
+    ///     recente no servidor. Chamado ao mudar de instância e ao abrir a tela "Jogar".
+    /// </summary>
+    public void RefreshUpdateState() => _ = CheckModpackUpdateAsync();
+
+    private async Task CheckModpackUpdateAsync()
     {
-        get => (decimal)InstanceRam;
-        set
+        UpdateAvailable = false;
+
+        var instance = Active;
+        if (instance is null || !instance.IsOfficial || instance.ModpackId is null) return;
+        if (!_shell.Manifest.IsConfigured) return;
+
+        try
         {
-            if (value is decimal mb) InstanceRam = (double)mb;
+            var list = await _shell.Manifest.GetModpacksAsync();
+            var match = list.FirstOrDefault(m => m.Id == instance.ModpackId);
+            if (match is not null && match.Version != instance.ManifestVersion)
+            {
+                AvailableVersion = match.Version;
+                UpdateAvailable = true;
+            }
+        }
+        catch
+        {
+            // Servidor offline / sem rede — simplesmente não mostra atualização.
+        }
+    }
+
+    private bool CanUpdateModpack() => UpdateAvailable && !IsLaunching && !_shell.IsGameRunning;
+
+    [RelayCommand(CanExecute = nameof(CanUpdateModpack))]
+    private async Task UpdateModpack()
+    {
+        var instance = Active;
+        if (instance?.ModpackId is null) return;
+
+        try
+        {
+            var full = await _shell.Manifest.GetManifestAsync(instance.ModpackId);
+            if (full is null) return;
+
+            // Atualiza os metadados da instância (mods/overrides nova versão); o
+            // download acontece ao Jogar. InstallFromManifest reseleciona a instância,
+            // o que dispara NotifyInstanceChanged → RefreshUpdateState.
+            _shell.InstallFromManifest(full);
+            UpdateAvailable = false;
+        }
+        catch (Exception ex)
+        {
+            LaunchStatus = "Erro ao atualizar: " + ex.Message;
         }
     }
 
@@ -66,12 +122,9 @@ public partial class HomePageViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PlayCommand))]
+    [NotifyCanExecuteChangedFor(nameof(UpdateModpackCommand))]
     [NotifyPropertyChangedFor(nameof(StatusColor))]
-    [NotifyPropertyChangedFor(nameof(CanEditRam))]
     public partial bool IsLaunching { get; set; }
-
-    /// <summary>RAM só é editável fora de instalação/execução.</summary>
-    public bool CanEditRam => !IsLaunching && !_shell.IsGameRunning;
 
     private MinecraftInstance? Active => _shell.ActiveInstance;
 
@@ -129,8 +182,6 @@ public partial class HomePageViewModel : ViewModelBase
             ? Active.Id[..30] + "…"
             : Active.Id;
 
-    public string RamDisplay => $"{(int)InstanceRam} MB";
-
     public void NotifyPlayerChanged()
     {
         OnPropertyChanged(nameof(PlayerName));
@@ -141,10 +192,6 @@ public partial class HomePageViewModel : ViewModelBase
 
     public void NotifyInstanceChanged()
     {
-        _suppressRam = true;
-        InstanceRam = Active?.RamOverrideMb ?? _game.AllocatedRamMb;
-        _suppressRam = false;
-
         OnPropertyChanged(nameof(InstanceName));
         OnPropertyChanged(nameof(InstanceTag));
         OnPropertyChanged(nameof(InstanceSubtitle));
@@ -156,6 +203,7 @@ public partial class HomePageViewModel : ViewModelBase
 
         RebuildServers();
         _ = RefreshServersAsync();
+        RefreshUpdateState();
     }
 
     public void NotifyGameRunningChanged()
@@ -163,8 +211,8 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(PlayLabel));
         OnPropertyChanged(nameof(PlayIcon));
         OnPropertyChanged(nameof(StatusColor));
-        OnPropertyChanged(nameof(CanEditRam));
         PlayCommand.NotifyCanExecuteChanged();
+        UpdateModpackCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -192,9 +240,36 @@ public partial class HomePageViewModel : ViewModelBase
     {
         Servers.Clear();
         if (Active is not null)
+        {
+            // Com um único servidor, entra nele automaticamente por defeito.
+            if (Active.Servers.Count == 1 && string.IsNullOrEmpty(Active.AutoJoinServerName))
+            {
+                Active.AutoJoinServerName = Active.Servers[0].Name;
+                _shell.SaveInstance(Active);
+            }
+
             foreach (var server in Active.Servers)
-                Servers.Add(new ServerStatusItem(server));
+                Servers.Add(new ServerStatusItem(server, OnToggleAutoJoin)
+                {
+                    IsAutoJoin = server.Name == Active.AutoJoinServerName
+                });
+        }
+
         OnPropertyChanged(nameof(HasServer));
+    }
+
+    /// <summary>
+    ///     Alterna o servidor de entrada automática (comportamento "rádio": só um ativo,
+    ///     e clicar no que já está ativo desliga — passa a abrir no menu principal).
+    /// </summary>
+    private void OnToggleAutoJoin(ServerStatusItem item)
+    {
+        if (Active is null) return;
+        var turnOn = !item.IsAutoJoin;
+        foreach (var s in Servers) s.IsAutoJoin = false;
+        item.IsAutoJoin = turnOn;
+        Active.AutoJoinServerName = turnOn ? item.Server.Name : null;
+        _shell.SaveInstance(Active);
     }
 
     private async Task ServerStatusLoopAsync()
@@ -228,33 +303,6 @@ public partial class HomePageViewModel : ViewModelBase
                 item.Motd = string.Empty;
             }
         }
-    }
-
-    partial void OnInstanceRamChanged(double value)
-    {
-        if (_suppressRam || Active is null) return;
-        Active.RamOverrideMb = (int)value;
-        DebounceSaveRam(Active); // evita gravar a cada "tick" do slider
-    }
-
-    private void DebounceSaveRam(MinecraftInstance instance)
-    {
-        _ramSaveCts?.Cancel();
-        _ramSaveCts = new CancellationTokenSource();
-        var ct = _ramSaveCts.Token;
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(600, ct);
-            }
-            catch
-            {
-                return;
-            }
-
-            if (!ct.IsCancellationRequested) _shell.SaveInstance(instance);
-        }, ct);
     }
 
     private bool CanPlay()
@@ -301,14 +349,15 @@ public partial class HomePageViewModel : ViewModelBase
 
         try
         {
-            var autoJoin = instance.Servers.Count > 0 ? instance.Servers[0] : null;
+            var autoJoin = instance.Servers
+                .FirstOrDefault(s => s.Name == instance.AutoJoinServerName);
 
             var process = await _launcher.PrepareAsync(
                 LauncherPaths.InstanceGameDir(instance.Id),
                 instance.MinecraftVersion,
                 instance.NeoForgeVersion,
                 session,
-                instance.RamOverrideMb ?? _game.AllocatedRamMb,
+                _shell.ClampRam(instance.RamOverrideMb ?? _game.AllocatedRamMb),
                 string.IsNullOrWhiteSpace(instance.JavaPathOverride) ? _game.JavaPath : instance.JavaPathOverride,
                 progress,
                 _launchCts.Token,
@@ -422,16 +471,30 @@ public partial class HomePageViewModel : ViewModelBase
 /// <summary>Estado de um servidor do modpack (para a lista na tela principal).</summary>
 public partial class ServerStatusItem : ViewModelBase
 {
+    private readonly Action<ServerStatusItem>? _onToggleAutoJoin;
+
     [ObservableProperty] private string _motd = string.Empty;
     [ObservableProperty] private string _statusColor = "#6B7280";
     [ObservableProperty] private string _statusText = "A verificar...";
 
-    public ServerStatusItem(ServerEntry server)
+    /// <summary>Este servidor é o de entrada automática ao iniciar o jogo.</summary>
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(AutoJoinLabel))]
+    private bool _isAutoJoin;
+
+    public string AutoJoinLabel => IsAutoJoin
+        ? "Entra automaticamente neste servidor ao iniciar (clica para desligar)"
+        : "Entrar automaticamente neste servidor ao iniciar o jogo";
+
+    public ServerStatusItem(ServerEntry server, Action<ServerStatusItem>? onToggleAutoJoin = null)
     {
         Server = server;
         Name = server.Name;
+        _onToggleAutoJoin = onToggleAutoJoin;
     }
 
     public ServerEntry Server { get; }
     public string Name { get; }
+
+    [RelayCommand]
+    private void ToggleAutoJoin() => _onToggleAutoJoin?.Invoke(this);
 }
