@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -28,6 +29,9 @@ public class ModpackManifest
 
     /// <summary>Nº de servidores (preenchido no resumo da lista).</summary>
     public int ServerCount { get; set; }
+
+    /// <summary>Última modificação no servidor (UTC). Vem no resumo; usado p/ sync incremental.</summary>
+    public DateTime UpdatedAt { get; set; }
 
     public List<ModEntry> Mods { get; set; } = new();
     public List<ServerEntry> Servers { get; set; } = new();

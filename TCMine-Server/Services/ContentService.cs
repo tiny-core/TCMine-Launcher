@@ -41,7 +41,7 @@ public class ContentService
             .OrderBy(m => m.Name)
             .Select(m => new ModpackSummaryDto(
                 m.Id, m.Name, m.Version, m.Minecraft, m.Neoforge, m.Description,
-                m.Mods.Count, m.Servers.Count))
+                m.Mods.Count, m.Servers.Count, m.UpdatedAt))
             .ToListAsync(ct);
     }
 

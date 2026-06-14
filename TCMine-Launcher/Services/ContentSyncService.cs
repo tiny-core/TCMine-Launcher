@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,25 +9,25 @@ namespace TCMine_Launcher.Services;
 
 /// <summary>
 ///     Sincroniza o estado das instâncias oficiais com o servidor — lógica de domínio
-///     (sem UI). Para cada instância oficial:
+///     (sem UI). Usa o RESUMO (<c>/modpacks</c>) como fonte barata:
 ///     <list type="bullet">
-///         <item>marca/limpa <see cref="MinecraftInstance.IsDiscontinued" /> conforme o
-///         modpack ainda está publicado (manifesto 404 ⇒ descontinuado);</item>
-///         <item>Quando a versão é a mesma, aplica metadados baratos (nome, descrição,
-///         servidores) que possam ter mudado sem subir a versão.</item>
+///         <item>modpack ausente do resumo (despublicado) ⇒ <see cref="MinecraftInstance.IsDiscontinued" />;</item>
+///         <item>só vai buscar o manifesto completo (e aplica metadados) quando o
+///         <c>UpdatedAt</c> do modpack é mais recente do que o já sincronizado
+///         (<see cref="MinecraftInstance.MetaSyncedAt" />) — sync incremental.</item>
 ///     </list>
-///     Mods e versões continuam a exigir reinstalação explícita (envolvem downloads).
-///     Best-effort: erros de rede deixam a instância inalterada.
+///     Mods e versões continuam a exigir reinstalação explícita. Best-effort: se o
+///     servidor estiver indisponível, nada muda. A gravação é delegada (testável).
 /// </summary>
 public class ContentSyncService
 {
-    private readonly InstanceService _instances;
-    private readonly ManifestService _manifest;
+    private readonly IManifestSource _manifest;
+    private readonly Action<MinecraftInstance> _persist;
 
-    public ContentSyncService(ManifestService manifest, InstanceService instances)
+    public ContentSyncService(IManifestSource manifest, Action<MinecraftInstance> persist)
     {
         _manifest = manifest;
-        _instances = instances;
+        _persist = persist;
     }
 
     /// <summary>
@@ -39,27 +40,30 @@ public class ContentSyncService
     {
         if (!_manifest.IsConfigured) return false;
 
+        List<ModpackManifest> summaries;
+        try
+        {
+            summaries = await _manifest.GetModpacksAsync(ct);
+        }
+        catch
+        {
+            return false; // servidor offline / sem rede — não muda nada
+        }
+
+        var byId = summaries
+            .Where(s => !string.IsNullOrEmpty(s.Id))
+            .ToDictionary(s => s.Id);
+
         var changed = false;
         foreach (var instance in instances.ToList())
         {
             if (!instance.IsOfficial || string.IsNullOrEmpty(instance.ModpackId)) continue;
 
-            ModpackManifest? manifest;
-            try
-            {
-                manifest = await _manifest.GetManifestAsync(instance.ModpackId, ct);
-            }
-            catch
-            {
-                continue; // servidor offline / sem rede — ignora esta instância
-            }
-
             var dirty = false;
 
-            if (manifest is null)
+            if (!byId.TryGetValue(instance.ModpackId, out var summary))
             {
-                // Modpack despublicado/removido — marca como descontinuado (sem mexer no
-                // snapshot: mods/servidores/mundos do jogador ficam intactos).
+                // Não está na lista de publicados ⇒ descontinuado (mantém o snapshot local).
                 if (!instance.IsDiscontinued)
                 {
                     instance.IsDiscontinued = true;
@@ -74,19 +78,46 @@ public class ContentSyncService
                     dirty = true;
                 }
 
-                // Só metadados quando a VERSÃO é a mesma; versão nova é update a sério.
-                if (manifest.Version == instance.ManifestVersion)
-                    dirty |= ApplyMetadata(instance, manifest);
+                // Só busca o manifesto completo se o modpack mudou desde o último sync.
+                if (instance.MetaSyncedAt is null || summary.UpdatedAt > instance.MetaSyncedAt)
+                    dirty |= await ApplyChangedAsync(instance, summary, ct);
             }
 
             if (dirty)
             {
-                _instances.Save(instance);
+                _persist(instance);
                 changed = true;
             }
         }
 
         return changed;
+    }
+
+    /// <summary>
+    ///     Vai buscar o manifesto completo de uma instância cujo modpack mudou e aplica
+    ///     metadados (se a versão for a mesma). Marca <see cref="MinecraftInstance.MetaSyncedAt" />.
+    /// </summary>
+    private async Task<bool> ApplyChangedAsync(MinecraftInstance instance, ModpackManifest summary,
+        CancellationToken ct)
+    {
+        ModpackManifest? full;
+        try
+        {
+            full = await _manifest.GetManifestAsync(instance.ModpackId!, ct);
+        }
+        catch
+        {
+            return false; // rede falhou a meio — tenta de novo no próximo sync
+        }
+
+        if (full is null) return false;
+
+        // Só metadados quando a VERSÃO é a mesma; versão nova é um update a sério.
+        if (full.Version == instance.ManifestVersion)
+            ApplyMetadata(instance, full);
+
+        instance.MetaSyncedAt = summary.UpdatedAt;
+        return true; // MetaSyncedAt mudou ⇒ há sempre algo a persistir
     }
 
     /// <summary>Aplica nome/descrição/servidores do manifesto à instância (em memória).</summary>

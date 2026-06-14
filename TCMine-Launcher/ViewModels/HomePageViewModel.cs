@@ -19,10 +19,8 @@ namespace TCMine_Launcher.ViewModels;
 /// </summary>
 public partial class HomePageViewModel : ViewModelBase
 {
-    private readonly PlayerConfigService _configSync = new();
     private readonly GameProfile _game;
-    private readonly GameLauncher _launcher = new();
-    private readonly OverridesInstaller _overrides = new();
+    private readonly LaunchOrchestrator _orchestrator;
     private readonly MinecraftServerPinger _pinger = new();
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
@@ -48,6 +46,7 @@ public partial class HomePageViewModel : ViewModelBase
         _player = player;
         _game = game;
         _shell = shell;
+        _orchestrator = new LaunchOrchestrator(shell.ModInstaller);
 
         LaunchStatus = DefaultStatus();
 
@@ -363,34 +362,15 @@ public partial class HomePageViewModel : ViewModelBase
 
         try
         {
-            var autoJoin = instance.Servers
-                .FirstOrDefault(s => s.Name == instance.AutoJoinServerName);
+            var javaPath = string.IsNullOrWhiteSpace(instance.JavaPathOverride)
+                ? _game.JavaPath
+                : instance.JavaPathOverride;
 
-            var process = await _launcher.PrepareAsync(
-                LauncherPaths.InstanceGameDir(instance.Id),
-                instance.MinecraftVersion,
-                instance.NeoForgeVersion,
-                session,
+            // Pipeline de preparação (mods + overrides + pull de configs) no orquestrador.
+            var process = await _orchestrator.PrepareAsync(
+                instance, session,
                 _shell.ClampRam(instance.RamOverrideMb ?? _game.AllocatedRamMb),
-                string.IsNullOrWhiteSpace(instance.JavaPathOverride) ? _game.JavaPath : instance.JavaPathOverride,
-                progress,
-                _launchCts.Token,
-                instance.Servers,
-                autoJoin);
-
-            // Com overrides não fazemos prune (eles podem trazer jars próprios).
-            await _shell.ModInstaller.EnsureModsAsync(
-                instance, progress, _launchCts.Token, instance.IsOfficial && !instance.HasOverrides);
-
-            // Aplica o bundle de overrides do modpack (configs/resourcepacks/options),
-            // uma vez por versão. Sobreposto por cima dos mods já instalados.
-            ((IProgress<LaunchProgress>)progress).Report(new LaunchProgress(
-                LaunchState.DownloadingAssets, 100, "A aplicar configuração do modpack..."));
-            await _overrides.EnsureAsync(instance, _game.ServerUrl, _launchCts.Token);
-
-            // Repõe as configs do jogador do servidor se forem mais recentes (sync entre
-            // PCs). Server-wins por timestamp; só atua em modpacks oficiais + conta Microsoft.
-            await _configSync.PullAsync(instance, session.UUID, _game.ServerUrl, _launchCts.Token);
+                javaPath, _game.ServerUrl, progress, _launchCts.Token);
 
             // Ignora updates de progresso atrasados (a partir daqui o estado é o do jogo).
             _acceptProgress = false;
@@ -454,7 +434,7 @@ public partial class HomePageViewModel : ViewModelBase
         _shell.MarkGameStopped();
 
         // Guarda no servidor as configs alteradas na sessão (keybinds, waypoints, …).
-        await _configSync.PushAsync(instance, uuid, _game.ServerUrl);
+        await _orchestrator.PushConfigsAsync(instance, uuid, _game.ServerUrl);
 
         if (exitCode != 0)
         {

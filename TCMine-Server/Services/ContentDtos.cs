@@ -13,7 +13,8 @@ public record ModpackSummaryDto(
     string Neoforge,
     string Description,
     int ModCount,
-    int ServerCount);
+    int ServerCount,
+    DateTime UpdatedAt);
 
 public record ModpackManifestDto(
     string Id,

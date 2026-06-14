@@ -101,7 +101,7 @@ public partial class MainWindowViewModel : ViewModelBase
         NewsFeed = new NewsService(() => _game.ServerUrl);
         ContentWatcher = new ContentWatcher(() => _game.ServerUrl);
         _updater = new AppUpdater(() => _game.ServerUrl);
-        _contentSync = new ContentSyncService(Manifest, _instances);
+        _contentSync = new ContentSyncService(Manifest, _instances.Save);
 
         LoadInstances();
 

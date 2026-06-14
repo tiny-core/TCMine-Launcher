@@ -25,6 +25,9 @@ public class ModpackEntity
     /// <summary>Tem um bundle de overrides (configs/resourcepacks/options) guardado.</summary>
     public bool HasOverrides { get; set; }
 
+    /// <summary>Última modificação (UTC). Exposto no resumo p/ sync incremental do launcher.</summary>
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
     public List<ModEntryEntity> Mods { get; set; } = new();
     public List<ServerEntryEntity> Servers { get; set; } = new();
 }

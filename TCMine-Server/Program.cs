@@ -82,6 +82,29 @@ builder.Services.AddHttpClient("curseforge", client =>
 });
 builder.Services.AddMemoryCache();
 
+// ── Rate limiting (por IP) dos endpoints públicos ────────────────────────────
+// Protege o proxy CurseForge e o PUT de configs do jogador contra abuso.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("public", ctx =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1), PermitLimit = 120, QueueLimit = 0
+            }));
+
+    options.AddPolicy("configs", ctx =>
+        System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+            {
+                Window = TimeSpan.FromMinutes(1), PermitLimit = 30, QueueLimit = 0
+            }));
+});
+
 // CORS aberto por defeito (proxy de leitura). Restringe via CF_ALLOWED_ORIGINS.
 builder.Services.AddCors(options =>
 {
@@ -123,6 +146,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseCors();
+app.UseRateLimiter();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -209,7 +233,7 @@ app.MapGet("/v1/{**path}", async (
         log.LogError(ex, "Falha a contactar o CurseForge.");
         return Results.Problem("Falha a contactar o CurseForge.", statusCode: 502);
     }
-});
+}).RequireRateLimiting("public");
 
 // ── Conteúdo público (BD) — mesmo contrato JSON de antes ─────────────────────
 app.MapGet("/news", (ContentService content, CancellationToken ct) =>
@@ -269,7 +293,7 @@ app.MapPut("/players/{uuid}/configs/{modpackId}", async (
 
     var updatedAt = await store.UpsertAsync(uuid, modpackId, ms.ToArray(), ct);
     return Results.Json(new { updatedAt });
-});
+}).RequireRateLimiting("configs");
 
 // ── Stream de eventos (SSE) — avisa os launchers que o conteúdo mudou ─────────
 // O launcher liga-se a /events e recarrega novidades/modpacks quando recebe uma

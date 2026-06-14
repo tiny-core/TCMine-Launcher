@@ -56,6 +56,12 @@ public class MinecraftInstance
     /// </summary>
     public bool IsDiscontinued { get; set; }
 
+    /// <summary>
+    ///     <c>UpdatedAt</c> do modpack já refletido localmente (sync incremental): evita
+    ///     ir buscar o manifesto completo se o servidor não mudou desde a última vez.
+    /// </summary>
+    public DateTime? MetaSyncedAt { get; set; }
+
     /// <summary>Mods (CurseForge) associados a esta instância.</summary>
     public List<ModEntry> Mods { get; set; } = new();
 

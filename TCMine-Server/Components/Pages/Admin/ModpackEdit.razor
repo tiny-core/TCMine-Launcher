@@ -427,6 +427,7 @@ else
                 db.Modpacks.Add(tracked);
             }
 
+            tracked.UpdatedAt = DateTime.UtcNow; // marca a alteração p/ sync incremental
             tracked.Name = _m.Name;
             tracked.Version = _m.Version;
             tracked.Minecraft = _m.Minecraft;

@@ -22,6 +22,9 @@
   <ItemGroup>
     <Compile Include="..\TCMine-Launcher\Models\**\*.cs"
              Link="Models\%(RecursiveDir)%(Filename)%(Extension)" />
+    <!-- ContentSyncService é lógica pura (depende só dos Models + IManifestSource). -->
+    <Compile Include="..\TCMine-Launcher\Services\ContentSyncService.cs" Link="Services\ContentSyncService.cs" />
+    <Compile Include="..\TCMine-Launcher\Services\IManifestSource.cs" Link="Services\IManifestSource.cs" />
   </ItemGroup>
 
 </Project>

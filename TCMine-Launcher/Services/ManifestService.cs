@@ -15,7 +15,7 @@ namespace TCMine_Launcher.Services;
 ///     e o manifesto completo de um modpack (<c>/modpacks/{id}</c>). Usa o mesmo
 ///     URL base do servidor (Definições → URL do servidor TCMine).
 /// </summary>
-public class ManifestService
+public class ManifestService : IManifestSource
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
