@@ -95,9 +95,23 @@
                     <StackPanel VerticalAlignment="Bottom"
                                 Margin="30,0,30,28"
                                 Spacing="0">
-                        <Border Classes="tag">
-                            <TextBlock Text="{Binding InstanceTag}" />
-                        </Border>
+                        <StackPanel Orientation="Horizontal" 
+                                    Spacing="8">
+                            <Border Classes="tag">
+                                <TextBlock Text="{Binding InstanceTag}" />
+                            </Border>
+                            <Border Background="{StaticResource DangerBg}" 
+                                    CornerRadius="5" 
+                                    Padding="8,3"
+                                    VerticalAlignment="Center"
+                                    IsVisible="{Binding IsActiveDiscontinued}"
+                                    ToolTip.Tip="{Binding DiscontinuedTooltip}">
+                                <TextBlock Text="DESCONTINUADO" 
+                                           FontSize="10" 
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource Danger}" />
+                            </Border>
+                        </StackPanel>
                         <TextBlock Text="{Binding InstanceName}"
                                    Classes="hero-title" 
                                    Margin="0,12,0,0" />

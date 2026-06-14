@@ -107,7 +107,7 @@
                         <TextBlock Classes="section-label"
                                    Text="URL DO SERVIDOR"
                                    Margin="2,16,0,7" />
-                        <TextBox Classes="field" 
+                        <TextBox Classes="field"
                                  Text="{Binding ServerUrl}"
                                  PlaceholderText="https://o-teu-servidor" />
                         <TextBlock Classes="muted"
@@ -116,6 +116,39 @@
                                    TextWrapping="Wrap"
                                    Text="Serve os modpacks oficiais e o proxy do CurseForge (mods). Necessário para a aba Modpacks e a pesquisa de mods." />
                     </StackPanel>
+                </Border>
+
+                <!-- Guardar (RAM + Java + URL gravam só aqui) -->
+                <Border Classes="panel">
+                    <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                        <TextBlock Grid.Column="0"
+                                   Classes="muted"
+                                   FontSize="11.5"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   IsVisible="{Binding SettingsStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                   Text="{Binding SettingsStatus}" />
+                        <Button Grid.Column="1"
+                                Classes="play-btn"
+                                Height="40"
+                                MinWidth="180"
+                                HorizontalContentAlignment="Center"
+                                IsEnabled="{Binding IsDirty}"
+                                Command="{Binding SaveSettingsCommand}">
+                            <StackPanel Orientation="Horizontal" 
+                                        Spacing="8"
+                                        VerticalAlignment="Center">
+                                <Ellipse Classes="spinner"
+                                         Width="13"
+                                         Height="13"
+                                         IsVisible="{Binding IsSyncing}" />
+                                <TextBlock Text="Guardar definições" 
+                                           FontSize="12.5"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
                 </Border>
 
             </StackPanel>

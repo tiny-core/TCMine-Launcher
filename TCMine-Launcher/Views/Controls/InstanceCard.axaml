@@ -41,9 +41,21 @@
                     <TextBlock Text="{Binding Name}"
                                Classes="card-title"
                                TextTrimming="CharacterEllipsis" />
-                    <Border Classes="tag">
-                        <TextBlock Text="{Binding SourceLabel}" />
-                    </Border>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="6">
+                        <Border Classes="tag">
+                            <TextBlock Text="{Binding SourceLabel}" />
+                        </Border>
+                        <Border Background="{StaticResource DangerBg}" 
+                                CornerRadius="5" 
+                                Padding="7,3"
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding IsDiscontinued}"
+                                ToolTip.Tip="Este modpack foi descontinuado e não receberá mais atualizações.">
+                            <TextBlock Text="DESCONTINUADO" FontSize="9.5" FontWeight="SemiBold"
+                                       Foreground="{StaticResource Danger}" />
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
 
@@ -111,27 +123,43 @@
                     </Button>
                 </Grid>
 
-                <!-- Oficial: não editável; só permite criar uma cópia -->
-                <Button Classes="outline-btn"
-                        Height="34"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        IsVisible="{Binding IsOfficial}"
-                        IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
-                        Command="{Binding #CardRoot.Owner.DuplicateCommand}"
-                        CommandParameter="{Binding}">
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="6"
-                                HorizontalAlignment="Center">
-                        <PathIcon Data="{StaticResource IconAdd}"
-                                  Width="13"
-                                  Height="13"
-                                  VerticalAlignment="Center" />
-                        <TextBlock Text="Criar cópia editável"
+                <!-- Oficial: não editável; criar cópia editável + eliminar -->
+                <Grid ColumnDefinitions="*,8,Auto"
+                      IsVisible="{Binding IsOfficial}">
+                    <Button Grid.Column="0"
+                            Classes="outline-btn"
+                            Height="34"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
+                            Command="{Binding #CardRoot.Owner.DuplicateCommand}"
+                            CommandParameter="{Binding}">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="6"
+                                    HorizontalAlignment="Center">
+                            <PathIcon Data="{StaticResource IconAdd}"
+                                      Width="13"
+                                      Height="13"
+                                      VerticalAlignment="Center" />
+                            <TextBlock Text="Criar cópia editável"
+                                       FontSize="12"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Column="2"
+                            Classes="outline-btn"
+                            Height="34"
+                            HorizontalContentAlignment="Center"
+                            IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
+                            Command="{Binding #CardRoot.Owner.DeleteCommand}"
+                            CommandParameter="{Binding}"
+                            ToolTip.Tip="Eliminar esta instância local">
+                        <TextBlock Text="Eliminar"
                                    FontSize="12"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
+                                   Foreground="{StaticResource Danger}" />
+                    </Button>
+                </Grid>
             </Grid>
 
             <!-- Pasta + Exportar (todas as instâncias) -->

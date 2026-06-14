@@ -233,10 +233,9 @@
             return;
         }
 
-        db.Modpacks.Add(new ModpackEntity { Id = id, Name = _newName.Trim(), IsPublished = true });
-        await db.SaveChangesAsync();
-        Notifier.Bump(); // avisa os launchers ligados
-        Nav.NavigateTo($"/admin/modpacks/{id}");
+        // Não cria já na BD — abre o editor como rascunho; só é criado ao clicar em
+        // Guardar (evita modpacks vazios a aparecerem logo no launcher).
+        Nav.NavigateTo($"/admin/modpacks/{id}?name={Uri.EscapeDataString(_newName.Trim())}");
     }
 
     private async Task DeleteAsync(ModpackEntity m)

@@ -18,6 +18,7 @@ namespace TCMine_Launcher.ViewModels;
 public partial class MainWindowViewModel
 {
     private readonly InstanceService _instances = new();
+    private readonly ContentSyncService _contentSync;
 
     /// <summary>Instância atualmente selecionada (a que a Home lança).</summary>
     [ObservableProperty] private MinecraftInstance? _activeInstance;
@@ -190,17 +191,29 @@ public partial class MainWindowViewModel
         _instances.Delete(instance);
         Instances.Remove(instance);
 
-        if (ActiveInstance == instance)
+        if (ActiveInstance != instance) return;
+        var fallback = Instances.FirstOrDefault();
+        if (fallback is null)
         {
-            var fallback = Instances.FirstOrDefault();
-            if (fallback is null)
-            {
-                fallback = CreateSeed();
-                Instances.Add(fallback);
-            }
-
-            SelectInstance(fallback);
+            fallback = CreateSeed();
+            Instances.Add(fallback);
         }
+
+        SelectInstance(fallback);
+    }
+
+    /// <summary>
+    ///     Sincroniza os metadados baratos (nome, descrição, servidores) de TODAS as
+    ///     instâncias oficiais a partir do manifesto — para mudanças que NÃO alteram a
+    ///     versão (ex.: servidor removido/adicionado, descrição editada no admin). Mods
+    ///     e versões continuam a exigir o botão "Atualizar" (envolvem downloads).
+    ///     Best-effort: falhas de rede são ignoradas. Chamada ao receber o evento SSE.
+    /// </summary>
+    public async Task SyncOfficialInstancesAsync()
+    {
+        // Lógica de domínio no serviço; o VM só refresca a UI se algo mudou.
+        if (await _contentSync.SyncOfficialAsync(Instances))
+            RefreshInstancesDisplay();
     }
 
     /// <summary>

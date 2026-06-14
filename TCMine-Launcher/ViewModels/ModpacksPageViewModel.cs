@@ -14,7 +14,10 @@ public enum ModpackInstallState
 {
     NotInstalled,
     Installed,
-    UpdateAvailable
+    UpdateAvailable,
+
+    /// <summary>Instalado, mas o modpack já não existe/foi despublicado no servidor.</summary>
+    Discontinued
 }
 
 /// <summary>Item da lista de modpacks: manifesto + estado de instalação local.</summary>
@@ -23,6 +26,7 @@ public partial class ModpackListItem : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InstallLabel))]
     [NotifyPropertyChangedFor(nameof(UpdateAvailable))]
+    [NotifyPropertyChangedFor(nameof(IsDiscontinued))]
     private ModpackInstallState _state;
 
     public ModpackListItem(ModpackManifest manifest, ModpackInstallState state)
@@ -41,10 +45,14 @@ public partial class ModpackListItem : ViewModelBase
 
     public bool UpdateAvailable => State == ModpackInstallState.UpdateAvailable;
 
+    /// <summary>Modpack descontinuado (instalado, mas já não está no servidor).</summary>
+    public bool IsDiscontinued => State == ModpackInstallState.Discontinued;
+
     public string InstallLabel => State switch
     {
         ModpackInstallState.UpdateAvailable => "Atualizar",
         ModpackInstallState.Installed => "Reinstalar",
+        ModpackInstallState.Discontinued => "Indisponível",
         _ => "Instalar"
     };
 }
@@ -107,6 +115,19 @@ public partial class ModpacksPageViewModel : ViewModelBase
             foreach (var modpack in list)
                 Modpacks.Add(new ModpackListItem(modpack, ResolveState(modpack)));
 
+            // Junta as instâncias oficiais cujo modpack já não vem do servidor
+            // (despublicado/removido) — mostra-as como descontinuadas a partir do
+            // snapshot local, para não desaparecerem do catálogo.
+            var catalogIds = list.Select(m => m.Id).ToHashSet();
+            foreach (var instance in _shell.Instances)
+            {
+                if (!instance.IsOfficial || string.IsNullOrEmpty(instance.ModpackId)) continue;
+                if (catalogIds.Contains(instance.ModpackId)) continue;
+
+                Modpacks.Add(new ModpackListItem(
+                    ManifestFromInstance(instance), ModpackInstallState.Discontinued));
+            }
+
             if (Modpacks.Count == 0) StatusMessage = "Nenhum modpack disponível no servidor.";
         }
         catch (Exception ex)
@@ -118,6 +139,19 @@ public partial class ModpacksPageViewModel : ViewModelBase
             IsLoading = false;
         }
     }
+
+    /// <summary>Constrói um manifesto a partir do snapshot local de uma instância oficial.</summary>
+    private static ModpackManifest ManifestFromInstance(MinecraftInstance instance) => new()
+    {
+        Id = instance.ModpackId ?? string.Empty,
+        Name = instance.Name,
+        Version = instance.ManifestVersion ?? string.Empty,
+        Minecraft = instance.MinecraftVersion,
+        Neoforge = instance.NeoForgeVersion,
+        Description = instance.Description,
+        Mods = instance.Mods,
+        Servers = instance.Servers
+    };
 
     private ModpackInstallState ResolveState(ModpackManifest manifest)
     {
@@ -131,6 +165,9 @@ public partial class ModpacksPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task InstallAsync(ModpackListItem item)
     {
+        // Descontinuado: não há manifesto no servidor para (re)instalar.
+        if (item.State == ModpackInstallState.Discontinued) return;
+
         try
         {
             var full = await _manifest.GetManifestAsync(item.Manifest.Id) ?? item.Manifest;

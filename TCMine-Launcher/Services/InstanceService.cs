@@ -17,6 +17,11 @@ public class InstanceService
 {
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
 
+    // Cache de instâncias já instaladas: uma vez instalada, mantém-se instalada até
+    // ser eliminada — por isso só memoizamos positivos (evita enumerar o disco a cada
+    // refresh da UI). Negativos não são cacheados, para refletir um install recente.
+    private readonly HashSet<string> _installedCache = new();
+
     /// <summary>Carrega todas as instâncias válidas, ordenadas pela mais recente jogada.</summary>
     public List<MinecraftInstance> LoadAll()
     {
@@ -78,6 +83,7 @@ public class InstanceService
     /// <summary>Remove uma instância e toda a sua pasta (jogo, mods, saves). Irreversível.</summary>
     public void Delete(MinecraftInstance instance)
     {
+        _installedCache.Remove(instance.Id);
         var dir = LauncherPaths.InstanceDir(instance.Id);
         if (Directory.Exists(dir))
             Directory.Delete(dir, true);
@@ -90,8 +96,12 @@ public class InstanceService
     /// </summary>
     public bool IsInstalled(MinecraftInstance instance)
     {
+        if (_installedCache.Contains(instance.Id)) return true;
+
         var versionsDir = Path.Combine(LauncherPaths.InstanceGameDir(instance.Id), "versions");
-        return Directory.Exists(versionsDir) && Directory.EnumerateDirectories(versionsDir).Any();
+        var installed = Directory.Exists(versionsDir) && Directory.EnumerateDirectories(versionsDir).Any();
+        if (installed) _installedCache.Add(instance.Id);
+        return installed;
     }
 
     /// <summary>Exporta a instância (config + jogo) para um ficheiro zip.</summary>

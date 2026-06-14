@@ -56,10 +56,23 @@
                         IsEnabled="{Binding CanEditRam}"
                         Margin="0,8,0,0" />
 
-                <TextBlock Classes="muted" FontSize="11" 
+                <TextBlock Classes="muted" FontSize="11"
                            Margin="0,4,0,0"
-                           Text="{Binding RamMaximum, 
+                           Text="{Binding RamMaximum,
                            StringFormat='Máx.: {0} MB (RAM do sistema)'}" />
+
+                <Button Classes="play-btn"
+                        Height="38"
+                        Margin="0,18,0,0"
+                        HorizontalAlignment="Right"
+                        MinWidth="130"
+                        HorizontalContentAlignment="Center"
+                        IsEnabled="{Binding RamDirty}"
+                        Command="{Binding SaveRamCommand}">
+                    <TextBlock Text="Guardar"
+                               FontSize="12.5" 
+                               FontWeight="SemiBold" />
+                </Button>
             </StackPanel>
         </Grid>
     </views:WindowChrome>

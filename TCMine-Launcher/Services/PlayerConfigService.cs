@@ -135,18 +135,12 @@ public class PlayerConfigService
         try
         {
             var path = LauncherPaths.ConfigSyncFile(instanceId);
-            if (!File.Exists(path)) return null;
-            using var doc = JsonDocument.Parse(File.ReadAllText(path));
-            if (doc.RootElement.TryGetProperty("updatedAt", out var v) &&
-                v.TryGetDateTimeOffset(out var dto))
-                return dto;
+            return File.Exists(path) ? ParseUpdatedAt(File.ReadAllText(path)) : null;
         }
         catch
         {
-            /* sidecar corrompido — trata como inexistente */
+            return null; // sidecar corrompido — trata como inexistente
         }
-
-        return null;
     }
 
     private static void WriteSidecar(string instanceId, DateTimeOffset updatedAt)

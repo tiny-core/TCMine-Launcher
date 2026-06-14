@@ -12,10 +12,12 @@ public class ContentService
 {
     private static readonly CultureInfo Pt = CultureInfo.GetCultureInfo("pt-PT");
     private readonly IDbContextFactory<AppDbContext> _factory;
+    private readonly OverridesStore _overrides;
 
-    public ContentService(IDbContextFactory<AppDbContext> factory)
+    public ContentService(IDbContextFactory<AppDbContext> factory, OverridesStore overrides)
     {
         _factory = factory;
+        _overrides = overrides;
     }
 
     public async Task<List<NewsDto>> GetNewsAsync(CancellationToken ct = default)
@@ -53,8 +55,9 @@ public class ContentService
 
         if (m is null) return null;
 
+        // HasOverrides deriva do ficheiro real (evita dessincronizar do bool manual).
         return new ModpackManifestDto(
-            m.Id, m.Name, m.Version, m.Minecraft, m.Neoforge, m.Description, m.HasOverrides,
+            m.Id, m.Name, m.Version, m.Minecraft, m.Neoforge, m.Description, _overrides.Exists(m.Id),
             m.RecommendedRamMb,
             m.Mods.Select(x => new ModDto(x.CurseModId, x.FileId, x.Name, x.FileName, x.DownloadUrl,
                 string.IsNullOrEmpty(x.Target) ? "mod" : x.Target)).ToList(),

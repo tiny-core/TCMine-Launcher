@@ -13,8 +13,12 @@
 }
 else
 {
-    <h1>@_m.Name</h1>
+    <h1>@(string.IsNullOrWhiteSpace(_m.Name) ? "Novo modpack" : _m.Name)</h1>
     <p class="muted">Modpack <code>@_m.Id</code> · servido em <code>/modpacks/@_m.Id</code></p>
+    @if (_isNew)
+    {
+        <p class="warn-box">Rascunho ainda não guardado — só é criado (e aparece no launcher) ao clicar em <strong>Guardar</strong>.</p>
+    }
 
     <section class="panel">
         <h2>Detalhes</h2>
@@ -210,7 +214,11 @@ else
 @code {
     [Parameter] public string Id { get; set; } = string.Empty;
 
+    /// <summary>Nome inicial vindo da página de modpacks ao criar um rascunho novo.</summary>
+    [SupplyParameterFromQuery] public string? Name { get; set; }
+
     private ModpackEntity? _m;
+    private bool _isNew; // rascunho ainda não gravado na BD
     private bool _saved;
     private bool _saving;
 
@@ -222,6 +230,13 @@ else
             .Include(m => m.Servers)
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == Id);
+
+        // Não existe na BD → rascunho em memória; só é criado ao clicar em Guardar.
+        if (_m is null)
+        {
+            _isNew = true;
+            _m = new ModpackEntity { Id = Id, Name = Name ?? string.Empty, IsPublished = true };
+        }
     }
 
     // Pesquisa de mods (CurseForge)
@@ -404,7 +419,13 @@ else
                 .Include(m => m.Mods)
                 .Include(m => m.Servers)
                 .FirstOrDefaultAsync(m => m.Id == Id);
-            if (tracked is null) return;
+
+            // Rascunho novo: cria a entidade só agora (ao Guardar).
+            if (tracked is null)
+            {
+                tracked = new ModpackEntity { Id = Id };
+                db.Modpacks.Add(tracked);
+            }
 
             tracked.Name = _m.Name;
             tracked.Version = _m.Version;
@@ -438,6 +459,7 @@ else
             }
 
             Notifier.Bump(); // avisa os launchers ligados
+            _isNew = false; // já existe na BD
             _saved = true;
         }
         finally

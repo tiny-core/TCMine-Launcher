@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -41,12 +42,23 @@ public class ManifestService
             $"{BaseUrl}/modpacks", JsonOptions, ct) ?? new List<ModpackManifest>();
     }
 
-    /// <summary>Manifesto completo de um modpack (mods + servidores).</summary>
+    /// <summary>
+    ///     Manifesto completo de um modpack (mods + servidores). Devolve <c>null</c> se
+    ///     o modpack já não existe / foi despublicado (404) — distinto de um erro de
+    ///     rede, que é propagado (para não marcar instâncias como descontinuadas à toa).
+    /// </summary>
     public async Task<ModpackManifest?> GetManifestAsync(string id, CancellationToken ct = default)
     {
         EnsureConfigured();
-        return await _http.GetFromJsonAsync<ModpackManifest>(
-            $"{BaseUrl}/modpacks/{id}", JsonOptions, ct);
+        try
+        {
+            return await _http.GetFromJsonAsync<ModpackManifest>(
+                $"{BaseUrl}/modpacks/{id}", JsonOptions, ct);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
     }
 
     private void EnsureConfigured()

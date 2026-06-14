@@ -89,6 +89,13 @@ public partial class HomePageViewModel : ViewModelBase
                 ? "Modpack oficial do servidor TCMine"
                 : "Instância personalizada";
 
+    /// <summary>O modpack oficial da instância ativa foi descontinuado no servidor.</summary>
+    public bool IsActiveDiscontinued => Active?.IsDiscontinued ?? false;
+
+    /// <summary>Tooltip do badge de descontinuado.</summary>
+    public string DiscontinuedTooltip =>
+        "Este modpack foi descontinuado e não receberá mais atualizações.";
+
     // ── Estado de instalação / execução ──────────────────────────
     public bool IsInstalled => Active is not null && _shell.IsInstanceInstalled(Active);
 
@@ -203,6 +210,7 @@ public partial class HomePageViewModel : ViewModelBase
         OnPropertyChanged(nameof(InstanceSubtitle));
         OnPropertyChanged(nameof(InstanceSummary));
         OnPropertyChanged(nameof(InstanceIdShort));
+        OnPropertyChanged(nameof(IsActiveDiscontinued));
         RefreshInstallState();
 
         if (!IsLaunching) LaunchStatus = DefaultStatus();
@@ -350,7 +358,7 @@ public partial class HomePageViewModel : ViewModelBase
             LaunchProgress = p.Percent;
             LaunchStatus = p.Message;
             LaunchLog.Add($"[{p.Percent,3:0}%] {p.Message}");
-            _shell.SetBusy(p.IsActive, p.Percent, p.Message);
+            _shell.SetBusy(p.IsActive, p.Message);
         });
 
         try
@@ -423,7 +431,7 @@ public partial class HomePageViewModel : ViewModelBase
             _launchCts = null;
             LaunchProgress = 0;
             IsLaunching = false;
-            _shell.SetBusy(false, 0, "Pronto");
+            _shell.SetBusy(false, "Pronto");
             RefreshInstallState();
         }
     }

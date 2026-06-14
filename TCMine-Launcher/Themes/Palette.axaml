@@ -60,6 +60,8 @@
 
     <!-- ── Perigo / destrutivo ─────────────────────────────────────── -->
     <SolidColorBrush x:Key="Danger" Color="#F87171" />
+    <SolidColorBrush x:Key="DangerText" Color="#F87171" />
+    <SolidColorBrush x:Key="DangerBg" Color="#3A1212" />
     <SolidColorBrush x:Key="DangerBorder" Color="#7F1D1D" />
     <SolidColorBrush x:Key="DangerSoft" Color="#FCA5A5" />
 </ResourceDictionary>

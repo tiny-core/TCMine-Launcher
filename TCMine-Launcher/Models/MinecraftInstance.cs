@@ -50,6 +50,12 @@ public class MinecraftInstance
     /// <summary>Versão do manifesto cujos overrides já foram aplicados (evita reaplicar).</summary>
     public string? OverridesVersion { get; set; }
 
+    /// <summary>
+    ///     O modpack oficial de origem já não está publicado no servidor (descontinuado).
+    ///     Definido pela sincronização; mostra um badge e deixa de receber atualizações.
+    /// </summary>
+    public bool IsDiscontinued { get; set; }
+
     /// <summary>Mods (CurseForge) associados a esta instância.</summary>
     public List<ModEntry> Mods { get; set; } = new();
 

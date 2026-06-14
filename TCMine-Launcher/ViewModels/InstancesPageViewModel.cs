@@ -121,7 +121,7 @@ public partial class InstancesPageViewModel : ViewModelBase
         {
             Log.Error(ex, "Falha na operação de instância: {Status}", status);
             // Erro na barra de estado global (persiste após esconder a faixa de progresso).
-            _shell.SetBusy(false, 0, "Erro: " + ex.Message);
+            _shell.SetBusy(false, "Erro: " + ex.Message);
         }
         finally
         {
@@ -132,12 +132,15 @@ public partial class InstancesPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task Delete(MinecraftInstance instance)
     {
-        // Instâncias oficiais não podem ser eliminadas pela UI.
-        if (instance.IsOfficial) return;
+        // Instâncias oficiais também podem ser eliminadas (ex.: limpar packs
+        // descontinuados); se o modpack ainda existir, pode reinstalar-se na aba Modpacks.
+        var extra = instance.IsOfficial
+            ? " O modpack pode ser reinstalado na aba Modpacks (se ainda estiver disponível)."
+            : string.Empty;
 
         var confirmed = await _shell.ConfirmAsync(
             "Eliminar instância",
-            $"Eliminar \"{instance.Name}\"? Isto remove a pasta (mods, mundos) e é irreversível.");
+            $"Eliminar \"{instance.Name}\"? Isto remove a pasta (mods, mundos) e é irreversível.{extra}");
 
         if (confirmed)
             _shell.DeleteInstance(instance);

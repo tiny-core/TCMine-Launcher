@@ -44,8 +44,6 @@ public partial class MainWindowViewModel : ViewModelBase
     // ── Estado de autenticação / navegação ───────────────────────
     [ObservableProperty] private ViewModelBase _currentPage;
 
-    [ObservableProperty] private double _globalProgress;
-
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamMbDecimal))] [NotifyPropertyChangedFor(nameof(RamDisplay))]
     private double _instanceRam = 4096;
 
@@ -66,7 +64,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private string _latestVersion = string.Empty;
 
     [ObservableProperty] private string? _loginError;
-    private CancellationTokenSource? _ramSaveCts;
+
+    /// <summary>A RAM da instância ativa foi alterada e ainda não foi gravada em disco.</summary>
+    [ObservableProperty] private bool _ramDirty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsHomeSelected))]
@@ -101,6 +101,7 @@ public partial class MainWindowViewModel : ViewModelBase
         NewsFeed = new NewsService(() => _game.ServerUrl);
         ContentWatcher = new ContentWatcher(() => _game.ServerUrl);
         _updater = new AppUpdater(() => _game.ServerUrl);
+        _contentSync = new ContentSyncService(Manifest, _instances);
 
         LoadInstances();
 
@@ -119,6 +120,9 @@ public partial class MainWindowViewModel : ViewModelBase
         ContentWatcher.ConnectionChanged += OnServerConnectionChanged;
         ContentWatcher.Start();
         ServerState = ContentWatcher.State;
+        // A sincronização de metadados é disparada quando a ligação SSE fica ligada
+        // (ver OnServerConnectionChanged) — cobre o caso de o servidor subir depois
+        // do launcher, em vez de tentar (e falhar) logo no arranque.
 
         // Se ficou um Minecraft a correr de uma sessão anterior, deteta-o.
         DetectRunningGame();
@@ -256,34 +260,26 @@ public partial class MainWindowViewModel : ViewModelBase
             ? _game.AllocatedRamMb
             : ClampRam(value.RamOverrideMb ?? _game.AllocatedRamMb);
         _suppressRam = false;
+        RamDirty = false; // a nova instância arranca sem alterações por gravar
         OnPropertyChanged(nameof(CanEditRam));
     }
 
     partial void OnInstanceRamChanged(double value)
     {
         if (_suppressRam || ActiveInstance is null) return;
+        // Só altera em memória (o launch já usa este valor); a gravação em disco
+        // acontece no botão "Guardar" da janela de memória.
         ActiveInstance.RamOverrideMb = (int)value;
-        DebounceSaveRam(ActiveInstance); // evita gravar a cada "tick" do slider
+        RamDirty = true;
     }
 
-    private void DebounceSaveRam(MinecraftInstance instance)
+    /// <summary>Grava em disco a RAM da instância ativa (botão da janela de memória).</summary>
+    [RelayCommand]
+    private void SaveRam()
     {
-        _ramSaveCts?.Cancel();
-        _ramSaveCts = new CancellationTokenSource();
-        var ct = _ramSaveCts.Token;
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(600, ct);
-            }
-            catch
-            {
-                return;
-            }
-
-            if (!ct.IsCancellationRequested) SaveInstance(instance);
-        }, ct);
+        if (ActiveInstance is null) return;
+        SaveInstance(ActiveInstance);
+        RamDirty = false;
     }
 
     /// <summary>Regista/limpa o jogo em execução (instância + PID) para deteção ao reabrir.</summary>
@@ -356,18 +352,68 @@ public partial class MainWindowViewModel : ViewModelBase
     ///     Conservador: não altera instâncias já instaladas — isso fica para o botão
     ///     "Atualizar".
     /// </summary>
+    private CancellationTokenSource? _contentDebounceCts;
+
     private void OnServerContentChanged()
     {
-        Modpacks.Begin();
-        News.Reload();
-        Home.RefreshUpdateState();
-        Log.Debug("Conteúdo do servidor mudou — novidades/modpacks recarregados");
+        // Coalesce rajadas de eventos (ex.: guardar mods + servidores dispara vários
+        // Bumps) num só refresh, poupando recargas de catálogo e pedidos de manifesto.
+        _contentDebounceCts?.Cancel();
+        _contentDebounceCts = new CancellationTokenSource();
+        _ = DebouncedContentRefreshAsync(_contentDebounceCts.Token);
     }
 
-    /// <summary>A ligação SSE ao servidor mudou de estado — atualiza o indicador.</summary>
+    private async Task DebouncedContentRefreshAsync(CancellationToken ct)
+    {
+        try { await Task.Delay(400, ct); }
+        catch (OperationCanceledException) { return; }
+
+        News.Reload();
+        await SyncAndRefreshAsync();
+        Log.Debug("Conteúdo do servidor mudou — novidades/modpacks/instâncias sincronizados");
+    }
+
+    /// <summary>
+    ///     Aplica mudanças de metadados (servidores/descrição) a TODAS as instâncias
+    ///     oficiais e recarrega o catálogo e o banner de atualização. Corre na thread
+    ///     da UI (continuações do await retomam no contexto capturado).
+    /// </summary>
+    private async Task SyncAndRefreshAsync()
+    {
+        Modpacks.Begin();
+        await SyncOfficialInstancesAsync();
+        Home.RefreshUpdateState();
+    }
+
+    /// <summary>
+    ///     Reaplica o URL do servidor: reinicia o stream de eventos (reconecta ao novo
+    ///     URL) e re-sincroniza conteúdo e metadados. Chamado pelo botão
+    ///     "Guardar e atualizar" nas Definições.
+    /// </summary>
+    public async Task ReconnectAndSyncAsync()
+    {
+        ContentWatcher.Stop();
+        ContentWatcher.Start();
+        ServerState = ContentWatcher.State;
+
+        Modpacks.Begin();
+        News.Reload();
+        await SyncOfficialInstancesAsync();
+        Home.RefreshUpdateState();
+    }
+
+    /// <summary>
+    ///     A ligação SSE mudou de estado — atualiza o indicador e, ao (re)ligar,
+    ///     sincroniza o conteúdo/metadados. Cobre o servidor que sobe depois do launcher
+    ///     e reconexões após quebra de rede.
+    /// </summary>
     private void OnServerConnectionChanged()
     {
+        var was = ServerState;
         ServerState = ContentWatcher.State;
+
+        if (ServerState == ServerConnectionState.Connected && was != ServerConnectionState.Connected)
+            _ = SyncAndRefreshAsync();
     }
 
     private async Task CheckForUpdateAsync()
@@ -492,11 +538,10 @@ public partial class MainWindowViewModel : ViewModelBase
         _settings.Save(_game);
     }
 
-    /// <summary>Atualiza o progresso global mostrado na barra de estado.</summary>
-    public void SetBusy(bool busy, double progress, string status)
+    /// <summary>Atualiza o estado ocupado + mensagem na barra de estado.</summary>
+    public void SetBusy(bool busy, string status)
     {
         IsBusy = busy;
-        GlobalProgress = progress;
         StatusMessage = status;
     }
 }

@@ -32,15 +32,26 @@
                             HorizontalAlignment="Left">
                         <TextBlock Text="OFICIAL" />
                     </Border>
-                    <Border Classes="badge" 
+                    <Border Classes="badge"
                             Background="{StaticResource WarningBg}"
                             VerticalAlignment="Top"
                             HorizontalAlignment="Right"
                             IsVisible="{Binding UpdateAvailable}">
-                        <TextBlock Text="ATUALIZAÇÃO" 
+                        <TextBlock Text="ATUALIZAÇÃO"
                                    FontSize="9.5"
                                    FontWeight="Bold"
                                    Foreground="{StaticResource WarningText}" />
+                    </Border>
+                    <Border Classes="badge"
+                            Background="{StaticResource DangerBg}"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Right"
+                            IsVisible="{Binding IsDiscontinued}"
+                            ToolTip.Tip="Este modpack foi descontinuado e não receberá mais atualizações.">
+                        <TextBlock Text="DESCONTINUADO"
+                                   FontSize="9.5"
+                                   FontWeight="Bold"
+                                   Foreground="{StaticResource Danger}" />
                     </Border>
                 </Grid>
             </Border>
@@ -88,18 +99,34 @@
                            Margin="0,8,0,0"
                            TextTrimming="CharacterEllipsis" />
 
-                <Button Classes="play-btn" 
+                <Button Classes="play-btn"
                         Height="38"
-                        HorizontalAlignment="Stretch" 
+                        HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center"
                         Margin="0,14,0,0"
+                        IsVisible="{Binding !IsDiscontinued}"
                         IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                         Command="{Binding #CardRoot.Owner.InstallCommand}"
                         CommandParameter="{Binding}">
                     <TextBlock Text="{Binding InstallLabel}"
-                               FontSize="12.5" 
+                               FontSize="12.5"
                                FontWeight="Bold" />
                 </Button>
+
+                <!-- Descontinuado: instalado, mas sem fonte no servidor -->
+                <Border Height="38"
+                        Margin="0,14,0,0"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{StaticResource BorderDivider}"
+                        Background="{StaticResource BgConsole}"
+                        IsVisible="{Binding IsDiscontinued}">
+                    <TextBlock Text="Descontinuado — indisponível"
+                               FontSize="12"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource TextMuted}" />
+                </Border>
             </StackPanel>
         </StackPanel>
     </Border>
