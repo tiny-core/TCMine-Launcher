@@ -22,6 +22,15 @@ namespace TCMine_Launcher.Views;
 
 public partial class MainWindow : Window
 {
+    private static readonly FilePickerFileType ZipType = new("Instância TCMine (zip)")
+    {
+        Patterns = new[] { "*.zip" }
+    };
+
+    private LogWindow? _logWindow;
+
+    private MemoryWindow? _memoryWindow;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -77,13 +86,9 @@ public partial class MainWindow : Window
             state.Y = Position.Y;
             state.HasPosition = true;
         }
+
         WindowStateStore.Save(state);
     }
-
-    private static readonly FilePickerFileType ZipType = new("Instância TCMine (zip)")
-    {
-        Patterns = new[] { "*.zip" }
-    };
 
     private async Task<string?> SaveZipAsync(string suggestedName)
     {
@@ -120,8 +125,6 @@ public partial class MainWindow : Window
         new ModSelectionWindow { DataContext = selection }.Show();
     }
 
-    private LogWindow? _logWindow;
-
     private void OpenLogWindow(HomePageViewModel logViewModel)
     {
         // Instância única: se já estiver aberta, traz para a frente.
@@ -135,8 +138,6 @@ public partial class MainWindow : Window
         _logWindow.Closed += (_, _) => _logWindow = null;
         _logWindow.Show(this);
     }
-
-    private MemoryWindow? _memoryWindow;
 
     private void OpenMemoryWindow()
     {
@@ -153,7 +154,7 @@ public partial class MainWindow : Window
         _memoryWindow.Show(this);
     }
 
-    private async System.Threading.Tasks.Task<bool> ShowConfirmAsync(string title, string message)
+    private async Task<bool> ShowConfirmAsync(string title, string message)
     {
         var dialog = new ConfirmDialog(title, message);
         return await dialog.ShowDialog<bool>(this);

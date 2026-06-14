@@ -19,14 +19,14 @@ public partial class MainWindowViewModel
 {
     private readonly AuthService _auth = new();
 
+    /// <summary>Permite cancelar o login interactivo em curso.</summary>
+    private CancellationTokenSource? _loginCts;
+
     /// <summary>Sessão Minecraft activa (usada depois para lançar o jogo).</summary>
     private MSession? _session;
 
     /// <summary>Sessão activa, exposta às páginas que precisam de lançar o jogo.</summary>
     public MSession? CurrentSession => _session;
-
-    /// <summary>Permite cancelar o login interactivo em curso.</summary>
-    private CancellationTokenSource? _loginCts;
 
     // ── Autenticação Microsoft (navegador do sistema) ────────────
     [RelayCommand]

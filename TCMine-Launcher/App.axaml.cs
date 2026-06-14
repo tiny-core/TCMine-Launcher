@@ -1,7 +1,8 @@
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TCMine_Launcher.ViewModels;
+using Avalonia.Threading;
 using TCMine_Launcher.Views;
 
 namespace TCMine_Launcher;
@@ -25,9 +26,9 @@ public class App : Application
             // Splash por cima, fechado após um momento.
             var splash = new SplashWindow();
             splash.Show();
-            Avalonia.Threading.DispatcherTimer.RunOnce(
+            DispatcherTimer.RunOnce(
                 () => splash.Close(),
-                System.TimeSpan.FromMilliseconds(1200));
+                TimeSpan.FromMilliseconds(1200));
         }
 
         base.OnFrameworkInitializationCompleted();

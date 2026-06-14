@@ -62,6 +62,7 @@ foreach (var name in new[] { "CF_API_KEY", "ADMIN_PASSWORD" })
 builder.Services.AddDbContextFactory<AppDbContext>(o => o.UseSqlite($"Data Source={dbPath}"));
 builder.Services.AddScoped<ContentService>();
 builder.Services.AddScoped<CurseForgeService>();
+builder.Services.AddScoped<PlayerConfigStore>();
 builder.Services.AddSingleton<OverridesStore>();
 
 // Persiste as chaves de Data Protection no volume (junto da BD) para que os cookies
@@ -227,6 +228,46 @@ app.MapGet("/modpacks/{id}/overrides", (string id, OverridesStore store) =>
 {
     var file = store.GetFile(id);
     return file is null ? Results.NotFound() : Results.File(file, "application/zip");
+});
+
+// ── Configs do jogador (sync entre PCs) ──────────────────────────────────────
+// Guardadas por (uuid, modpackId) como um zip. SEM AUTH: a chave é o UUID do
+// Minecraft (semi-público) — são apenas settings de jogo, sem segredos. Quem
+// souber um UUID pode ler/gravar as configs desse UUID. Endurecimento futuro:
+// validar o access token da MSession enviado pelo launcher.
+const long maxConfigBytes = 25 * 1024 * 1024; // 25 MB — limite defensivo do PUT.
+
+// Aceita só slugs simples nas chaves (defesa, embora sejam só chaves de BD).
+static bool IsValidKey(string s)
+{
+    return !string.IsNullOrWhiteSpace(s) && s.Length <= 80 &&
+           s.All(c => char.IsLetterOrDigit(c) || c is '-' or '_');
+}
+
+app.MapGet("/players/{uuid}/configs/{modpackId}", async (
+    string uuid, string modpackId, PlayerConfigStore store, CancellationToken ct) =>
+{
+    if (!IsValidKey(uuid) || !IsValidKey(modpackId)) return Results.BadRequest();
+
+    var entry = await store.GetAsync(uuid, modpackId, ct);
+    if (entry is null) return Results.NotFound();
+
+    // O launcher usa o X-Updated-At para decidir se a versão do servidor é mais recente.
+    return Results.File(entry.Data, "application/zip",
+        lastModified: new DateTimeOffset(entry.UpdatedAt, TimeSpan.Zero));
+});
+
+app.MapPut("/players/{uuid}/configs/{modpackId}", async (
+    string uuid, string modpackId, HttpContext ctx, PlayerConfigStore store, CancellationToken ct) =>
+{
+    if (!IsValidKey(uuid) || !IsValidKey(modpackId)) return Results.BadRequest();
+
+    using var ms = new MemoryStream();
+    await ctx.Request.Body.CopyToAsync(ms, ct);
+    if (ms.Length == 0 || ms.Length > maxConfigBytes) return Results.BadRequest();
+
+    var updatedAt = await store.UpsertAsync(uuid, modpackId, ms.ToArray(), ct);
+    return Results.Json(new { updatedAt });
 });
 
 // ── Autenticação de admin (form login/logout) ────────────────────────────────

@@ -16,11 +16,11 @@
     <section class="panel">
         <h2>Nova release</h2>
         <label class="field-label">VERSÃO</label>
-        <input class="input" @bind="_version" placeholder="1.1.0" />
+        <input class="input" @bind="_version" placeholder="1.1.0"/>
         <label class="field-label">NOTAS (changelog)</label>
         <textarea class="input" rows="3" @bind="_notes"></textarea>
         <label class="field-label">ARTEFACTOS</label>
-        <InputFile OnChange="OnFilesSelected" multiple />
+        <InputFile OnChange="OnFilesSelected" multiple/>
         @if (_selected.Count > 0)
         {
             <ul class="files">
@@ -62,7 +62,8 @@
                             }
                         </div>
                         <div class="row-actions">
-                            <button class="btn small danger" @onclick="() => DeleteAsync(r)">Remover do histórico</button>
+                            <button class="btn small danger" @onclick="() => DeleteAsync(r)">Remover do histórico
+                            </button>
                         </div>
                     </li>
                 }
@@ -83,7 +84,10 @@
     private string UpdatesDir => Config["UPDATES_DIR"]
                                  ?? Path.Combine(Env.ContentRootPath, "updates");
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {
@@ -94,7 +98,7 @@
     private void OnFilesSelected(InputFileChangeEventArgs e)
     {
         _selected.Clear();
-        _selected.AddRange(e.GetMultipleFiles(maximumFileCount: 50));
+        _selected.AddRange(e.GetMultipleFiles(50));
     }
 
     private async Task PublishAsync()
@@ -116,7 +120,7 @@
             {
                 var safe = Path.GetFileName(file.Name);
                 var dest = Path.Combine(UpdatesDir, safe);
-                await using var input = file.OpenReadStream(maxAllowedSize: 1_000_000_000);
+                await using var input = file.OpenReadStream(1_000_000_000);
                 await using var output = File.Create(dest);
                 await input.CopyToAsync(output);
                 names.Add(safe);
@@ -158,4 +162,5 @@
         await db.SaveChangesAsync();
         await LoadAsync();
     }
+
 }

@@ -29,7 +29,9 @@
             <!-- ═══════════════════════════════════════════════════ -->
             <!--  BARRA DE TÍTULO (componente reutilizável)          -->
             <!-- ═══════════════════════════════════════════════════ -->
-            <views:TitleBar Grid.Row="0" Title="TCMine Launcher" ShowAbout="True" />
+            <views:TitleBar Grid.Row="0" 
+                            Title="TCMine Launcher" 
+                            ShowAbout="True" />
 
             <!-- ═══════════════════════════════════════════════════ -->
             <!--  CORPO — Login (deslogado) OU Shell (logado)        -->
@@ -40,7 +42,8 @@
                 <views:LoginView IsVisible="{Binding !IsLoggedIn}" />
 
                 <!-- ── APLICAÇÃO (sidebar + página activa) ───────── -->
-                <Grid IsVisible="{Binding IsLoggedIn}" ColumnDefinitions="64,*">
+                <Grid IsVisible="{Binding IsLoggedIn}" 
+                      ColumnDefinitions="64,*">
 
                     <!-- SIDEBAR -->
                     <Border Grid.Column="0"
@@ -57,28 +60,36 @@
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Home}"
                                         ToolTip.Tip="Jogar">
-                                    <PathIcon Data="{StaticResource IconPlay}" Width="18" Height="18" />
+                                    <PathIcon Data="{StaticResource IconPlay}"
+                                              Width="18" 
+                                              Height="18" />
                                 </Button>
                                 <Button Classes="nav-btn"
                                         Classes.active="{Binding IsInstancesSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Instances}"
                                         ToolTip.Tip="Instâncias">
-                                    <PathIcon Data="{StaticResource IconInstances}" Width="18" Height="18" />
+                                    <PathIcon Data="{StaticResource IconInstances}" 
+                                              Width="18" 
+                                              Height="18" />
                                 </Button>
                                 <Button Classes="nav-btn"
                                         Classes.active="{Binding IsModpacksSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Modpacks}"
                                         ToolTip.Tip="Modpacks">
-                                    <PathIcon Data="{StaticResource IconModpacks}" Width="18" Height="18" />
+                                    <PathIcon Data="{StaticResource IconModpacks}" 
+                                              Width="18" 
+                                              Height="18" />
                                 </Button>
                                 <Button Classes="nav-btn"
                                         Classes.active="{Binding IsNewsSelected}"
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.News}"
                                         ToolTip.Tip="Novidades">
-                                    <PathIcon Data="{StaticResource IconNews}" Width="18" Height="18" />
+                                    <PathIcon Data="{StaticResource IconNews}"
+                                              Width="18" 
+                                              Height="18" />
                                 </Button>
                             </StackPanel>
 
@@ -91,11 +102,17 @@
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Settings}"
                                         ToolTip.Tip="{Binding PlayerName}">
-                                    <Border Classes="avatar" Width="34" Height="34" ClipToBounds="True">
+                                    <Border Classes="avatar" 
+                                            Width="34" 
+                                            Height="34"
+                                            ClipToBounds="True">
                                         <Panel>
-                                            <TextBlock Text="{Binding AvatarInitials}" FontSize="13"
-                                                       Foreground="White" FontWeight="Bold"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding AvatarInitials}" 
+                                                       FontSize="13"
+                                                       Foreground="White" 
+                                                       FontWeight="Bold"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
                                             <Image bh:ImageLoader.SourceUrl="{Binding PlayerHeadUrl}"
                                                    Stretch="UniformToFill" />
                                         </Panel>
@@ -107,14 +124,17 @@
                                         Command="{Binding NavigateCommand}"
                                         CommandParameter="{x:Static vm:AppTab.Settings}"
                                         ToolTip.Tip="Definições">
-                                    <PathIcon Data="{StaticResource IconSettings}" Width="18" Height="18" />
+                                    <PathIcon Data="{StaticResource IconSettings}"
+                                              Width="18"
+                                              Height="18" />
                                 </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- PÁGINA ACTIVA (resolvida pelo ViewLocator) -->
-                    <TransitioningContentControl Grid.Column="1" Content="{Binding CurrentPage}">
+                    <TransitioningContentControl Grid.Column="1" 
+                                                 Content="{Binding CurrentPage}">
                         <TransitioningContentControl.PageTransition>
                             <CrossFade Duration="0:0:0.18" />
                         </TransitioningContentControl.PageTransition>
@@ -138,52 +158,74 @@
                                  Fill="{StaticResource Success}"
                                  IsVisible="{Binding IsLoggedIn}" />
                         <TextBlock Text="{Binding StatusMessage}"
-                                   FontSize="11" Foreground="{StaticResource TextFaint}"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextFaint}"
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
                     <!-- Registo de eventos do launch -->
-                    <Button Grid.Column="2" Classes="subtle"
+                    <Button Grid.Column="2" 
+                            Classes="subtle"
                             VerticalAlignment="Center"
                             IsVisible="{Binding IsLoggedIn}"
                             Command="{Binding OpenLogCommand}"
                             ToolTip.Tip="Abrir o registo de eventos">
-                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <PathIcon Data="{StaticResource IconNews}" Width="12" Height="12"
+                        <StackPanel Orientation="Horizontal" Spacing="6" 
+                                    VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource IconNews}"
+                                      Width="12"
+                                      Height="12"
                                       VerticalAlignment="Center" />
-                            <TextBlock Text="Eventos" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="Eventos" 
+                                       FontSize="11" 
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
                     <!-- Memória RAM alocada à instância ativa (abre janela com slider) -->
-                    <Button Grid.Column="4" Classes="subtle"
+                    <Button Grid.Column="4"
+                            Classes="subtle"
                             VerticalAlignment="Center"
                             IsVisible="{Binding IsLoggedIn}"
                             Command="{Binding OpenMemoryCommand}"
                             ToolTip.Tip="Configurar a memória do jogo">
-                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <PathIcon Data="{StaticResource IconMemory}" Width="12" Height="12"
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="6" 
+                                    VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource IconMemory}" 
+                                      Width="12" 
+                                      Height="12"
                                       VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding RamDisplay}" FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding RamDisplay}"
+                                       FontSize="11" 
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
                     <!-- Aviso de atualização do launcher -->
-                    <Button Grid.Column="6" Classes="update-pill"
+                    <Button Grid.Column="6"
+                            Classes="update-pill"
                             VerticalAlignment="Center"
                             IsVisible="{Binding UpdateAvailable}"
                             Command="{Binding OpenUpdateCommand}">
-                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                            <PathIcon Data="{StaticResource IconUpload}" Width="11" Height="11"
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="5" 
+                                    VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource IconUpload}"
+                                      Width="11"
+                                      Height="11"
                                       VerticalAlignment="Center" />
                             <TextBlock Text="{Binding LatestVersion, StringFormat='Atualizar para {0}'}"
-                                       FontSize="10.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                       FontSize="10.5" 
+                                       FontWeight="SemiBold" 
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
                     <TextBlock Grid.Column="8"
                                Text="{Binding VersionLabel}"
-                               FontSize="11" Foreground="#2A2A40"
+                               FontSize="11" 
+                               Foreground="#2A2A40"
                                VerticalAlignment="Center"
                                ToolTip.Tip="Versão instalada do launcher" />
                 </Grid>

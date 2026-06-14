@@ -8,15 +8,25 @@
              x:CompileBindings="False">
 
     <!-- Botão "Atualizar" com spinner. Liga-se a Command + IsLoading. -->
-    <Button Classes="outline-btn" VerticalAlignment="Center"
+    <Button Classes="outline-btn" 
+            VerticalAlignment="Center"
             Command="{Binding #Root.Command}"
             IsEnabled="{Binding !#Root.IsLoading}">
         <Panel>
-            <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding !#Root.IsLoading}">
-                <PathIcon Data="{StaticResource IconRefresh}" Width="14" Height="14" VerticalAlignment="Center" />
-                <TextBlock Text="Atualizar" FontSize="12.5" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="6" IsVisible="{Binding !#Root.IsLoading}">
+                <PathIcon Data="{StaticResource IconRefresh}"
+                          Width="14" 
+                          Height="14" 
+                          VerticalAlignment="Center" />
+                <TextBlock Text="Atualizar"
+                           FontSize="12.5"
+                           VerticalAlignment="Center" />
             </StackPanel>
-            <Ellipse Classes="spinner" Width="14" Height="14" IsVisible="{Binding #Root.IsLoading}" />
+            <Ellipse Classes="spinner"
+                     Width="14"
+                     Height="14"
+                     IsVisible="{Binding #Root.IsLoading}" />
         </Panel>
     </Button>
 </UserControl>

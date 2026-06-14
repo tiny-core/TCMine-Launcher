@@ -22,7 +22,7 @@
         {
             <div class="row">
                 <input class="input" @bind="_cfQuery" @bind:event="oninput"
-                       placeholder="Nome do modpack…" @onkeydown="OnSearchKey" />
+                       placeholder="Nome do modpack…" @onkeydown="OnSearchKey"/>
                 <button class="btn" @onclick="SearchCf" disabled="@_cfBusy">Procurar</button>
             </div>
 
@@ -30,6 +30,7 @@
             {
                 <p class="muted small">A procurar…</p>
             }
+
             @if (_importError is not null)
             {
                 <p class="error">@_importError</p>
@@ -42,7 +43,7 @@
                         <div class="cf-mod">
                             @if (!string.IsNullOrEmpty(m.LogoUrl))
                             {
-                                <img src="@m.LogoUrl" class="cf-logo" alt="" />
+                                <img src="@m.LogoUrl" class="cf-logo" alt=""/>
                             }
                             <div>
                                 <strong>@m.Name</strong>
@@ -61,9 +62,9 @@
     <section class="panel">
         <h2>Novo modpack (manual)</h2>
         <label class="field-label">ID (slug)</label>
-        <input class="input" @bind="_newId" placeholder="ex.: tcmine-official" />
+        <input class="input" @bind="_newId" placeholder="ex.: tcmine-official"/>
         <label class="field-label">NOME</label>
-        <input class="input" @bind="_newName" />
+        <input class="input" @bind="_newName"/>
         @if (_error is not null)
         {
             <p class="error">@_error</p>
@@ -93,7 +94,9 @@
                         {
                             <span class="muted">(rascunho)</span>
                         }
-                        <div class="muted small">v@(m.Version) · MC @m.Minecraft · @m.Mods.Count mod(s) · @m.Servers.Count servidor(es)</div>
+                        <div class="muted small">v@(m.Version) · MC @m.Minecraft · @m.Mods.Count mod(s)
+                            · @m.Servers.Count servidor(es)
+                        </div>
                     </div>
                     <div class="row-actions">
                         <button class="btn small" @onclick="() => Edit(m)">Editar</button>
@@ -118,9 +121,15 @@
     private long _importingId;
     private string? _importError;
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
 
-    private void Edit(ModpackEntity m) => Nav.NavigateTo($"/admin/modpacks/{m.Id}");
+    private void Edit(ModpackEntity m)
+    {
+        Nav.NavigateTo($"/admin/modpacks/{m.Id}");
+    }
 
     private async Task LoadAsync()
     {
@@ -256,4 +265,5 @@
         slug = slug.Trim('-');
         return string.IsNullOrEmpty(slug) ? "modpack" : slug;
     }
+
 }

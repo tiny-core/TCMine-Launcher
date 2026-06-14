@@ -19,11 +19,11 @@ public partial class MainWindowViewModel
 {
     private readonly InstanceService _instances = new();
 
-    /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
-    public ObservableCollection<MinecraftInstance> Instances { get; } = new();
-
     /// <summary>Instância atualmente selecionada (a que a Home lança).</summary>
     [ObservableProperty] private MinecraftInstance? _activeInstance;
+
+    /// <summary>Todas as instâncias instaladas (fonte única, partilhada com a página).</summary>
+    public ObservableCollection<MinecraftInstance> Instances { get; } = new();
 
     /// <summary>Carrega as instâncias do disco e restaura a que estava selecionada.</summary>
     private void LoadInstances()
@@ -43,8 +43,10 @@ public partial class MainWindowViewModel
     }
 
     /// <summary>Cria a instância inicial padrão (usada na 1.ª execução e após apagar a última).</summary>
-    private MinecraftInstance CreateSeed() =>
-        _instances.Create("Instância padrão", _game.MinecraftVersion, _game.NeoForgeVersion);
+    private MinecraftInstance CreateSeed()
+    {
+        return _instances.Create("Instância padrão", _game.MinecraftVersion, _game.NeoForgeVersion);
+    }
 
     /// <summary>Define a instância ativa (a que a Home lança) e persiste a escolha.</summary>
     public void SelectInstance(MinecraftInstance instance)
@@ -196,6 +198,7 @@ public partial class MainWindowViewModel
                 fallback = CreateSeed();
                 Instances.Add(fallback);
             }
+
             SelectInstance(fallback);
         }
     }

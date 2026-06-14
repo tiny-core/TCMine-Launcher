@@ -14,24 +14,44 @@
             BorderThickness="0,0,0,1"
             PointerPressed="OnDrag">
         <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="11"
-                        VerticalAlignment="Center" Margin="20,0,0,0">
-                <Image Source="{StaticResource AppLogo}" Width="20" Height="20" VerticalAlignment="Center" />
-                <TextBlock Text="{Binding #Root.Title}" FontSize="12.5"
-                           Foreground="#3A3A52" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="11"
+                        VerticalAlignment="Center" 
+                        Margin="20,0,0,0">
+                <Image Source="{StaticResource AppLogo}" 
+                       Width="20"
+                       Height="20" 
+                       VerticalAlignment="Center" />
+                <TextBlock Text="{Binding #Root.Title}" 
+                           FontSize="12.5"
+                           Foreground="#3A3A52" 
+                           VerticalAlignment="Center" />
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Classes="wnd-btn" Click="OnAbout"
-                        IsVisible="{Binding #Root.ShowAbout}" ToolTip.Tip="Sobre">
-                    <PathIcon Data="{StaticResource IconInfo}" Width="15" Height="15" />
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal">
+                <Button Classes="wnd-btn" 
+                        Click="OnAbout"
+                        IsVisible="{Binding #Root.ShowAbout}" 
+                        ToolTip.Tip="Sobre">
+                    
+                    <PathIcon Data="{StaticResource IconInfo}"
+                              Width="15" 
+                              Height="15" />
                 </Button>
-                <Button Classes="wnd-btn" Click="OnMinimize"
+                <Button Classes="wnd-btn"
+                        Click="OnMinimize"
                         IsVisible="{Binding #Root.ShowMinimize}">
-                    <PathIcon Data="{StaticResource IconMinimize}" Width="13" Height="13" />
+                    <PathIcon Data="{StaticResource IconMinimize}"
+                              Width="13"
+                              Height="13" />
                 </Button>
-                <Button Classes="wnd-btn wnd-btn-close" Click="OnClose">
-                    <PathIcon Data="{StaticResource IconClose}" Width="13" Height="13" />
+                <Button Classes="wnd-btn wnd-btn-close" 
+                        Click="OnClose">
+                    <PathIcon Data="{StaticResource IconClose}"
+                              Width="13"
+                              Height="13" />
                 </Button>
             </StackPanel>
         </Grid>

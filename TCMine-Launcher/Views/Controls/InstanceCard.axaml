@@ -11,22 +11,35 @@
 
     <!-- Cartão de uma instância. DataContext = MinecraftInstance; os comandos
          vêm do ViewModel da página, passado em Owner. -->
-    <Border Classes="modpack-card" Width="304" Padding="22" BorderThickness="1.5">
+    <Border Classes="modpack-card"
+            Width="304"
+            Padding="22"
+            BorderThickness="1.5">
+
         <Border.BorderBrush>
             <MultiBinding Converter="{x:Static conv:ActiveBorderConverter.Instance}">
                 <Binding Path="Id" />
-                <Binding Path="Owner.ActiveInstanceId" ElementName="CardRoot" />
+                <Binding Path="Owner.ActiveInstanceId"
+                         ElementName="CardRoot" />
             </MultiBinding>
         </Border.BorderBrush>
-        <StackPanel Spacing="0">
 
+        <StackPanel Spacing="0">
             <!-- Cabeçalho: ícone + nome + tag -->
             <Grid ColumnDefinitions="56,14,*">
-                <Border Grid.Column="0" Classes="avatar" Width="56" Height="56">
-                    <TextBlock Text="{Binding Initial}" FontSize="23" />
+                <Border Grid.Column="0"
+                        Classes="avatar"
+                        Width="56"
+                        Height="56">
+                    <TextBlock Text="{Binding Initial}"
+                               FontSize="23" />
                 </Border>
-                <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="6">
-                    <TextBlock Text="{Binding Name}" Classes="card-title"
+
+                <StackPanel Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Spacing="6">
+                    <TextBlock Text="{Binding Name}"
+                               Classes="card-title"
                                TextTrimming="CharacterEllipsis" />
                     <Border Classes="tag">
                         <TextBlock Text="{Binding SourceLabel}" />
@@ -34,77 +47,129 @@
                 </StackPanel>
             </Grid>
 
-            <Separator Classes="divider" Margin="0,18" />
+            <Separator Classes="divider"
+                       Margin="0,18" />
 
             <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Grid.Column="0" Text="{Binding VersionSummary}"
-                           Foreground="{StaticResource TextMuted}" FontSize="12.5"
+                <TextBlock Grid.Column="0"
+                           Text="{Binding VersionSummary}"
+                           Foreground="{StaticResource TextMuted}"
+                           FontSize="12.5"
                            VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="{Binding ModsLabel}"
-                           Foreground="{StaticResource TextFaint}" FontSize="11"
+
+                <TextBlock Grid.Column="1"
+                           Text="{Binding ModsLabel}"
+                           Foreground="{StaticResource TextFaint}"
+                           FontSize="11"
                            VerticalAlignment="Center" />
             </Grid>
 
             <!-- Ação principal -->
-            <Button Classes="play-btn" Height="40" Margin="0,16,0,0"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+            <Button Classes="play-btn"
+                    Height="40"
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
                     IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                     Command="{Binding #CardRoot.Owner.SelectCommand}"
                     CommandParameter="{Binding}">
-                <TextBlock Text="Selecionar" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+
+                <TextBlock Text="Selecionar"
+                           FontSize="13"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center" />
             </Button>
 
             <!-- Ações secundárias: personalizadas vs oficiais -->
             <Grid Margin="0,10,0,0">
                 <!-- Personalizada: gerir mods + eliminar -->
-                <Grid ColumnDefinitions="*,8,*" IsVisible="{Binding !IsOfficial}">
-                    <Button Grid.Column="0" Classes="outline-btn" Height="34"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                <Grid ColumnDefinitions="*,8,*"
+                      IsVisible="{Binding !IsOfficial}">
+                    <Button Grid.Column="0"
+                            Classes="outline-btn"
+                            Height="34"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
                             IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                             Command="{Binding #CardRoot.Owner.ManageModsCommand}"
                             CommandParameter="{Binding}">
-                        <TextBlock Text="Gerir" FontSize="12" />
+                        <TextBlock Text="Gerir"
+                                   FontSize="12" />
                     </Button>
-                    <Button Grid.Column="2" Classes="outline-btn" Height="34"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+
+                    <Button Grid.Column="2"
+                            Classes="outline-btn"
+                            Height="34"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
                             IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                             Command="{Binding #CardRoot.Owner.DeleteCommand}"
                             CommandParameter="{Binding}">
-                        <TextBlock Text="Eliminar" FontSize="12" Foreground="{StaticResource Danger}" />
+                        <TextBlock Text="Eliminar"
+                                   FontSize="12"
+                                   Foreground="{StaticResource Danger}" />
                     </Button>
                 </Grid>
 
                 <!-- Oficial: não editável; só permite criar uma cópia -->
-                <Button Classes="outline-btn" Height="34"
-                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                <Button Classes="outline-btn"
+                        Height="34"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
                         IsVisible="{Binding IsOfficial}"
                         IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                         Command="{Binding #CardRoot.Owner.DuplicateCommand}"
                         CommandParameter="{Binding}">
-                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <PathIcon Data="{StaticResource IconAdd}" Width="13" Height="13" VerticalAlignment="Center" />
-                        <TextBlock Text="Criar cópia editável" FontSize="12" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="6"
+                                HorizontalAlignment="Center">
+                        <PathIcon Data="{StaticResource IconAdd}"
+                                  Width="13"
+                                  Height="13"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Text="Criar cópia editável"
+                                   FontSize="12"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </Grid>
 
             <!-- Pasta + Exportar (todas as instâncias) -->
-            <Grid ColumnDefinitions="*,8,*" Margin="0,8,0,0">
-                <Button Grid.Column="0" Classes="subtle" HorizontalAlignment="Stretch"
+            <Grid ColumnDefinitions="*,8,*"
+                  Margin="0,8,0,0">
+                <Button Grid.Column="0"
+                        Classes="subtle"
+                        HorizontalAlignment="Stretch"
                         Command="{Binding #CardRoot.Owner.OpenFolderCommand}"
                         CommandParameter="{Binding}">
-                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <PathIcon Data="{StaticResource IconFolder}" Width="13" Height="13" VerticalAlignment="Center" />
-                        <TextBlock Text="Pasta" FontSize="11.5" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="6"
+                                HorizontalAlignment="Center">
+                        <PathIcon Data="{StaticResource IconFolder}"
+                                  Width="13"
+                                  Height="13"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Text="Pasta"
+                                   FontSize="11.5"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="2" Classes="subtle" HorizontalAlignment="Stretch"
+                <Button Grid.Column="2"
+                        Classes="subtle"
+                        HorizontalAlignment="Stretch"
                         IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                         Command="{Binding #CardRoot.Owner.ExportCommand}"
                         CommandParameter="{Binding}">
-                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                        <PathIcon Data="{StaticResource IconUpload}" Width="13" Height="13" VerticalAlignment="Center" />
-                        <TextBlock Text="Exportar" FontSize="11.5" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="6"
+                                HorizontalAlignment="Center">
+                        <PathIcon Data="{StaticResource IconUpload}"
+                                  Width="13"
+                                  Height="13"
+                                  VerticalAlignment="Center" />
+                        <TextBlock Text="Exportar"
+                                   FontSize="11.5"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
             </Grid>

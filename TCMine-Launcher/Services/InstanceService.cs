@@ -120,8 +120,8 @@ public class InstanceService
         }
 
         var instance = JsonSerializer.Deserialize<MinecraftInstance>(
-            File.ReadAllText(configFile), Options)
-            ?? throw new InvalidDataException("instance.json inválido.");
+                           File.ReadAllText(configFile), Options)
+                       ?? throw new InvalidDataException("instance.json inválido.");
 
         instance.Id = newId;
         instance.Source = InstanceSource.Manual;

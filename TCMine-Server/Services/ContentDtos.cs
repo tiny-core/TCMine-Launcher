@@ -6,13 +6,26 @@ namespace TCMine_Server.Services;
 public record NewsDto(string Tag, string Title, string Date, string Summary);
 
 public record ModpackSummaryDto(
-    string Id, string Name, string Version, string Minecraft, string Neoforge,
-    string Description, int ModCount, int ServerCount);
+    string Id,
+    string Name,
+    string Version,
+    string Minecraft,
+    string Neoforge,
+    string Description,
+    int ModCount,
+    int ServerCount);
 
 public record ModpackManifestDto(
-    string Id, string Name, string Version, string Minecraft, string Neoforge,
-    string Description, bool HasOverrides, int? RecommendedRamMb,
-    IReadOnlyList<ModDto> Mods, IReadOnlyList<ServerDto> Servers);
+    string Id,
+    string Name,
+    string Version,
+    string Minecraft,
+    string Neoforge,
+    string Description,
+    bool HasOverrides,
+    int? RecommendedRamMb,
+    IReadOnlyList<ModDto> Mods,
+    IReadOnlyList<ServerDto> Servers);
 
 public record ModDto(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target);
 

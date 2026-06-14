@@ -18,21 +18,37 @@
 
     <views:WindowChrome>
         <Grid RowDefinitions="Auto,*">
-            <views:TitleBar Grid.Row="0" Title="Gerir mods" ShowMinimize="False" />
+            <views:TitleBar Grid.Row="0" 
+                            Title="Gerir mods" 
+                            ShowMinimize="False" />
 
-            <Grid Grid.Row="1" Margin="22" RowDefinitions="Auto,*,Auto">
-                <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                    <TextBlock Classes="page-title" Text="Mods" />
-                    <TextBlock Classes="muted" Text="Pesquisa e seleciona os mods (CurseForge)"
+            <Grid Grid.Row="1"
+                  Margin="22"
+                  RowDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Row="0"
+                            Margin="0,0,0,16">
+                    <TextBlock Classes="page-title"
+                               Text="Mods" />
+                    <TextBlock Classes="muted" 
+                               Text="Pesquisa e seleciona os mods (CurseForge)"
                                Margin="0,4,0,0" />
                 </StackPanel>
 
-                <views:ModSelectionView Grid.Row="1" DataContext="{Binding}" VerticalContentAlignment="Stretch" />
+                <views:ModSelectionView Grid.Row="1"
+                                        DataContext="{Binding}" 
+                                        VerticalContentAlignment="Stretch" />
 
-                <Button Grid.Row="2" Classes="play-btn" Height="40" Width="140"
-                        HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                        Margin="0,16,0,0" Click="Done_Click">
-                    <TextBlock Text="Concluído" FontSize="13" FontWeight="Bold" />
+                <Button Grid.Row="2" 
+                        Classes="play-btn" 
+                        Height="40"
+                        Width="140"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Center"
+                        Margin="0,16,0,0"
+                        Click="Done_Click">
+                    <TextBlock Text="Concluído" 
+                               FontSize="13" 
+                               FontWeight="Bold" />
                 </Button>
             </Grid>
         </Grid>

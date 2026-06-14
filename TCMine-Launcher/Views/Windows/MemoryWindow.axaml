@@ -18,23 +18,35 @@
 
     <views:WindowChrome>
         <Grid RowDefinitions="45,*">
-            <views:TitleBar Grid.Row="0" Title="Memória" ShowMinimize="False" />
+            <views:TitleBar Grid.Row="0"
+                            Title="Memória" 
+                            ShowMinimize="False" />
 
-            <StackPanel Grid.Row="1" Margin="28,4,28,24" Spacing="0">
-                <TextBlock Classes="muted" TextWrapping="Wrap"
+            <StackPanel Grid.Row="1" 
+                        Margin="28,4,28,24" 
+                        Spacing="0">
+                <TextBlock Classes="muted" 
+                           TextWrapping="Wrap"
                            Text="Memória RAM alocada à instância ativa." />
 
-                <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0" VerticalAlignment="Center">
-                    <TextBlock Grid.Column="0" Classes="section-label" Text="MEMÓRIA" Margin="0"
+                <Grid ColumnDefinitions="*,Auto"
+                      Margin="0,18,0,0" 
+                      VerticalAlignment="Center">
+                    <TextBlock Grid.Column="0"
+                               Classes="section-label" 
+                               Text="MEMÓRIA"
+                               Margin="0"
                                VerticalAlignment="Center" />
                     <NumericUpDown Grid.Column="1"
                                    Value="{Binding RamMbDecimal}"
-                                   Minimum="1024" Maximum="{Binding RamMaximum}" Increment="1024"
+                                   Minimum="1024" Maximum="{Binding RamMaximum}" 
+                                   Increment="1024"
                                    FormatString="0 'MB'"
                                    ShowButtonSpinner="False"
                                    IsEnabled="{Binding CanEditRam}"
                                    Width="110" Height="32"
-                                   Background="{StaticResource BgInset}" BorderBrush="{StaticResource BorderInset}"
+                                   Background="{StaticResource BgInset}" 
+                                   BorderBrush="{StaticResource BorderInset}"
                                    Foreground="{StaticResource Accent}" />
                 </Grid>
 
@@ -44,8 +56,10 @@
                         IsEnabled="{Binding CanEditRam}"
                         Margin="0,8,0,0" />
 
-                <TextBlock Classes="muted" FontSize="11" Margin="0,4,0,0"
-                           Text="{Binding RamMaximum, StringFormat='Máx.: {0} MB (RAM do sistema)'}" />
+                <TextBlock Classes="muted" FontSize="11" 
+                           Margin="0,4,0,0"
+                           Text="{Binding RamMaximum, 
+                           StringFormat='Máx.: {0} MB (RAM do sistema)'}" />
             </StackPanel>
         </Grid>
     </views:WindowChrome>

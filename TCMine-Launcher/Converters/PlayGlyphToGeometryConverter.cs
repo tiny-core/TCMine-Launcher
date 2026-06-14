@@ -18,14 +18,18 @@ public class PlayGlyphToGeometryConverter : IValueConverter
     private static readonly Geometry Stop = Geometry.Parse("M6 6h12v12H6z");
     private static readonly Geometry Download = Geometry.Parse("M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z");
 
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        (value as string) switch
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return (value as string) switch
         {
             "■" => Stop,
             "⬇" => Download,
             _ => Play
         };
+    }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
         throw new NotSupportedException();
+    }
 }

@@ -10,5 +10,8 @@ public partial class ModSelectionWindow : Window
         InitializeComponent();
     }
 
-    private void Done_Click(object? sender, RoutedEventArgs e) => Close();
+    private void Done_Click(object? sender, RoutedEventArgs e)
+    {
+        Close();
+    }
 }

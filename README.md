@@ -32,7 +32,8 @@ com instâncias isoladas, auto-update e conteúdo gerido pelo servidor.
 ## 🚀 Funcionalidades
 
 - 🔐 **Login com a Microsoft** (navegador do sistema) — obtém o teu perfil, nome e UUID reais
-- 🧩 **Modpacks oficiais** do servidor — instala mods, resource packs/shaders e servidores, aplica as configs (overrides) e a RAM recomendada
+- 🧩 **Modpacks oficiais** do servidor — instala mods, resource packs/shaders e servidores, aplica as configs (overrides)
+  e a RAM recomendada
 - 🗂️ **Instâncias isoladas** — cria, importa/exporta e gere várias instalações independentes
 - ▶️ **Launch real do Minecraft (NeoForge)** com progresso e janela de **registo de eventos**
 - ⬆️ **Auto-update** do próprio launcher (Velopack)

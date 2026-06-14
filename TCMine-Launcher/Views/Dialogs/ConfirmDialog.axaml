@@ -10,23 +10,43 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <views:WindowChrome Background="{StaticResource BgPanel}" Padding="26">
+    <views:WindowChrome Background="{StaticResource BgPanel}" 
+                        Padding="26">
         <DockPanel>
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="12"
-                        HorizontalAlignment="Right" Margin="0,22,0,0">
-                <Button Classes="ghost-btn" Click="Cancel_Click">
-                    <TextBlock Text="Cancelar" FontSize="13" />
+            <StackPanel DockPanel.Dock="Bottom" 
+                        Orientation="Horizontal" 
+                        Spacing="12"
+                        HorizontalAlignment="Right"
+                        Margin="0,22,0,0">
+                <Button Classes="ghost-btn" 
+                        Click="Cancel_Click">
+                    <TextBlock Text="Cancelar" 
+                               FontSize="13" />
                 </Button>
-                <Button Click="Confirm_Click" Height="38" Width="120"
-                        Background="{StaticResource DangerBorder}" Foreground="White" BorderThickness="0"
-                        CornerRadius="9" HorizontalContentAlignment="Center">
-                    <TextBlock Text="Eliminar" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" />
+                <Button Click="Confirm_Click" 
+                        Height="38"
+                        Width="120"
+                        Background="{StaticResource DangerBorder}" 
+                        Foreground="White" 
+                        BorderThickness="0"
+                        CornerRadius="9" 
+                        HorizontalContentAlignment="Center">
+                    <TextBlock Text="Eliminar"
+                               FontSize="14" 
+                               FontWeight="Bold"
+                               VerticalAlignment="Center" />
                 </Button>
             </StackPanel>
 
-            <StackPanel Spacing="10" VerticalAlignment="Center">
-                <TextBlock x:Name="TitleText" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" />
-                <TextBlock x:Name="MessageText" FontSize="13" Foreground="#9A9ABA"
+            <StackPanel Spacing="10" 
+                        VerticalAlignment="Center">
+                <TextBlock x:Name="TitleText" 
+                           FontSize="16" 
+                           FontWeight="Bold" 
+                           Foreground="{StaticResource TextPrimary}" />
+                <TextBlock x:Name="MessageText"
+                           FontSize="13" 
+                           Foreground="#9A9ABA"
                            TextWrapping="Wrap" />
             </StackPanel>
         </DockPanel>

@@ -13,10 +13,10 @@ public partial class SettingsPageViewModel : ViewModelBase
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
 
+    [ObservableProperty] private string _javaPath;
+
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(RamDisplay))]
     private double _ramMb;
-
-    [ObservableProperty] private string _javaPath;
 
     [ObservableProperty] private string _serverUrl;
 

@@ -43,6 +43,10 @@ public static class SystemInfo
         return 16384;
     }
 
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern bool GlobalMemoryStatusEx([In] [Out] MemoryStatusEx lpBuffer);
+
     [StructLayout(LayoutKind.Sequential)]
     private class MemoryStatusEx
     {
@@ -56,8 +60,4 @@ public static class SystemInfo
         public ulong ullAvailVirtual;
         public ulong ullAvailExtendedVirtual;
     }
-
-    [return: MarshalAs(UnmanagedType.Bool)]
-    [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern bool GlobalMemoryStatusEx([In] [Out] MemoryStatusEx lpBuffer);
 }

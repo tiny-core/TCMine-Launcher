@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace TCMine_Launcher.Services;
 
@@ -20,11 +19,26 @@ public sealed class GameLogCapture : IDisposable
     public GameLogCapture(string logPath)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-        _writer = new StreamWriter(logPath, append: false) { AutoFlush = true };
+        _writer = new StreamWriter(logPath, false) { AutoFlush = true };
         LogPath = logPath;
     }
 
     public string LogPath { get; }
+
+    public void Dispose()
+    {
+        lock (_lock)
+        {
+            try
+            {
+                _writer.Dispose();
+            }
+            catch
+            {
+                /* noop */
+            }
+        }
+    }
 
     public void Append(string? line)
     {
@@ -43,15 +57,6 @@ public sealed class GameLogCapture : IDisposable
         lock (_lock)
         {
             return _tail.ToArray();
-        }
-    }
-
-    public void Dispose()
-    {
-        lock (_lock)
-        {
-            try { _writer.Dispose(); }
-            catch { /* noop */ }
         }
     }
 }

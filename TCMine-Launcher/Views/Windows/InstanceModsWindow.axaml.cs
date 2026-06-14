@@ -25,5 +25,8 @@ public partial class InstanceModsWindow : Window
             vm.CloseRequested -= OnCloseRequested;
     }
 
-    private void OnCloseRequested() => Close();
+    private void OnCloseRequested()
+    {
+        Close();
+    }
 }

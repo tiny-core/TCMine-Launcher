@@ -23,23 +23,41 @@ public static class LauncherPaths
     /// <summary>Pasta-mãe de todas as instâncias isoladas.</summary>
     public static string InstancesDir => Path.Combine(Root, "instances");
 
-    /// <summary>Pasta de uma instância concreta (config + jogo).</summary>
-    public static string InstanceDir(string id) => Path.Combine(InstancesDir, id);
-
-    /// <summary>Ficheiro de configuração JSON de uma instância.</summary>
-    public static string InstanceConfigFile(string id) => Path.Combine(InstanceDir(id), "instance.json");
-
-    /// <summary>Diretório <c>.minecraft</c> isolado de uma instância (mods, saves, config).</summary>
-    public static string InstanceGameDir(string id) => Path.Combine(InstanceDir(id), "minecraft");
-
-    /// <summary>Ficheiro de log da última execução do jogo desta instância.</summary>
-    public static string InstanceLogFile(string id) => Path.Combine(InstanceDir(id), "logs", "latest.log");
-
     /// <summary>Cache local partilhada de jars de mods (evita re-descarregar entre instâncias).</summary>
     public static string ModCacheDir => Path.Combine(Root, "cache", "mods");
 
     /// <summary>Cache local de imagens (logos de mods, skins) entre execuções.</summary>
     public static string ImageCacheDir => Path.Combine(Root, "cache", "images");
+
+    /// <summary>Pasta de uma instância concreta (config + jogo).</summary>
+    public static string InstanceDir(string id)
+    {
+        return Path.Combine(InstancesDir, id);
+    }
+
+    /// <summary>Ficheiro de configuração JSON de uma instância.</summary>
+    public static string InstanceConfigFile(string id)
+    {
+        return Path.Combine(InstanceDir(id), "instance.json");
+    }
+
+    /// <summary>Diretório <c>.minecraft</c> isolado de uma instância (mods, saves, config).</summary>
+    public static string InstanceGameDir(string id)
+    {
+        return Path.Combine(InstanceDir(id), "minecraft");
+    }
+
+    /// <summary>Ficheiro de log da última execução do jogo desta instância.</summary>
+    public static string InstanceLogFile(string id)
+    {
+        return Path.Combine(InstanceDir(id), "logs", "latest.log");
+    }
+
+    /// <summary>Sidecar com o timestamp das configs do jogador já aplicadas (sync na nuvem).</summary>
+    public static string ConfigSyncFile(string id)
+    {
+        return Path.Combine(InstanceDir(id), "configsync.json");
+    }
 
     /// <summary>Garante que a raiz existe antes de escrever.</summary>
     public static void EnsureRoot()

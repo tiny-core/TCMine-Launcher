@@ -12,7 +12,7 @@ name: Publicar imagem do servidor (Docker Hub)
 
 on:
   push:
-    tags: ["server-v*"]
+    tags: [ "server-v*" ]
   workflow_dispatch:
 
 jobs:

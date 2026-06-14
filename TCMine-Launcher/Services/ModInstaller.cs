@@ -69,7 +69,7 @@ public class ModInstaller
                         }
                     }
 
-                    File.Copy(cached, dest, overwrite: true);
+                    File.Copy(cached, dest, true);
                 }
 
                 var done = Interlocked.Increment(ref completed);
@@ -87,12 +87,15 @@ public class ModInstaller
     }
 
     /// <summary>Pasta de destino conforme o tipo do ficheiro.</summary>
-    private static string FolderFor(string? target) => target?.ToLowerInvariant() switch
+    private static string FolderFor(string? target)
     {
-        "resourcepack" => "resourcepacks",
-        "shaderpack" => "shaderpacks",
-        _ => "mods"
-    };
+        return target?.ToLowerInvariant() switch
+        {
+            "resourcepack" => "resourcepacks",
+            "shaderpack" => "shaderpacks",
+            _ => "mods"
+        };
+    }
 
     /// <summary>Apaga jars na pasta mods que não constam da lista da instância.</summary>
     private static void PruneUnlisted(MinecraftInstance instance, string modsDir)
@@ -119,7 +122,13 @@ public class ModInstaller
 
     private static void TryDelete(string path)
     {
-        try { File.Delete(path); }
-        catch { /* noop */ }
+        try
+        {
+            File.Delete(path);
+        }
+        catch
+        {
+            /* noop */
+        }
     }
 }

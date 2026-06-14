@@ -15,9 +15,13 @@ public class AppDbContext : DbContext
     public DbSet<ModEntryEntity> Mods => Set<ModEntryEntity>();
     public DbSet<ServerEntryEntity> Servers => Set<ServerEntryEntity>();
     public DbSet<ReleaseEntity> Releases => Set<ReleaseEntity>();
+    public DbSet<PlayerConfigEntity> PlayerConfigs => Set<PlayerConfigEntity>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
+        // Configs do jogador: chave composta (Uuid, ModpackId).
+        b.Entity<PlayerConfigEntity>().HasKey(p => new { p.Uuid, p.ModpackId });
+
         b.Entity<ModpackEntity>(e =>
         {
             e.HasKey(m => m.Id);

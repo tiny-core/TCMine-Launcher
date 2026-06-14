@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,25 +24,22 @@ public partial class CreateInstancePageViewModel : ViewModelBase
         { "21.1.172", "21.1.171", "21.1.170", "21.1.165", "21.1.160" };
 
     private readonly GameProfile _game;
+
+    private readonly ObservableCollection<ModEntry> _pendingMods = new();
     private readonly MainWindowViewModel _shell;
     private readonly VersionService _versions = new();
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
-    private string _name = "Nova Instância";
 
     [ObservableProperty] private bool _isLoadingMinecraft;
     [ObservableProperty] private bool _isLoadingNeoForge;
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
+    private string _name = "Nova Instância";
+
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
     private string? _selectedMinecraftVersion;
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
     private string? _selectedNeoForgeVersion;
-
-    private readonly ObservableCollection<ModEntry> _pendingMods = new();
 
     public CreateInstancePageViewModel(GameProfile game, MainWindowViewModel shell)
     {
@@ -56,17 +54,17 @@ public partial class CreateInstancePageViewModel : ViewModelBase
     /// <summary>Nº de mods selecionados (para o botão).</summary>
     public int ModCount => _pendingMods.Count;
 
-    [RelayCommand]
-    private void OpenMods()
-    {
-        _shell.ShowModSelection(ModSelection);
-    }
-
     public ObservableCollection<string> MinecraftVersions { get; } = new();
     public ObservableCollection<string> NeoForgeVersions { get; } = new();
 
     /// <summary>Seleção de mods inicial (anexada à instância ao criar).</summary>
     public ModSelectionViewModel ModSelection { get; }
+
+    [RelayCommand]
+    private void OpenMods()
+    {
+        _shell.ShowModSelection(ModSelection);
+    }
 
     /// <summary>Prepara o formulário ao abrir a página (recarrega versões).</summary>
     public void Begin()
@@ -120,7 +118,7 @@ public partial class CreateInstancePageViewModel : ViewModelBase
         SelectedNeoForgeVersion = NeoForgeVersions.FirstOrDefault();
     }
 
-    private static void FillReplacing(ObservableCollection<string> target, System.Collections.Generic.IEnumerable<string> source)
+    private static void FillReplacing(ObservableCollection<string> target, IEnumerable<string> source)
     {
         target.Clear();
         foreach (var item in source) target.Add(item);

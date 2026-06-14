@@ -25,6 +25,7 @@ vpk pack --packId TCMine.Launcher --packVersion 1.1.0 `
 ```
 
 Isto cria, em `releases/`:
+
 - `TCMine.Launcher-win-Setup.exe` — o **instalador** (primeira instalação).
 - `*-full.nupkg` / `*-delta.nupkg` — os pacotes de atualização.
 - `releases.win.json` — o índice que o launcher lê.

@@ -71,15 +71,15 @@ A partir daí a pesquisa e instalação de mods funcionam.
 
 ## Variáveis de ambiente
 
-| Variável | Obrigatória | Descrição |
-|---|---|---|
-| `CF_API_KEY` | **sim** (mods) | API key do CurseForge (Eternal). |
-| `ADMIN_PASSWORD` | **sim** (admin) | Senha da interface `/admin`. Vazia = login sempre recusado. |
-| `DB_PATH` | não | Caminho do ficheiro SQLite (default `./tcmine.db`). |
-| `CF_CACHE_MINUTES` | não | TTL da cache em memória (default `5`). |
-| `CF_ALLOWED_ORIGINS` | não | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem. |
-| `UPDATES_DIR` | não | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
-| `OVERRIDES_DIR` | não | Pasta dos bundles de overrides dos modpacks (default `./overrides`). |
+| Variável             | Obrigatória     | Descrição                                                                                     |
+|----------------------|-----------------|-----------------------------------------------------------------------------------------------|
+| `CF_API_KEY`         | **sim** (mods)  | API key do CurseForge (Eternal).                                                              |
+| `ADMIN_PASSWORD`     | **sim** (admin) | Senha da interface `/admin`. Vazia = login sempre recusado.                                   |
+| `DB_PATH`            | não             | Caminho do ficheiro SQLite (default `./tcmine.db`).                                           |
+| `CF_CACHE_MINUTES`   | não             | TTL da cache em memória (default `5`).                                                        |
+| `CF_ALLOWED_ORIGINS` | não             | Lista de origens CORS separadas por vírgula. Vazio = qualquer origem.                         |
+| `UPDATES_DIR`        | não             | Pasta do feed de updates do launcher (Velopack), servida em `/updates` (default `./updates`). |
+| `OVERRIDES_DIR`      | não             | Pasta dos bundles de overrides dos modpacks (default `./overrides`).                          |
 
 > **Segredos persistentes (automático):** na primeira arranque, `CF_API_KEY` e
 > `ADMIN_PASSWORD` são guardados em `<dados>/secrets/` e, a partir daí, lidos do ficheiro,

@@ -17,7 +17,13 @@ public partial class ConfirmDialog : Window
         MessageText.Text = message;
     }
 
-    private void Cancel_Click(object? sender, RoutedEventArgs e) => Close(false);
+    private void Cancel_Click(object? sender, RoutedEventArgs e)
+    {
+        Close(false);
+    }
 
-    private void Confirm_Click(object? sender, RoutedEventArgs e) => Close(true);
+    private void Confirm_Click(object? sender, RoutedEventArgs e)
+    {
+        Close(true);
+    }
 }

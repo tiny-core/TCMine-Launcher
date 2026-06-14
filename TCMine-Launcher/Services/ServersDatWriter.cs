@@ -35,6 +35,7 @@ public static class ServersDatWriter
                 found = new NbtList("servers", NbtTagType.Compound);
                 root.Add(found);
             }
+
             serverList = found;
         }
         else

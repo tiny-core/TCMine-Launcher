@@ -19,13 +19,18 @@ namespace TCMine_Launcher.ViewModels;
 /// </summary>
 public partial class HomePageViewModel : ViewModelBase
 {
+    private readonly PlayerConfigService _configSync = new();
     private readonly GameProfile _game;
     private readonly GameLauncher _launcher = new();
-    private readonly MinecraftServerPinger _pinger = new();
     private readonly OverridesInstaller _overrides = new();
+    private readonly MinecraftServerPinger _pinger = new();
     private readonly PlayerProfile _player;
     private readonly MainWindowViewModel _shell;
     private bool _acceptProgress;
+
+    /// <summary>Versão disponível no servidor (para o rótulo do botão de atualizar).</summary>
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(UpdateVersionsLabel))]
+    private string _availableVersion = string.Empty;
 
     private CancellationTokenSource? _launchCts;
 
@@ -37,17 +42,6 @@ public partial class HomePageViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(UpdateVersionsLabel))]
     [NotifyCanExecuteChangedFor(nameof(UpdateModpackCommand))]
     private bool _updateAvailable;
-
-    /// <summary>Versão disponível no servidor (para o rótulo do botão de atualizar).</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(UpdateVersionsLabel))]
-    private string _availableVersion = string.Empty;
-
-    /// <summary>Transição de versões para o banner (ex.: "v1.0 → v1.1").</summary>
-    public string UpdateVersionsLabel =>
-        string.IsNullOrWhiteSpace(Active?.ManifestVersion)
-            ? $"Nova versão v{AvailableVersion}"
-            : $"v{Active!.ManifestVersion} → v{AvailableVersion}";
 
     public HomePageViewModel(PlayerProfile player, GameProfile game, MainWindowViewModel shell)
     {
@@ -62,60 +56,11 @@ public partial class HomePageViewModel : ViewModelBase
         RefreshUpdateState();
     }
 
-    /// <summary>
-    ///     Verifica (em segundo plano) se a instância oficial ativa tem uma versão mais
-    ///     recente no servidor. Chamado ao mudar de instância e ao abrir a tela "Jogar".
-    /// </summary>
-    public void RefreshUpdateState() => _ = CheckModpackUpdateAsync();
-
-    private async Task CheckModpackUpdateAsync()
-    {
-        UpdateAvailable = false;
-
-        var instance = Active;
-        if (instance is null || !instance.IsOfficial || instance.ModpackId is null) return;
-        if (!_shell.Manifest.IsConfigured) return;
-
-        try
-        {
-            var list = await _shell.Manifest.GetModpacksAsync();
-            var match = list.FirstOrDefault(m => m.Id == instance.ModpackId);
-            if (match is not null && match.Version != instance.ManifestVersion)
-            {
-                AvailableVersion = match.Version;
-                UpdateAvailable = true;
-            }
-        }
-        catch
-        {
-            // Servidor offline / sem rede — simplesmente não mostra atualização.
-        }
-    }
-
-    private bool CanUpdateModpack() => UpdateAvailable && !IsLaunching && !_shell.IsGameRunning;
-
-    [RelayCommand(CanExecute = nameof(CanUpdateModpack))]
-    private async Task UpdateModpack()
-    {
-        var instance = Active;
-        if (instance?.ModpackId is null) return;
-
-        try
-        {
-            var full = await _shell.Manifest.GetManifestAsync(instance.ModpackId);
-            if (full is null) return;
-
-            // Atualiza os metadados da instância (mods/overrides nova versão); o
-            // download acontece ao Jogar. InstallFromManifest reseleciona a instância,
-            // o que dispara NotifyInstanceChanged → RefreshUpdateState.
-            _shell.InstallFromManifest(full);
-            UpdateAvailable = false;
-        }
-        catch (Exception ex)
-        {
-            LaunchStatus = "Erro ao atualizar: " + ex.Message;
-        }
-    }
+    /// <summary>Transição de versões para o banner (ex.: "v1.0 → v1.1").</summary>
+    public string UpdateVersionsLabel =>
+        string.IsNullOrWhiteSpace(Active?.ManifestVersion)
+            ? $"Nova versão v{AvailableVersion}"
+            : $"v{Active!.ManifestVersion} → v{AvailableVersion}";
 
     /// <summary>Estado (online/offline + jogadores + MOTD) de cada servidor do modpack.</summary>
     public ObservableCollection<ServerStatusItem> Servers { get; } = new();
@@ -181,6 +126,67 @@ public partial class HomePageViewModel : ViewModelBase
         : Active.Id.Length > 30
             ? Active.Id[..30] + "…"
             : Active.Id;
+
+    /// <summary>
+    ///     Verifica (em segundo plano) se a instância oficial ativa tem uma versão mais
+    ///     recente no servidor. Chamado ao mudar de instância e ao abrir a tela "Jogar".
+    /// </summary>
+    public void RefreshUpdateState()
+    {
+        _ = CheckModpackUpdateAsync();
+    }
+
+    private async Task CheckModpackUpdateAsync()
+    {
+        UpdateAvailable = false;
+
+        var instance = Active;
+        if (instance is null || !instance.IsOfficial || instance.ModpackId is null) return;
+        if (!_shell.Manifest.IsConfigured) return;
+
+        try
+        {
+            var list = await _shell.Manifest.GetModpacksAsync();
+            var match = list.FirstOrDefault(m => m.Id == instance.ModpackId);
+            if (match is not null && match.Version != instance.ManifestVersion)
+            {
+                AvailableVersion = match.Version;
+                UpdateAvailable = true;
+            }
+        }
+        catch
+        {
+            // Servidor offline / sem rede — simplesmente não mostra atualização.
+        }
+    }
+
+    private bool CanUpdateModpack()
+    {
+        return UpdateAvailable && !IsLaunching && !_shell.IsGameRunning;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanUpdateModpack))]
+    private async Task UpdateModpack()
+    {
+        var instance = Active;
+        if (instance?.ModpackId is null) return;
+
+        try
+        {
+            var full = await _shell.Manifest.GetManifestAsync(instance.ModpackId);
+            if (full is null) return;
+
+            // Atualiza os metadados da instância (mods/overrides nova versão); o
+            // download acontece ao Jogar. InstallFromManifest reseleciona a instância,
+            // o que dispara NotifyInstanceChanged → RefreshUpdateState.
+            _shell.InstallFromManifest(full);
+            UpdateAvailable = false;
+        }
+        catch (Exception ex)
+        {
+            LaunchStatus = "Erro ao atualizar: " + ex.Message;
+        }
+    }
 
     public void NotifyPlayerChanged()
     {
@@ -374,6 +380,10 @@ public partial class HomePageViewModel : ViewModelBase
                 LaunchState.DownloadingAssets, 100, "A aplicar configuração do modpack..."));
             await _overrides.EnsureAsync(instance, _game.ServerUrl, _launchCts.Token);
 
+            // Repõe as configs do jogador do servidor se forem mais recentes (sync entre
+            // PCs). Server-wins por timestamp; só atua em modpacks oficiais + conta Microsoft.
+            await _configSync.PullAsync(instance, session.UUID, _game.ServerUrl, _launchCts.Token);
+
             // Ignora updates de progresso atrasados (a partir daqui o estado é o do jogo).
             _acceptProgress = false;
 
@@ -394,7 +404,7 @@ public partial class HomePageViewModel : ViewModelBase
             LaunchStatus = "Minecraft em execução";
             LaunchLog.Add("Minecraft iniciado.");
 
-            _ = MonitorGameAsync(process, logCapture);
+            _ = MonitorGameAsync(process, logCapture, instance, session.UUID);
         }
         catch (OperationCanceledException)
         {
@@ -418,7 +428,8 @@ public partial class HomePageViewModel : ViewModelBase
         }
     }
 
-    private async Task MonitorGameAsync(Process process, GameLogCapture logCapture)
+    private async Task MonitorGameAsync(Process process, GameLogCapture logCapture,
+        MinecraftInstance instance, string? uuid)
     {
         var exitCode = 0;
         try
@@ -433,6 +444,9 @@ public partial class HomePageViewModel : ViewModelBase
 
         _shell.IsGameRunning = false;
         _shell.MarkGameStopped();
+
+        // Guarda no servidor as configs alteradas na sessão (keybinds, waypoints, …).
+        await _configSync.PushAsync(instance, uuid, _game.ServerUrl);
 
         if (exitCode != 0)
         {
@@ -473,17 +487,13 @@ public partial class ServerStatusItem : ViewModelBase
 {
     private readonly Action<ServerStatusItem>? _onToggleAutoJoin;
 
-    [ObservableProperty] private string _motd = string.Empty;
-    [ObservableProperty] private string _statusColor = "#6B7280";
-    [ObservableProperty] private string _statusText = "A verificar...";
-
     /// <summary>Este servidor é o de entrada automática ao iniciar o jogo.</summary>
     [ObservableProperty] [NotifyPropertyChangedFor(nameof(AutoJoinLabel))]
     private bool _isAutoJoin;
 
-    public string AutoJoinLabel => IsAutoJoin
-        ? "Entra automaticamente neste servidor ao iniciar (clica para desligar)"
-        : "Entrar automaticamente neste servidor ao iniciar o jogo";
+    [ObservableProperty] private string _motd = string.Empty;
+    [ObservableProperty] private string _statusColor = "#6B7280";
+    [ObservableProperty] private string _statusText = "A verificar...";
 
     public ServerStatusItem(ServerEntry server, Action<ServerStatusItem>? onToggleAutoJoin = null)
     {
@@ -492,9 +502,16 @@ public partial class ServerStatusItem : ViewModelBase
         _onToggleAutoJoin = onToggleAutoJoin;
     }
 
+    public string AutoJoinLabel => IsAutoJoin
+        ? "Entra automaticamente neste servidor ao iniciar (clica para desligar)"
+        : "Entrar automaticamente neste servidor ao iniciar o jogo";
+
     public ServerEntry Server { get; }
     public string Name { get; }
 
     [RelayCommand]
-    private void ToggleAutoJoin() => _onToggleAutoJoin?.Invoke(this);
+    private void ToggleAutoJoin()
+    {
+        _onToggleAutoJoin?.Invoke(this);
+    }
 }

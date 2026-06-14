@@ -31,11 +31,15 @@ public static class ImageLoader
             _ = LoadAsync(image, e.NewValue as string));
     }
 
-    public static void SetSourceUrl(Image element, string? value) =>
+    public static void SetSourceUrl(Image element, string? value)
+    {
         element.SetValue(SourceUrlProperty, value);
+    }
 
-    public static string? GetSourceUrl(Image element) =>
-        element.GetValue(SourceUrlProperty);
+    public static string? GetSourceUrl(Image element)
+    {
+        return element.GetValue(SourceUrlProperty);
+    }
 
     private static async Task LoadAsync(Image image, string? url)
     {

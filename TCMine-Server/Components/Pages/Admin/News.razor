@@ -12,10 +12,10 @@
         <h2>@(_form.Id == 0 ? "Nova novidade" : $"Editar #{_form.Id}")</h2>
 
         <label class="field-label">ETIQUETA</label>
-        <input class="input" @bind="_form.Tag" placeholder="MODPACK / LAUNCHER / SERVIDOR" />
+        <input class="input" @bind="_form.Tag" placeholder="MODPACK / LAUNCHER / SERVIDOR"/>
 
         <label class="field-label">TÍTULO</label>
-        <input class="input" @bind="_form.Title" />
+        <input class="input" @bind="_form.Title"/>
 
         <label class="field-label">RESUMO</label>
         <textarea class="input" rows="3" @bind="_form.Summary"></textarea>
@@ -23,10 +23,10 @@
         <div class="row">
             <div>
                 <label class="field-label">DATA</label>
-                <input class="input" type="date" @bind="_form.PublishedAt" @bind:format="yyyy-MM-dd" />
+                <input class="input" type="date" @bind="_form.PublishedAt" @bind:format="yyyy-MM-dd"/>
             </div>
             <label class="check">
-                <input type="checkbox" @bind="_form.IsPublished" /> Publicada
+                <input type="checkbox" @bind="_form.IsPublished"/> Publicada
             </label>
         </div>
 
@@ -75,7 +75,10 @@
     private List<NewsEntity> _items = new();
     private NewsEntity _form = CreateForm();
 
-    protected override async Task OnInitializedAsync() => await LoadAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
 
     private async Task LoadAsync()
     {
@@ -83,15 +86,24 @@
         _items = await db.News.OrderByDescending(n => n.PublishedAt).ToListAsync();
     }
 
-    private static NewsEntity CreateForm() => new() { PublishedAt = DateTime.UtcNow, IsPublished = true };
-
-    private void NewForm() => _form = CreateForm();
-
-    private void Edit(NewsEntity n) => _form = new NewsEntity
+    private static NewsEntity CreateForm()
     {
-        Id = n.Id, Tag = n.Tag, Title = n.Title, Summary = n.Summary,
-        PublishedAt = n.PublishedAt, IsPublished = n.IsPublished
-    };
+        return new NewsEntity { PublishedAt = DateTime.UtcNow, IsPublished = true };
+    }
+
+    private void NewForm()
+    {
+        _form = CreateForm();
+    }
+
+    private void Edit(NewsEntity n)
+    {
+        _form = new NewsEntity
+        {
+            Id = n.Id, Tag = n.Tag, Title = n.Title, Summary = n.Summary,
+            PublishedAt = n.PublishedAt, IsPublished = n.IsPublished
+        };
+    }
 
     private async Task SaveAsync()
     {
@@ -116,4 +128,5 @@
         if (_form.Id == n.Id) NewForm();
         await LoadAsync();
     }
+
 }

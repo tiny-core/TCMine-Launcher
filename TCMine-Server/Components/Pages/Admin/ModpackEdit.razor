@@ -18,29 +18,29 @@ else
     <section class="panel">
         <h2>Detalhes</h2>
         <label class="field-label">NOME</label>
-        <input class="input" @bind="_m.Name" />
+        <input class="input" @bind="_m.Name"/>
         <div class="row">
             <div class="grow">
                 <label class="field-label">VERSÃO</label>
-                <input class="input" @bind="_m.Version" placeholder="1.0.0" />
+                <input class="input" @bind="_m.Version" placeholder="1.0.0"/>
             </div>
             <div class="grow">
                 <label class="field-label">MINECRAFT</label>
-                <input class="input" @bind="_m.Minecraft" placeholder="1.21.1" />
+                <input class="input" @bind="_m.Minecraft" placeholder="1.21.1"/>
             </div>
             <div class="grow">
                 <label class="field-label">NEOFORGE</label>
-                <input class="input" @bind="_m.Neoforge" placeholder="21.1.172" />
+                <input class="input" @bind="_m.Neoforge" placeholder="21.1.172"/>
             </div>
         </div>
         <label class="field-label">DESCRIÇÃO</label>
         <textarea class="input" rows="2" @bind="_m.Description"></textarea>
 
         <label class="field-label">RAM RECOMENDADA (MB) — opcional</label>
-        <input class="input narrow" type="number" @bind="_m.RecommendedRamMb" placeholder="ex.: 8192" />
+        <input class="input narrow" type="number" @bind="_m.RecommendedRamMb" placeholder="ex.: 8192"/>
 
         <label class="check">
-            <input type="checkbox" @bind="_m.IsPublished" /> Publicado
+            <input type="checkbox" @bind="_m.IsPublished"/> Publicado
         </label>
     </section>
 
@@ -55,7 +55,7 @@ else
 
             <div class="row">
                 <input class="input" @bind="_packQuery" @bind:event="oninput"
-                       placeholder="Nome do modpack…" @onkeydown="OnPackSearchKey" />
+                       placeholder="Nome do modpack…" @onkeydown="OnPackSearchKey"/>
                 <button class="btn" @onclick="SearchPacks" disabled="@_packBusy">Procurar</button>
             </div>
 
@@ -93,7 +93,7 @@ else
                             <div class="cf-mod">
                                 @if (!string.IsNullOrEmpty(r.LogoUrl))
                                 {
-                                    <img src="@r.LogoUrl" class="cf-logo" alt="" />
+                                    <img src="@r.LogoUrl" class="cf-logo" alt=""/>
                                 }
                                 <div>
                                     <strong>@r.Name</strong>
@@ -119,13 +119,14 @@ else
         {
             <div class="row">
                 <input class="input" @bind="_modQuery" @bind:event="oninput"
-                       placeholder="Procurar mod no CurseForge…" @onkeydown="OnModSearchKey" />
+                       placeholder="Procurar mod no CurseForge…" @onkeydown="OnModSearchKey"/>
                 <button class="btn" @onclick="SearchMods" disabled="@_modBusy">Procurar</button>
             </div>
             @if (_modError is not null)
             {
                 <p class="error">@_modError</p>
             }
+
             @if (_modResults.Count > 0)
             {
                 <ul class="list cf-results">
@@ -135,7 +136,7 @@ else
                             <div class="cf-mod">
                                 @if (!string.IsNullOrEmpty(r.LogoUrl))
                                 {
-                                    <img src="@r.LogoUrl" class="cf-logo" alt="" />
+                                    <img src="@r.LogoUrl" class="cf-logo" alt=""/>
                                 }
                                 <div>
                                     <strong>@r.Name</strong>
@@ -151,22 +152,24 @@ else
             }
         }
 
-        @foreach (var mod in _m.Mods)
-        {
-            <div class="row mod-row">
-                <input class="input" @bind="mod.Name" placeholder="Nome" />
-                <input class="input narrow" type="number" @bind="mod.CurseModId" placeholder="modId" />
-                <input class="input narrow" type="number" @bind="mod.FileId" placeholder="fileId" />
-                <input class="input" @bind="mod.FileName" placeholder="ficheiro.jar" />
-                <input class="input" @bind="mod.DownloadUrl" placeholder="https://…" />
-                <select class="input narrow" @bind="mod.Target">
-                    <option value="mod">mod</option>
-                    <option value="resourcepack">resourcepack</option>
-                    <option value="shaderpack">shaderpack</option>
-                </select>
-                <button class="btn small danger" @onclick="() => _m.Mods.Remove(mod)">✕</button>
-            </div>
-        }
+        <div class="mod-list">
+            @foreach (var mod in _m.Mods)
+            {
+                <div class="row mod-row">
+                    <input class="input" @bind="mod.Name" placeholder="Nome"/>
+                    <input class="input narrow" type="number" @bind="mod.CurseModId" placeholder="modId"/>
+                    <input class="input narrow" type="number" @bind="mod.FileId" placeholder="fileId"/>
+                    <input class="input" @bind="mod.FileName" placeholder="ficheiro.jar"/>
+                    <input class="input" @bind="mod.DownloadUrl" placeholder="https://…"/>
+                    <select class="input narrow" @bind="mod.Target">
+                        <option value="mod">mod</option>
+                        <option value="resourcepack">resourcepack</option>
+                        <option value="shaderpack">shaderpack</option>
+                    </select>
+                    <button class="btn small danger" @onclick="() => _m.Mods.Remove(mod)">✕</button>
+                </div>
+            }
+        </div>
     </section>
 
     <section class="panel">
@@ -177,9 +180,9 @@ else
         @foreach (var srv in _m.Servers)
         {
             <div class="row mod-row">
-                <input class="input" @bind="srv.Name" placeholder="Nome" />
-                <input class="input" @bind="srv.Address" placeholder="endereço.servidor.net" />
-                <input class="input narrow" type="number" @bind="srv.Port" placeholder="25565" />
+                <input class="input" @bind="srv.Name" placeholder="Nome"/>
+                <input class="input" @bind="srv.Address" placeholder="endereço.servidor.net"/>
+                <input class="input narrow" type="number" @bind="srv.Port" placeholder="25565"/>
                 <button class="btn small danger" @onclick="() => _m.Servers.Remove(srv)">✕</button>
             </div>
         }
@@ -301,9 +304,15 @@ else
         }
     }
 
-    private void Back() => Nav.NavigateTo("/admin/modpacks");
+    private void Back()
+    {
+        Nav.NavigateTo("/admin/modpacks");
+    }
 
-    private void AddMod() => _m?.Mods.Add(new ModEntryEntity());
+    private void AddMod()
+    {
+        _m?.Mods.Add(new ModEntryEntity());
+    }
 
     private async Task OnModSearchKey(KeyboardEventArgs e)
     {
@@ -373,7 +382,11 @@ else
             _addingId = 0;
         }
     }
-    private void AddServer() => _m?.Servers.Add(new ServerEntryEntity { Port = 25565 });
+
+    private void AddServer()
+    {
+        _m?.Servers.Add(new ServerEntryEntity { Port = 25565 });
+    }
 
     private async Task SaveAsync()
     {
@@ -383,49 +396,50 @@ else
         _saved = false;
         try
         {
-        await using var db = await DbFactory.CreateDbContextAsync();
-        var tracked = await db.Modpacks
-            .Include(m => m.Mods)
-            .Include(m => m.Servers)
-            .FirstOrDefaultAsync(m => m.Id == Id);
-        if (tracked is null) return;
+            await using var db = await DbFactory.CreateDbContextAsync();
+            var tracked = await db.Modpacks
+                .Include(m => m.Mods)
+                .Include(m => m.Servers)
+                .FirstOrDefaultAsync(m => m.Id == Id);
+            if (tracked is null) return;
 
-        tracked.Name = _m.Name;
-        tracked.Version = _m.Version;
-        tracked.Minecraft = _m.Minecraft;
-        tracked.Neoforge = _m.Neoforge;
-        tracked.Description = _m.Description;
-        tracked.IsPublished = _m.IsPublished;
-        tracked.HasOverrides = _m.HasOverrides;
-        tracked.RecommendedRamMb = _m.RecommendedRamMb;
+            tracked.Name = _m.Name;
+            tracked.Version = _m.Version;
+            tracked.Minecraft = _m.Minecraft;
+            tracked.Neoforge = _m.Neoforge;
+            tracked.Description = _m.Description;
+            tracked.IsPublished = _m.IsPublished;
+            tracked.HasOverrides = _m.HasOverrides;
+            tracked.RecommendedRamMb = _m.RecommendedRamMb;
 
-        // Reconcilia as listas (substitui tudo pelo estado do formulário).
-        db.Mods.RemoveRange(tracked.Mods);
-        db.Servers.RemoveRange(tracked.Servers);
-        tracked.Mods = _m.Mods.Select(x => new ModEntryEntity
-        {
-            CurseModId = x.CurseModId, FileId = x.FileId, Name = x.Name,
-            FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
-        }).ToList();
-        tracked.Servers = _m.Servers.Select(x => new ServerEntryEntity
-        {
-            Name = x.Name, Address = x.Address, Port = x.Port
-        }).ToList();
+            // Reconcilia as listas (substitui tudo pelo estado do formulário).
+            db.Mods.RemoveRange(tracked.Mods);
+            db.Servers.RemoveRange(tracked.Servers);
+            tracked.Mods = _m.Mods.Select(x => new ModEntryEntity
+            {
+                CurseModId = x.CurseModId, FileId = x.FileId, Name = x.Name,
+                FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
+            }).ToList();
+            tracked.Servers = _m.Servers.Select(x => new ServerEntryEntity
+            {
+                Name = x.Name, Address = x.Address, Port = x.Port
+            }).ToList();
 
-        await db.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
-        // Grava o bundle de overrides importado (se houver um pendente).
-        if (_pendingOverrides is not null)
-        {
-            await Overrides.SaveAsync(Id, _pendingOverrides);
-            _pendingOverrides = null;
-        }
+            // Grava o bundle de overrides importado (se houver um pendente).
+            if (_pendingOverrides is not null)
+            {
+                await Overrides.SaveAsync(Id, _pendingOverrides);
+                _pendingOverrides = null;
+            }
 
-        _saved = true;
+            _saved = true;
         }
         finally
         {
             _saving = false;
         }
     }
+
 }

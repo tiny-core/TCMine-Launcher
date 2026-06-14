@@ -21,21 +21,26 @@ public partial class InstanceModsPageViewModel : ViewModelBase
     private readonly MainWindowViewModel _shell;
     private readonly VersionService _versions = new();
     private MinecraftInstance? _instance;
-    private ObservableCollection<ModEntry>? _selectedMods;
+    [ObservableProperty] private bool _isLoadingNeoForge;
     private bool _isNew;
+    [ObservableProperty] private string _javaPathOverride = string.Empty;
     private bool _loading;
 
     [ObservableProperty] private ModSelectionViewModel? _modSelection;
     [ObservableProperty] private string _name = string.Empty;
-    [ObservableProperty] private bool _isLoadingNeoForge;
-    [ObservableProperty] private string? _selectedMinecraftVersion;
-    [ObservableProperty] private string? _selectedNeoForgeVersion;
-    [ObservableProperty] private string _javaPathOverride = string.Empty;
+    [ObservableProperty] private string _newServerAddress = string.Empty;
 
     // Campos do formulário "adicionar servidor"
     [ObservableProperty] private string _newServerName = string.Empty;
-    [ObservableProperty] private string _newServerAddress = string.Empty;
     [ObservableProperty] private string _newServerPort = "25565";
+    [ObservableProperty] private string? _selectedMinecraftVersion;
+    private ObservableCollection<ModEntry>? _selectedMods;
+    [ObservableProperty] private string? _selectedNeoForgeVersion;
+
+    public InstanceModsPageViewModel(MainWindowViewModel shell)
+    {
+        _shell = shell;
+    }
 
     /// <summary>Servidores associados à instância (editáveis em memória).</summary>
     public ObservableCollection<ServerEntry> Servers { get; } = new();
@@ -43,22 +48,17 @@ public partial class InstanceModsPageViewModel : ViewModelBase
     /// <summary>Nº de mods selecionados (para o botão).</summary>
     public int ModCount => _selectedMods?.Count ?? 0;
 
+    public ObservableCollection<string> MinecraftVersions { get; } = new();
+    public ObservableCollection<string> NeoForgeVersions { get; } = new();
+
     [RelayCommand]
     private void OpenMods()
     {
         if (ModSelection is not null) _shell.ShowModSelection(ModSelection);
     }
 
-    public InstanceModsPageViewModel(MainWindowViewModel shell)
-    {
-        _shell = shell;
-    }
-
     /// <summary>Pedido para fechar a janela (ligado pela View).</summary>
     public event Action? CloseRequested;
-
-    public ObservableCollection<string> MinecraftVersions { get; } = new();
-    public ObservableCollection<string> NeoForgeVersions { get; } = new();
 
     public void Begin(MinecraftInstance instance, bool isNew)
     {

@@ -10,59 +10,95 @@
 
     <!-- Cartão de um modpack oficial. DataContext = ModpackListItem; o comando
          de instalar vem do ViewModel da página, passado em Owner. -->
-    <Border Classes="modpack-card" Width="290">
+    <Border Classes="modpack-card" 
+            Width="290">
         <StackPanel>
             <!-- Banner -->
-            <Border Height="84" CornerRadius="12,12,0,0" ClipToBounds="True">
+            <Border Height="84"
+                    CornerRadius="12,12,0,0" 
+                    ClipToBounds="True">
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                        <GradientStop Color="#3B1D4D" Offset="0" />
-                        <GradientStop Color="#2A1206" Offset="1" />
+                    <LinearGradientBrush StartPoint="0%,0%" 
+                                         EndPoint="100%,100%">
+                        <GradientStop Color="#3B1D4D"
+                                      Offset="0" />
+                        <GradientStop Color="#2A1206"
+                                      Offset="1" />
                     </LinearGradientBrush>
                 </Border.Background>
                 <Grid Margin="12">
-                    <Border Classes="tag" VerticalAlignment="Top" HorizontalAlignment="Left">
+                    <Border Classes="tag"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left">
                         <TextBlock Text="OFICIAL" />
                     </Border>
-                    <Border Classes="badge" Background="{StaticResource WarningBg}"
-                            VerticalAlignment="Top" HorizontalAlignment="Right"
+                    <Border Classes="badge" 
+                            Background="{StaticResource WarningBg}"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Right"
                             IsVisible="{Binding UpdateAvailable}">
-                        <TextBlock Text="ATUALIZAÇÃO" FontSize="9.5" FontWeight="Bold"
+                        <TextBlock Text="ATUALIZAÇÃO" 
+                                   FontSize="9.5"
+                                   FontWeight="Bold"
                                    Foreground="{StaticResource WarningText}" />
                     </Border>
                 </Grid>
             </Border>
 
-            <StackPanel Margin="18,15,18,18" Spacing="0">
-                <TextBlock Text="{Binding Name}" Classes="card-title" />
+            <StackPanel Margin="18,15,18,18" 
+                        Spacing="0">
+                <TextBlock Text="{Binding Name}" 
+                           Classes="card-title" />
                 <TextBlock Text="{Binding VersionSummary}"
-                           Foreground="{StaticResource TextFaint}" FontSize="11" Margin="0,6,0,0" />
+                           Foreground="{StaticResource TextFaint}"
+                           FontSize="11" 
+                           Margin="0,6,0,0" />
 
-                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                <StackPanel Orientation="Horizontal"
+                            Spacing="8" 
+                            Margin="0,6,0,0">
                     <TextBlock Text="{Binding ModsSummary}"
-                               Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" />
-                    <Border Classes="badge" Padding="7,2" VerticalAlignment="Center"
-                            Background="{StaticResource SuccessBg}" IsVisible="{Binding HasServer}">
-                        <StackPanel Orientation="Horizontal" Spacing="5">
-                            <Ellipse Width="6" Height="6" Fill="{StaticResource Success}" VerticalAlignment="Center" />
-                            <TextBlock Text="Servidor" FontSize="10" Foreground="{StaticResource SuccessText}"
+                               Foreground="{StaticResource TextMuted}" 
+                               FontSize="11"
+                               VerticalAlignment="Center" />
+                    <Border Classes="badge"
+                            Padding="7,2"
+                            VerticalAlignment="Center"
+                            Background="{StaticResource SuccessBg}"
+                            IsVisible="{Binding HasServer}">
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="5">
+                            <Ellipse Width="6"
+                                     Height="6" 
+                                     Fill="{StaticResource Success}"
+                                     VerticalAlignment="Center" />
+                            <TextBlock Text="Servidor"
+                                       FontSize="10" 
+                                       Foreground="{StaticResource SuccessText}"
                                        VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
 
                 <TextBlock Text="{Binding Description}"
-                           Foreground="{StaticResource TextMuted}" FontSize="12"
-                           TextWrapping="Wrap" Height="36" Margin="0,8,0,0"
+                           Foreground="{StaticResource TextMuted}"
+                           FontSize="12"
+                           TextWrapping="Wrap"
+                           Height="36"
+                           Margin="0,8,0,0"
                            TextTrimming="CharacterEllipsis" />
 
-                <Button Classes="play-btn" Height="38"
-                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                <Button Classes="play-btn" 
+                        Height="38"
+                        HorizontalAlignment="Stretch" 
+                        HorizontalContentAlignment="Center"
                         Margin="0,14,0,0"
                         IsEnabled="{Binding #CardRoot.Owner.CanInteract}"
                         Command="{Binding #CardRoot.Owner.InstallCommand}"
                         CommandParameter="{Binding}">
-                    <TextBlock Text="{Binding InstallLabel}" FontSize="12.5" FontWeight="Bold" />
+                    <TextBlock Text="{Binding InstallLabel}"
+                               FontSize="12.5" 
+                               FontWeight="Bold" />
                 </Button>
             </StackPanel>
         </StackPanel>

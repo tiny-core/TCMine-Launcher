@@ -48,10 +48,10 @@ public partial class ModSelectionViewModel : ViewModelBase
     private readonly Func<string?> _gameVersion;
     private readonly Action? _onChanged;
     private readonly ObservableCollection<ModEntry> _selected;
-    private CancellationTokenSource? _searchCts;
+    [ObservableProperty] private bool _isSearching;
 
     [ObservableProperty] private string _query = string.Empty;
-    [ObservableProperty] private bool _isSearching;
+    private CancellationTokenSource? _searchCts;
     [ObservableProperty] private string? _statusMessage;
 
     public ModSelectionViewModel(
@@ -142,7 +142,8 @@ public partial class ModSelectionViewModel : ViewModelBase
         try
         {
             var before = _selected.Count;
-            var added = await AddWithDependenciesAsync(item.ModId, item.Name, item.LogoUrl, gameVersion, new HashSet<int>());
+            var added = await AddWithDependenciesAsync(item.ModId, item.Name, item.LogoUrl, gameVersion,
+                new HashSet<int>());
             if (!added) return;
 
             item.IsSelected = true;
@@ -204,6 +205,7 @@ public partial class ModSelectionViewModel : ViewModelBase
             existing.IsSelected = true;
             return;
         }
+
         Results.Insert(0, new ModSearchItem(modId, name, string.Empty, true, logoUrl));
     }
 }

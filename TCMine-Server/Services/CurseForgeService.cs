@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -18,9 +17,9 @@ public class CurseForgeService
     public const int LoaderNeoForge = 6;
 
     private static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true };
+    private readonly string? _apiKey;
 
     private readonly IHttpClientFactory _factory;
-    private readonly string? _apiKey;
 
     public CurseForgeService(IHttpClientFactory factory, IConfiguration config)
     {
@@ -39,16 +38,20 @@ public class CurseForgeService
     }
 
     /// <summary>Pesquisa modpacks de Minecraft pelo nome.</summary>
-    public Task<List<CfMod>> SearchModpacksAsync(string query, CancellationToken ct = default) =>
-        SearchAsync(ClassModpacks, query, null, ct);
+    public Task<List<CfMod>> SearchModpacksAsync(string query, CancellationToken ct = default)
+    {
+        return SearchAsync(ClassModpacks, query, null, ct);
+    }
 
     /// <summary>Pesquisa mods de Minecraft (opcionalmente filtrados pela versão MC).</summary>
-    public Task<List<CfMod>> SearchModsAsync(string query, string? gameVersion, CancellationToken ct = default) =>
-        SearchAsync(ClassMods, query, gameVersion, ct);
+    public Task<List<CfMod>> SearchModsAsync(string query, string? gameVersion, CancellationToken ct = default)
+    {
+        return SearchAsync(ClassMods, query, gameVersion, ct);
+    }
 
     private async Task<List<CfMod>> SearchAsync(int classId, string query, string? gameVersion, CancellationToken ct)
     {
-        if (!IsConfigured || string.IsNullOrWhiteSpace(query)) return new();
+        if (!IsConfigured || string.IsNullOrWhiteSpace(query)) return new List<CfMod>();
 
         var url = $"/v1/mods/search?gameId={GameMinecraft}&classId={classId}" +
                   $"&searchFilter={Uri.EscapeDataString(query)}&sortField=2&sortOrder=desc&pageSize=20";
@@ -56,14 +59,14 @@ public class CurseForgeService
             url += $"&gameVersion={Uri.EscapeDataString(gameVersion)}";
 
         var resp = await Api().GetFromJsonAsync<CfListResponse>(url, Json, ct);
-        return resp?.Data ?? new();
+        return resp?.Data ?? new List<CfMod>();
     }
 
     /// <summary>Ficheiros de um mod (mais recentes primeiro), filtrados por versão/loader.</summary>
     public async Task<List<CfFile>> GetModFilesAsync(
         long modId, string? gameVersion, int? loaderType, CancellationToken ct = default)
     {
-        if (!IsConfigured) return new();
+        if (!IsConfigured) return new List<CfFile>();
 
         var url = $"/v1/mods/{modId}/files?pageSize=50";
         if (!string.IsNullOrWhiteSpace(gameVersion))
@@ -72,7 +75,7 @@ public class CurseForgeService
             url += $"&modLoaderType={lt}";
 
         var resp = await Api().GetFromJsonAsync<CfFilesResponse>(url, Json, ct);
-        return resp?.Data ?? new();
+        return resp?.Data ?? new List<CfFile>();
     }
 
     /// <summary>
@@ -151,7 +154,7 @@ public class CurseForgeService
         if (entries.Count == 0) return null;
 
         using var ms = new MemoryStream();
-        using (var outZip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
+        using (var outZip = new ZipArchive(ms, ZipArchiveMode.Create, true))
         {
             foreach (var e in entries)
             {
@@ -163,6 +166,7 @@ public class CurseForgeService
                 inS.CopyTo(outS);
             }
         }
+
         return ms.ToArray();
     }
 
@@ -170,23 +174,26 @@ public class CurseForgeService
     {
         var resp = await Api().PostAsJsonAsync("/v1/mods/files", new { fileIds }, ct);
         var parsed = await resp.Content.ReadFromJsonAsync<CfFilesResponse>(Json, ct);
-        return parsed?.Data ?? new();
+        return parsed?.Data ?? new List<CfFile>();
     }
 
     private async Task<Dictionary<long, CfMod>> GetModsAsync(IEnumerable<long> modIds, CancellationToken ct)
     {
         var resp = await Api().PostAsJsonAsync("/v1/mods", new { modIds }, ct);
         var parsed = await resp.Content.ReadFromJsonAsync<CfListResponse>(Json, ct);
-        return (parsed?.Data ?? new()).ToDictionary(m => m.Id);
+        return (parsed?.Data ?? new List<CfMod>()).ToDictionary(m => m.Id);
     }
 
     /// <summary>Mapeia a classe do CurseForge para a pasta de destino no cliente.</summary>
-    public static string ClassToTarget(long classId) => classId switch
+    public static string ClassToTarget(long classId)
     {
-        12 => "resourcepack",
-        6552 => "shaderpack",
-        _ => "mod"
-    };
+        return classId switch
+        {
+            12 => "resourcepack",
+            6552 => "shaderpack",
+            _ => "mod"
+        };
+    }
 
     /// <summary>downloadUrl da API, ou reconstrução do URL edge.forgecdn quando vem nulo.</summary>
     public static string? ResolveDownloadUrl(CfFile file)
@@ -196,10 +203,12 @@ public class CurseForgeService
         return $"https://edge.forgecdn.net/files/{file.Id / 1000}/{file.Id % 1000}/{file.FileName}";
     }
 
-    private static string ExtractNeoForgeVersion(string? loaderId) =>
+    private static string ExtractNeoForgeVersion(string? loaderId)
+    {
         // ex.: "neoforge-21.1.172" -> "21.1.172"
-        string.IsNullOrWhiteSpace(loaderId) ? string.Empty
+        return string.IsNullOrWhiteSpace(loaderId) ? string.Empty
             : loaderId.Contains('-') ? loaderId[(loaderId.LastIndexOf('-') + 1)..] : loaderId;
+    }
 
     private static async Task<MemoryStream> BufferAsync(Stream source, CancellationToken ct)
     {
@@ -212,6 +221,7 @@ public class CurseForgeService
 
 // ── DTOs da API CurseForge ───────────────────────────────────────────────────
 public record CfListResponse([property: JsonPropertyName("data")] List<CfMod> Data);
+
 public record CfFilesResponse([property: JsonPropertyName("data")] List<CfFile> Data);
 
 public record CfMod(long Id, string Name, string? Summary, CfLogo? Logo, List<CfFile>? LatestFiles, long ClassId = 6)
@@ -223,14 +233,30 @@ public record CfMod(long Id, string Name, string? Summary, CfLogo? Logo, List<Cf
 }
 
 public record CfLogo(string? Url);
+
 public record CfFile(long Id, long ModId, string FileName, string? DownloadUrl, List<string>? GameVersions);
 
 // ── Manifest de um modpack CurseForge (dentro do .zip) ───────────────────────
-public record CfManifest(CfManifestMc Minecraft, string? Name, string? Version, List<CfManifestFile> Files, string? Overrides = "overrides");
+public record CfManifest(
+    CfManifestMc Minecraft,
+    string? Name,
+    string? Version,
+    List<CfManifestFile> Files,
+    string? Overrides = "overrides");
+
 public record CfManifestMc(string Version, List<CfManifestLoader> ModLoaders);
+
 public record CfManifestLoader(string Id, bool Primary);
+
 public record CfManifestFile(long ProjectID, long FileID, bool Required);
 
 // ── Resultado da importação ──────────────────────────────────────────────────
-public record ImportedModpack(string Name, string Version, string Minecraft, string Neoforge, List<ImportedMod> Mods, byte[]? Overrides);
+public record ImportedModpack(
+    string Name,
+    string Version,
+    string Minecraft,
+    string Neoforge,
+    List<ImportedMod> Mods,
+    byte[]? Overrides);
+
 public record ImportedMod(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target);

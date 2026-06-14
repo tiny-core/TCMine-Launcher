@@ -62,6 +62,8 @@ public class ContentService
     }
 
     /// <summary>Formata a data no estilo das novidades (ex.: "07 jun 2026").</summary>
-    private static string FormatDate(DateTime dt) =>
-        dt.ToString("dd MMM yyyy", Pt).Replace(".", string.Empty);
+    private static string FormatDate(DateTime dt)
+    {
+        return dt.ToString("dd MMM yyyy", Pt).Replace(".", string.Empty);
+    }
 }

@@ -31,6 +31,7 @@ public static class WindowStateStore
         {
             // ignora ficheiro inválido
         }
+
         return null;
     }
 

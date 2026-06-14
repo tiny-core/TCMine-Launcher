@@ -14,9 +14,9 @@ namespace TCMine_Launcher.ViewModels;
 public partial class NewsPageViewModel : ViewModelBase
 {
     private readonly NewsService _news;
-    private bool _loadedOnce;
 
     [ObservableProperty] private bool _isLoading;
+    private bool _loadedOnce;
     [ObservableProperty] private string? _statusMessage;
 
     public NewsPageViewModel(NewsService news)

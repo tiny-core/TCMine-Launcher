@@ -14,9 +14,15 @@ public class OverridesStore
     }
 
     // Path.GetFileName protege contra path traversal (o id é um slug).
-    private string PathFor(string id) => Path.Combine(_dir, Path.GetFileName(id) + ".zip");
+    private string PathFor(string id)
+    {
+        return Path.Combine(_dir, Path.GetFileName(id) + ".zip");
+    }
 
-    public bool Exists(string id) => File.Exists(PathFor(id));
+    public bool Exists(string id)
+    {
+        return File.Exists(PathFor(id));
+    }
 
     public string? GetFile(string id)
     {

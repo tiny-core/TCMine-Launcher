@@ -8,38 +8,59 @@
              x:Class="TCMine_Launcher.Views.SettingsPageView"
              x:DataType="vm:SettingsPageViewModel">
 
-    <Grid Margin="26" RowDefinitions="Auto,16,*">
+    <Grid Margin="26" 
+          RowDefinitions="Auto,16,*">
 
         <StackPanel Grid.Row="0">
-            <TextBlock Classes="page-title" Text="Definições" />
-            <TextBlock Classes="muted" Text="Conta, memória e Java" Margin="0,4,0,0" />
+            <TextBlock Classes="page-title" 
+                       Text="Definições" />
+            <TextBlock Classes="muted" 
+                       Text="Conta, memória e Java"
+                       Margin="0,4,0,0" />
         </StackPanel>
 
         <ScrollViewer Grid.Row="2">
-            <StackPanel Spacing="14" Width="600" HorizontalAlignment="Center">
+            <StackPanel Spacing="14"
+                        Width="600" 
+                        HorizontalAlignment="Center">
 
                 <!-- Conta -->
                 <Border Classes="panel">
                     <Grid ColumnDefinitions="Auto,16,*,Auto">
-                        <Border Grid.Column="0" Classes="avatar" Width="52" Height="52"
-                                VerticalAlignment="Center" ClipToBounds="True">
+                        <Border Grid.Column="0" 
+                                Classes="avatar"
+                                Width="52" 
+                                Height="52"
+                                VerticalAlignment="Center"
+                                ClipToBounds="True">
                             <Panel>
-                                <TextBlock Text="{Binding AvatarInitials}" FontSize="18"
-                                           Foreground="White" FontWeight="Bold"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding AvatarInitials}" 
+                                           FontSize="18"
+                                           Foreground="White" 
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center" />
                                 <Image bh:ImageLoader.SourceUrl="{Binding PlayerHeadUrl}"
                                        Stretch="UniformToFill" />
                             </Panel>
                         </Border>
-                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                        <StackPanel Grid.Column="2"
+                                    VerticalAlignment="Center"
+                                    Spacing="2">
                             <TextBlock Text="{Binding PlayerName}"
-                                       FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" />
-                            <TextBlock Text="{Binding AccountLabel}" Classes="muted" FontSize="11" />
+                                       FontSize="15" 
+                                       FontWeight="Bold" 
+                                       Foreground="{StaticResource TextPrimary}" />
+                            <TextBlock Text="{Binding AccountLabel}"
+                                       Classes="muted" 
+                                       FontSize="11" />
                         </StackPanel>
-                        <Button Grid.Column="3" Classes="outline-btn"
+                        <Button Grid.Column="3" 
+                                Classes="outline-btn"
                                 Command="{Binding LogoutCommand}"
                                 VerticalAlignment="Center">
-                            <TextBlock Text="Terminar sessão" FontSize="12.5" />
+                            <TextBlock Text="Terminar sessão"
+                                       FontSize="12.5" />
                         </Button>
                     </Grid>
                 </Border>
@@ -47,21 +68,33 @@
                 <!-- Jogo -->
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
-                        <TextBlock Text="Jogo" Classes="panel-heading" />
+                        <TextBlock Text="Jogo" 
+                                   Classes="panel-heading" />
 
-                        <Grid ColumnDefinitions="*,Auto" Margin="0,18,0,0">
-                            <TextBlock Grid.Column="0" Classes="section-label"
-                                       Text="MEMÓRIA ALOCADA" Margin="0" />
-                            <TextBlock Grid.Column="1" Text="{Binding RamDisplay}"
-                                       FontSize="12" Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
+                        <Grid ColumnDefinitions="*,Auto" 
+                              Margin="0,18,0,0">
+                            <TextBlock Grid.Column="0"
+                                       Classes="section-label"
+                                       Text="MEMÓRIA ALOCADA"
+                                       Margin="0" />
+                            <TextBlock Grid.Column="1" 
+                                       Text="{Binding RamDisplay}"
+                                       FontSize="12"
+                                       Foreground="{StaticResource Accent}" 
+                                       FontWeight="SemiBold" />
                         </Grid>
-                        <Slider Minimum="1024" Maximum="16384"
-                                TickFrequency="1024" IsSnapToTickEnabled="True"
-                                Value="{Binding RamMb}" Margin="0,4,0,0" />
+                        <Slider Minimum="1024"
+                                Maximum="16384"
+                                TickFrequency="1024"
+                                IsSnapToTickEnabled="True"
+                                Value="{Binding RamMb}" 
+                                Margin="0,4,0,0" />
 
-                        <TextBlock Classes="section-label" Text="CAMINHO DO JAVA (opcional)"
+                        <TextBlock Classes="section-label" 
+                                   Text="CAMINHO DO JAVA (opcional)"
                                    Margin="2,16,0,7" />
-                        <TextBox Classes="field" Text="{Binding JavaPath}"
+                        <TextBox Classes="field"
+                                 Text="{Binding JavaPath}"
                                  PlaceholderText="Auto-detectar" />
                     </StackPanel>
                 </Border>
@@ -69,12 +102,17 @@
                 <!-- Servidor TCMine -->
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
-                        <TextBlock Text="Servidor TCMine" Classes="panel-heading" />
-                        <TextBlock Classes="section-label" Text="URL DO SERVIDOR"
+                        <TextBlock Text="Servidor TCMine" 
+                                   Classes="panel-heading" />
+                        <TextBlock Classes="section-label"
+                                   Text="URL DO SERVIDOR"
                                    Margin="2,16,0,7" />
-                        <TextBox Classes="field" Text="{Binding ServerUrl}"
+                        <TextBox Classes="field" 
+                                 Text="{Binding ServerUrl}"
                                  PlaceholderText="https://o-teu-servidor" />
-                        <TextBlock Classes="muted" FontSize="11" Margin="2,8,0,0"
+                        <TextBlock Classes="muted"
+                                   FontSize="11"
+                                   Margin="2,8,0,0"
                                    TextWrapping="Wrap"
                                    Text="Serve os modpacks oficiais e o proxy do CurseForge (mods). Necessário para a aba Modpacks e a pesquisa de mods." />
                     </StackPanel>

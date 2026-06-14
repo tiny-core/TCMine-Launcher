@@ -31,6 +31,8 @@ public partial class LogWindow : Window
         _log = null;
     }
 
-    private void OnLogChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+    private void OnLogChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
         Dispatcher.UIThread.Post(() => LogScroll.ScrollToEnd());
+    }
 }

@@ -32,17 +32,13 @@ public class ModpackManifest
     public List<ModEntry> Mods { get; set; } = new();
     public List<ServerEntry> Servers { get; set; } = new();
 
-    [JsonIgnore]
-    public int TotalMods => Mods.Count > 0 ? Mods.Count : ModCount;
+    [JsonIgnore] public int TotalMods => Mods.Count > 0 ? Mods.Count : ModCount;
 
-    [JsonIgnore]
-    public int TotalServers => Servers.Count > 0 ? Servers.Count : ServerCount;
+    [JsonIgnore] public int TotalServers => Servers.Count > 0 ? Servers.Count : ServerCount;
 
-    [JsonIgnore]
-    public bool HasServer => TotalServers > 0;
+    [JsonIgnore] public bool HasServer => TotalServers > 0;
 
-    [JsonIgnore]
-    public string ServerLabel => HasServer ? "Com servidor" : "Sem servidor";
+    [JsonIgnore] public string ServerLabel => HasServer ? "Com servidor" : "Sem servidor";
 
     [JsonIgnore]
     public string VersionSummary =>
@@ -50,6 +46,5 @@ public class ModpackManifest
             ? $"MC {Minecraft} · NeoForge {Neoforge}"
             : $"v{Version} · MC {Minecraft} · NeoForge {Neoforge}";
 
-    [JsonIgnore]
-    public string ModsSummary => TotalMods == 0 ? "Sem mods" : $"{TotalMods} mod(s)";
+    [JsonIgnore] public string ModsSummary => TotalMods == 0 ? "Sem mods" : $"{TotalMods} mod(s)";
 }

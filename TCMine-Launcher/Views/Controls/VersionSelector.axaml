@@ -11,9 +11,15 @@
          ComboBox. Totalmente desacoplado do ViewModel — liga-se por propriedades. -->
     <StackPanel>
         <Grid ColumnDefinitions="*,Auto">
-            <TextBlock Grid.Column="0" Classes="section-label" Text="{Binding #Root.Label}" />
-            <Ellipse Grid.Column="1" Classes="spinner" Width="12" Height="12"
-                     Margin="0,0,4,6" IsVisible="{Binding #Root.IsLoading}" />
+            <TextBlock Grid.Column="0" 
+                       Classes="section-label" 
+                       Text="{Binding #Root.Label}" />
+            <Ellipse Grid.Column="1"
+                     Classes="spinner"
+                     Width="12"
+                     Height="12"
+                     Margin="0,0,4,6" 
+                     IsVisible="{Binding #Root.IsLoading}" />
         </Grid>
         <ComboBox Classes="version-select"
                   ItemsSource="{Binding #Root.ItemsSource}"

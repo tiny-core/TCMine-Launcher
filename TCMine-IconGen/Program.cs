@@ -32,7 +32,9 @@ static byte[] RenderIcon(int s)
     var tile = new SKRect(pad, pad, s - pad, s - pad);
 
     using (var fill = new SKPaint { Color = new SKColor(0x1A, 0x0E, 0x06), IsAntialias = true })
+    {
         canvas.DrawRoundRect(tile, radius, radius, fill);
+    }
 
     using (var border = new SKPaint
            {
@@ -70,7 +72,7 @@ static byte[] RenderSplash(int w, int h)
 
     DrawCube(canvas, w / 2f, h * 0.36f, 48f);
 
-    DrawText(canvas, "TCMine Launcher", w / 2f, h * 0.70f, 27f, SKColors.White, bold: true);
+    DrawText(canvas, "TCMine Launcher", w / 2f, h * 0.70f, 27f, SKColors.White, true);
     DrawText(canvas, "A preparar a instalação…", w / 2f, h * 0.70f + 26f, 13f,
         new SKColor(0x7A, 0x7A, 0x9A));
 
@@ -90,7 +92,8 @@ static void DrawCube(SKCanvas canvas, float cx, float cy, float w)
     Face(canvas, right, new SKColor(0xF9, 0x73, 0x16));
 }
 
-static void DrawText(SKCanvas canvas, string text, float cx, float baseline, float size, SKColor color, bool bold = false)
+static void DrawText(SKCanvas canvas, string text, float cx, float baseline, float size, SKColor color,
+    bool bold = false)
 {
     using var paint = new SKPaint
     {
@@ -101,7 +104,10 @@ static void DrawText(SKCanvas canvas, string text, float cx, float baseline, flo
     canvas.DrawText(text, cx, baseline, paint);
 }
 
-static SKPoint P(float x, float y) => new(x, y);
+static SKPoint P(float x, float y)
+{
+    return new SKPoint(x, y);
+}
 
 static void Face(SKCanvas canvas, SKPoint[] pts, SKColor color)
 {
@@ -120,8 +126,8 @@ static void WriteIco(string path, Dictionary<int, byte[]> images)
     using var w = new BinaryWriter(fs);
 
     var entries = images.OrderBy(kv => kv.Key).ToList();
-    w.Write((short)0);            // reserved
-    w.Write((short)1);            // type = icon
+    w.Write((short)0); // reserved
+    w.Write((short)1); // type = icon
     w.Write((short)entries.Count);
 
     var offset = 6 + entries.Count * 16;
@@ -129,12 +135,12 @@ static void WriteIco(string path, Dictionary<int, byte[]> images)
     {
         w.Write((byte)(size >= 256 ? 0 : size)); // width  (0 = 256)
         w.Write((byte)(size >= 256 ? 0 : size)); // height (0 = 256)
-        w.Write((byte)0);         // palette
-        w.Write((byte)0);         // reserved
-        w.Write((short)1);        // color planes
-        w.Write((short)32);       // bits per pixel
-        w.Write(bytes.Length);    // size of image data
-        w.Write(offset);          // offset of image data
+        w.Write((byte)0); // palette
+        w.Write((byte)0); // reserved
+        w.Write((short)1); // color planes
+        w.Write((short)32); // bits per pixel
+        w.Write(bytes.Length); // size of image data
+        w.Write(offset); // offset of image data
         offset += bytes.Length;
     }
 

@@ -9,26 +9,35 @@
              x:DataType="vm:ModpacksPageViewModel"
              x:Name="PageRoot">
 
-    <Grid Margin="26" RowDefinitions="Auto,16,Auto,*">
+    <Grid Margin="26" 
+          RowDefinitions="Auto,16,Auto,*">
 
         <!-- Cabeçalho -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="*,Auto">
             <StackPanel Grid.Column="0">
-                <TextBlock Classes="page-title" Text="Modpacks oficiais" />
-                <TextBlock Classes="muted" Text="Modpacks publicados pelo servidor TCMine"
+                <TextBlock Classes="page-title" 
+                           Text="Modpacks oficiais" />
+                <TextBlock Classes="muted" 
+                           Text="Modpacks publicados pelo servidor TCMine"
                            Margin="0,4,0,0" />
             </StackPanel>
-            <ctl:RefreshButton Grid.Column="1" Command="{Binding RefreshCommand}"
+            <ctl:RefreshButton Grid.Column="1"
+                               Command="{Binding RefreshCommand}"
                                IsLoading="{Binding IsLoading}" />
         </Grid>
 
         <!-- Estado / mensagens -->
-        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}"
-                   Classes="muted" FontSize="12" TextWrapping="Wrap" Margin="0,12,0,0"
+        <TextBlock Grid.Row="2" 
+                   Text="{Binding StatusMessage}"
+                   Classes="muted" 
+                   FontSize="12" 
+                   TextWrapping="Wrap" Margin="0,12,0,0"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
         <!-- Catálogo -->
-        <ScrollViewer Grid.Row="3" Margin="0,12,0,0" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Grid.Row="3"
+                      Margin="0,12,0,0" HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Modpacks}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

@@ -12,55 +12,84 @@
     <Grid RowDefinitions="Auto,Auto,*">
 
         <!-- Barra de pesquisa -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,10,Auto">
-            <TextBox Grid.Column="0" Classes="field" Text="{Binding Query}"
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,10,Auto">
+            <TextBox Grid.Column="0"
+                     Classes="field" 
+                     Text="{Binding Query}"
                      PlaceholderText="Pesquisar mods (CurseForge)..."
                      Foreground="{StaticResource TextPrimary}">
                 <TextBox.KeyBindings>
-                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                    <KeyBinding Gesture="Enter" 
+                        Command="{Binding SearchCommand}" />
                 </TextBox.KeyBindings>
             </TextBox>
-            <Button Grid.Column="2" Classes="outline-btn" Height="38" Width="110"
+            <Button Grid.Column="2" 
+                    Classes="outline-btn"
+                    Height="38"
+                    Width="110"
                     HorizontalContentAlignment="Center"
                     Command="{Binding SearchCommand}"
                     IsEnabled="{Binding !IsSearching}">
                 <Panel>
-                    <TextBlock Text="Pesquisar" FontSize="12.5"
+                    <TextBlock Text="Pesquisar" 
+                               FontSize="12.5"
                                IsVisible="{Binding !IsSearching}" />
-                    <Ellipse Classes="spinner" Width="14" Height="14"
+                    <Ellipse Classes="spinner"
+                             Width="14"
+                             Height="14"
                              IsVisible="{Binding IsSearching}" />
                 </Panel>
             </Button>
         </Grid>
 
         <!-- Estado / mensagens -->
-        <TextBlock Grid.Row="1" Text="{Binding StatusMessage}"
-                   Classes="muted" FontSize="11.5" TextWrapping="Wrap" Margin="0,12"
+        <TextBlock Grid.Row="1" 
+                   Text="{Binding StatusMessage}"
+                   Classes="muted"
+                   FontSize="11.5" 
+                   TextWrapping="Wrap" 
+                   Margin="0,12"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
         <!-- Lista única (resultados + selecionados; o botão alterna) — ocupa o resto -->
-        <Border Grid.Row="2" Background="{StaticResource BgConsole}" BorderBrush="{StaticResource BorderDivider}" BorderThickness="1"
-                CornerRadius="8" Margin="0,12,0,0" IsVisible="{Binding IsConfigured}">
+        <Border Grid.Row="2" 
+                Background="{StaticResource BgConsole}"
+                BorderBrush="{StaticResource BorderDivider}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Margin="0,12,0,0" 
+                IsVisible="{Binding IsConfigured}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Results}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vm:ModSearchItem">
-                            <Grid ColumnDefinitions="Auto,12,*,Auto" Margin="12,9">
-                                <Border Grid.Column="0" Width="38" Height="38"
-                                        CornerRadius="6" ClipToBounds="True"
-                                        Background="{StaticResource BgElevated}" VerticalAlignment="Center">
+                            <Grid ColumnDefinitions="Auto,12,*,Auto"
+                                  Margin="12,9">
+                                <Border Grid.Column="0"
+                                        Width="38"
+                                        Height="38"
+                                        CornerRadius="6" 
+                                        ClipToBounds="True"
+                                        Background="{StaticResource BgElevated}"
+                                        VerticalAlignment="Center">
                                     <Image bh:ImageLoader.SourceUrl="{Binding LogoUrl}"
                                            Stretch="UniformToFill" />
                                 </Border>
-                                <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="2" 
+                                            Spacing="2"
+                                            VerticalAlignment="Center">
                                     <TextBlock Text="{Binding Name}"
-                                               FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" />
+                                               FontSize="13" 
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimary}" />
                                     <TextBlock Text="{Binding Summary}"
                                                FontSize="11" Foreground="{StaticResource TextMuted}"
                                                TextTrimming="CharacterEllipsis"
                                                IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                                 </StackPanel>
-                                <Button Grid.Column="3" Classes="outline-btn mod-toggle" Height="30"
+                                <Button Grid.Column="3" 
+                                        Classes="outline-btn mod-toggle" Height="30"
                                         Classes.selected="{Binding IsSelected}"
                                         VerticalAlignment="Center" Margin="10,0,20,0"
                                         Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ToggleCommand}"

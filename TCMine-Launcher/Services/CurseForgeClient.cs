@@ -28,12 +28,12 @@ public class CurseForgeClient
     };
 
     private readonly Func<string?> _baseUrlProvider;
+    private readonly ConcurrentDictionary<string, CurseForgeFile?> _fileCache = new();
     private readonly HttpClient _http = HttpClientProvider.Shared;
+    private readonly ConcurrentDictionary<int, CurseForgeMod?> _modCache = new();
 
     // Cache em memória (por sessão) — evita repetir pedidos iguais.
     private readonly ConcurrentDictionary<string, List<CurseForgeMod>> _searchCache = new();
-    private readonly ConcurrentDictionary<string, CurseForgeFile?> _fileCache = new();
-    private readonly ConcurrentDictionary<int, CurseForgeMod?> _modCache = new();
 
     public CurseForgeClient(Func<string?> baseUrlProvider)
     {

@@ -17,8 +17,11 @@
 
     <views:WindowChrome>
         <Grid RowDefinitions="45,*">
-            <views:TitleBar Grid.Row="0" Title="Gerir instância" ShowMinimize="False" />
-            <views:InstanceModsPageView Margin="20" Grid.Row="1" />
+            <views:TitleBar Grid.Row="0" 
+                            Title="Gerir instância" 
+                            ShowMinimize="False" />
+            <views:InstanceModsPageView Margin="20" 
+                                        Grid.Row="1" />
         </Grid>
     </views:WindowChrome>
 </Window>

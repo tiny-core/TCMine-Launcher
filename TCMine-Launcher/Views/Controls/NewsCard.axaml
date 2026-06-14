@@ -8,19 +8,28 @@
              x:DataType="m:NewsItem">
 
     <!-- Cartão de uma novidade. DataContext = NewsItem (sem comandos). -->
-    <Border Classes="panel" Padding="20,18">
+    <Border Classes="panel" 
+            Padding="20,18">
         <StackPanel Spacing="0">
             <Grid ColumnDefinitions="Auto,*,Auto">
-                <Border Grid.Column="0" Classes="tag">
+                <Border Grid.Column="0" 
+                        Classes="tag">
                     <TextBlock Text="{Binding Tag}" />
                 </Border>
-                <TextBlock Grid.Column="2" Text="{Binding Date}"
-                           Classes="muted" FontSize="11" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2"
+                           Text="{Binding Date}"
+                           Classes="muted"
+                           FontSize="11" 
+                           VerticalAlignment="Center" />
             </Grid>
-            <TextBlock Text="{Binding Title}" Classes="card-title" Margin="0,12,0,0" />
+            <TextBlock Text="{Binding Title}" 
+                       Classes="card-title"
+                       Margin="0,12,0,0" />
             <TextBlock Text="{Binding Summary}"
-                       Foreground="{StaticResource TextMuted}" FontSize="13"
-                       TextWrapping="Wrap" Margin="0,6,0,0" />
+                       Foreground="{StaticResource TextMuted}" 
+                       FontSize="13"
+                       TextWrapping="Wrap"
+                       Margin="0,6,0,0" />
         </StackPanel>
     </Border>
 </UserControl>

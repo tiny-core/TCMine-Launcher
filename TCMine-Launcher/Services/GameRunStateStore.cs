@@ -11,8 +11,6 @@ namespace TCMine_Launcher.Services;
 /// </summary>
 public class GameRunStateStore
 {
-    public record RunState(string InstanceId, int Pid, DateTimeOffset StartedAt);
-
     public void Save(string instanceId, int pid)
     {
         try
@@ -29,8 +27,14 @@ public class GameRunStateStore
 
     public void Clear()
     {
-        try { File.Delete(LauncherPaths.RunStateFile); }
-        catch { /* noop */ }
+        try
+        {
+            File.Delete(LauncherPaths.RunStateFile);
+        }
+        catch
+        {
+            /* noop */
+        }
     }
 
     public RunState? Load()
@@ -46,4 +50,6 @@ public class GameRunStateStore
             return null;
         }
     }
+
+    public record RunState(string InstanceId, int Pid, DateTimeOffset StartedAt);
 }

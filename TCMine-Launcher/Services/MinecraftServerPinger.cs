@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -106,11 +107,14 @@ public class MinecraftServerPinger
                 foreach (var part in extra.EnumerateArray())
                     sb.Append(ExtractText(part));
         }
+
         return sb.ToString();
     }
 
-    private static string StripCodes(string s) =>
-        System.Text.RegularExpressions.Regex.Replace(s, "§.", string.Empty).Trim();
+    private static string StripCodes(string s)
+    {
+        return Regex.Replace(s, "§.", string.Empty).Trim();
+    }
 
     // ── Protocolo: VarInt / String / framing ─────────────────────
     private static void WriteVarInt(Stream s, int value)
@@ -154,6 +158,7 @@ public class MinecraftServerPinger
             shift += 7;
             if (shift >= 35) throw new InvalidDataException("VarInt demasiado grande.");
         }
+
         return result;
     }
 
@@ -167,6 +172,7 @@ public class MinecraftServerPinger
             if (n == 0) throw new EndOfStreamException();
             read += n;
         }
+
         return buffer;
     }
 }

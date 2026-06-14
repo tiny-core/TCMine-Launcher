@@ -67,5 +67,8 @@ public partial class TitleBar : UserControl
         if (Host is { } window) window.WindowState = WindowState.Minimized;
     }
 
-    private void OnClose(object? sender, RoutedEventArgs e) => Host?.Close();
+    private void OnClose(object? sender, RoutedEventArgs e)
+    {
+        Host?.Close();
+    }
 }

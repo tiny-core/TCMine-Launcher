@@ -39,16 +39,16 @@ GET /modpacks/{id}/overrides → zip de overrides (configs/resourcepacks/options
 }
 ```
 
-| Campo | Descrição |
-|---|---|
-| `id` | Identificador único (slug). Estável — o launcher usa-o para atualizar em vez de duplicar. |
-| `version` | Versão do modpack. Mudá-la sinaliza atualização (e reaplica os overrides). |
-| `minecraft` / `neoforge` | Versões usadas pela instância criada. |
-| `hasOverrides` | Se `true`, há um bundle de overrides em `/modpacks/{id}/overrides`. |
-| `recommendedRamMb` | RAM (MB) aplicada à instância ao instalar (opcional). |
-| `mods[]` | Mesma forma que o `ModEntry` do launcher (ver `target`). |
-| `mods[].target` | Pasta de destino: `mod` → `mods/`, `resourcepack` → `resourcepacks/`, `shaderpack` → `shaderpacks/`. |
-| `servers[]` | Escritos no `servers.dat`; o 1.º é usado para ligação direta ao arrancar. |
+| Campo                    | Descrição                                                                                            |
+|--------------------------|------------------------------------------------------------------------------------------------------|
+| `id`                     | Identificador único (slug). Estável — o launcher usa-o para atualizar em vez de duplicar.            |
+| `version`                | Versão do modpack. Mudá-la sinaliza atualização (e reaplica os overrides).                           |
+| `minecraft` / `neoforge` | Versões usadas pela instância criada.                                                                |
+| `hasOverrides`           | Se `true`, há um bundle de overrides em `/modpacks/{id}/overrides`.                                  |
+| `recommendedRamMb`       | RAM (MB) aplicada à instância ao instalar (opcional).                                                |
+| `mods[]`                 | Mesma forma que o `ModEntry` do launcher (ver `target`).                                             |
+| `mods[].target`          | Pasta de destino: `mod` → `mods/`, `resourcepack` → `resourcepacks/`, `shaderpack` → `shaderpacks/`. |
+| `servers[]`              | Escritos no `servers.dat`; o 1.º é usado para ligação direta ao arrancar.                            |
 
 ## Gestão na administração
 

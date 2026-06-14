@@ -10,20 +10,28 @@
              x:Class="TCMine_Launcher.Views.HomePageView"
              x:DataType="vm:HomePageViewModel">
 
-    <Grid Margin="26" ColumnDefinitions="*,18,300">
+    <Grid Margin="26" 
+          ColumnDefinitions="*,18,300">
 
         <!-- ════════════════════════════════════════════════════ -->
         <!--  ESQUERDA: hero do modpack + barra de launch          -->
         <!-- ════════════════════════════════════════════════════ -->
-        <Grid Grid.Column="0" RowDefinitions="*,Auto">
+        <Grid Grid.Column="0"
+              RowDefinitions="*,Auto">
 
             <!-- Hero / banner -->
-            <Border Grid.Row="0" CornerRadius="16" ClipToBounds="True">
+            <Border Grid.Row="0" 
+                    CornerRadius="16" 
+                    ClipToBounds="True">
                 <Border.Background>
-                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
-                        <GradientStop Color="#3B1D4D" Offset="0" />
-                        <GradientStop Color="#1A1326" Offset="0.55" />
-                        <GradientStop Color="#2A1206" Offset="1" />
+                    <LinearGradientBrush StartPoint="0%,0%"
+                                         EndPoint="100%,100%">
+                        <GradientStop Color="#3B1D4D" 
+                                      Offset="0" />
+                        <GradientStop Color="#1A1326"
+                                      Offset="0.55" />
+                        <GradientStop Color="#2A1206"
+                                      Offset="1" />
                     </LinearGradientBrush>
                 </Border.Background>
 
@@ -31,63 +39,98 @@
                     <!-- brilho decorativo -->
                     <Border>
                         <Border.Background>
-                            <RadialGradientBrush Center="85%,15%" GradientOrigin="85%,15%"
-                                                 RadiusX="50%" RadiusY="60%">
-                                <GradientStop Color="#40F97316" Offset="0" />
-                                <GradientStop Color="#00F97316" Offset="1" />
+                            <RadialGradientBrush Center="85%,15%"
+                                                 GradientOrigin="85%,15%"
+                                                 RadiusX="50%" 
+                                                 RadiusY="60%">
+                                <GradientStop Color="#40F97316"
+                                              Offset="0" />
+                                <GradientStop Color="#00F97316"
+                                              Offset="1" />
                             </RadialGradientBrush>
                         </Border.Background>
                     </Border>
 
                     <!-- Banner de atualização do modpack (versão nova no servidor) -->
-                    <Border Classes="update-banner" VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                            Margin="20" IsVisible="{Binding UpdateAvailable}">
-                        <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                            <Border Grid.Column="0" Classes="update-banner-icon">
-                                <PathIcon Data="{StaticResource IconDownload}" Width="16" Height="16"
+                    <Border Classes="update-banner"
+                            VerticalAlignment="Top" 
+                            HorizontalAlignment="Stretch"
+                            Margin="20" 
+                            IsVisible="{Binding UpdateAvailable}">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              VerticalAlignment="Center">
+                            <Border Grid.Column="0"
+                                    Classes="update-banner-icon">
+                                <PathIcon Data="{StaticResource IconDownload}"
+                                          Width="16" 
+                                          Height="16"
                                           Foreground="{StaticResource Accent}" />
                             </Border>
-                            <StackPanel Grid.Column="1" Spacing="1" Margin="12,0"
+                            <StackPanel Grid.Column="1" 
+                                        Spacing="1" 
+                                        Margin="12,0"
                                         VerticalAlignment="Center">
-                                <TextBlock Text="Atualização disponível" FontSize="13" FontWeight="Bold"
+                                <TextBlock Text="Atualização disponível"
+                                           FontSize="13"
+                                           FontWeight="Bold"
                                            Foreground="{StaticResource TextPrimary}" />
-                                <TextBlock Text="{Binding UpdateVersionsLabel}" FontSize="11.5"
+                                <TextBlock Text="{Binding UpdateVersionsLabel}"
+                                           FontSize="11.5"
                                            Foreground="{StaticResource Accent}" />
                             </StackPanel>
-                            <Button Grid.Column="2" Classes="play-btn" Height="34" Padding="18,0"
+                            <Button Grid.Column="2" 
+                                    Classes="play-btn"
+                                    Height="34" 
+                                    Padding="18,0"
                                     Command="{Binding UpdateModpackCommand}"
                                     VerticalContentAlignment="Center">
-                                <TextBlock Text="ATUALIZAR" FontSize="12" FontWeight="Bold"
-                                           LetterSpacing="1.5" VerticalAlignment="Center" />
+                                <TextBlock Text="ATUALIZAR" FontSize="12"
+                                           FontWeight="Bold"
+                                           LetterSpacing="1.5"
+                                           VerticalAlignment="Center" />
                             </Button>
                         </Grid>
                     </Border>
 
-                    <StackPanel VerticalAlignment="Bottom" Margin="30,0,30,28" Spacing="0">
+                    <StackPanel VerticalAlignment="Bottom"
+                                Margin="30,0,30,28"
+                                Spacing="0">
                         <Border Classes="tag">
                             <TextBlock Text="{Binding InstanceTag}" />
                         </Border>
                         <TextBlock Text="{Binding InstanceName}"
-                                   Classes="hero-title" Margin="0,12,0,0" />
+                                   Classes="hero-title" 
+                                   Margin="0,12,0,0" />
                         <TextBlock Text="{Binding InstanceSubtitle}"
-                                   Classes="hero-subtitle" Margin="0,2,0,0" />
+                                   Classes="hero-subtitle" 
+                                   Margin="0,2,0,0" />
                         <TextBlock Text="{Binding InstanceSummary}"
                                    Classes="hero-summary"
-                                   MaxWidth="460" HorizontalAlignment="Left"
+                                   MaxWidth="460" 
+                                   HorizontalAlignment="Left"
                                    Margin="0,12,0,0" />
                     </StackPanel>
 
                     <!-- Overlay de loading (spinner reutilizável) -->
-                    <Border Classes="busy-overlay" IsVisible="{Binding IsLaunching}">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                    <Border Classes="busy-overlay" 
+                            IsVisible="{Binding IsLaunching}">
+                        <StackPanel HorizontalAlignment="Center" 
+                                    VerticalAlignment="Center"
                                     Spacing="16">
-                            <Ellipse Classes="spinner" HorizontalAlignment="Center" />
+                            <Ellipse Classes="spinner"
+                                     HorizontalAlignment="Center" />
                             <TextBlock Text="{Binding LaunchProgress, StringFormat='{}{0:0}%'}"
-                                       Foreground="{StaticResource Accent}" FontSize="13" FontWeight="Bold"
+                                       Foreground="{StaticResource Accent}"
+                                       FontSize="13"
+                                       FontWeight="Bold"
                                        HorizontalAlignment="Center" />
-                            <Button Classes="ghost-btn" Command="{Binding CancelLaunchCommand}"
-                                    HorizontalAlignment="Center" Margin="0,4,0,0">
-                                <TextBlock Text="Cancelar" FontSize="12.5" Foreground="{StaticResource Danger}" />
+                            <Button Classes="ghost-btn" 
+                                    Command="{Binding CancelLaunchCommand}"
+                                    HorizontalAlignment="Center"
+                                    Margin="0,4,0,0">
+                                <TextBlock Text="Cancelar"
+                                           FontSize="12.5"
+                                           Foreground="{StaticResource Danger}" />
                             </Button>
                         </StackPanel>
                     </Border>
@@ -95,14 +138,23 @@
             </Border>
 
             <!-- Barra de launch -->
-            <StackPanel Grid.Row="1" Margin="0,18,0,0" Spacing="12">
-                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9"
+            <StackPanel Grid.Row="1" 
+                        Margin="0,18,0,0"
+                        Spacing="12">
+                
+                <Grid ColumnDefinitions="*,Auto" 
+                      VerticalAlignment="Center">
+                    <StackPanel Grid.Column="0"
+                                Orientation="Horizontal" 
+                                Spacing="9"
                                 VerticalAlignment="Center">
-                        <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                        <Ellipse Width="8"
+                                 Height="8" 
+                                 VerticalAlignment="Center"
                                  Fill="{Binding StatusColor, Converter={StaticResource StringToBrush}}" />
                         <TextBlock Text="{Binding LaunchStatus}"
-                                   Foreground="#8A8AAA" FontSize="13"
+                                   Foreground="#8A8AAA"
+                                   FontSize="13"
                                    VerticalAlignment="Center" />
                     </StackPanel>
 
@@ -110,13 +162,19 @@
                             Classes="play-btn"
                             Command="{Binding PlayCommand}"
                             Width="230" Height="50">
-                        <StackPanel Orientation="Horizontal" Spacing="10"
+                        <StackPanel Orientation="Horizontal" 
+                                    Spacing="10"
                                     HorizontalAlignment="Center">
                             <PathIcon
                                 Data="{Binding PlayIcon, Converter={x:Static conv:PlayGlyphToGeometryConverter.Instance}}"
-                                Width="14" Height="14" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding PlayLabel}" FontSize="14" FontWeight="Bold"
-                                       LetterSpacing="2" VerticalAlignment="Center" />
+                                Width="14"
+                                Height="14"
+                                VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding PlayLabel}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       LetterSpacing="2"
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -131,48 +189,77 @@
             <DockPanel>
                 <!-- Conteúdo (topo) -->
                 <StackPanel Spacing="0">
-                    <Border Classes="avatar" Width="72" Height="72" ClipToBounds="True">
+                    <Border Classes="avatar"
+                            Width="72"
+                            Height="72"
+                            ClipToBounds="True">
                         <Panel>
-                            <TextBlock Text="{Binding AvatarInitials}" FontSize="24"
-                                       Foreground="White" FontWeight="Bold"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding AvatarInitials}"
+                                       FontSize="24"
+                                       Foreground="White"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
                             <Image bh:ImageLoader.SourceUrl="{Binding PlayerHeadUrl}"
                                    Stretch="UniformToFill" />
                         </Panel>
                     </Border>
                     <TextBlock Text="{Binding PlayerName}"
-                               FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
-                               HorizontalAlignment="Center" Margin="0,12,0,0" />
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Foreground="{StaticResource TextPrimary}"
+                               HorizontalAlignment="Center"
+                               Margin="0,12,0,0" />
                     <TextBlock Text="{Binding AccountLabel}"
-                               Classes="muted" FontSize="11"
-                               HorizontalAlignment="Center" Margin="0,3,0,0" />
+                               Classes="muted"
+                               FontSize="11"
+                               HorizontalAlignment="Center"
+                               Margin="0,3,0,0" />
 
-                    <Separator Classes="divider" Margin="0,20" />
+                    <Separator Classes="divider"
+                               Margin="0,20" />
 
                     <StackPanel Spacing="6">
-                        <TextBlock Classes="section-label" Text="IDENTIFICADOR" Margin="0" />
-                        <Button Classes="idbox" Command="{Binding OpenInstanceFolderCommand}"
+                        <TextBlock Classes="section-label"
+                                   Text="IDENTIFICADOR"
+                                   Margin="0" />
+                        <Button Classes="idbox"
+                                Command="{Binding OpenInstanceFolderCommand}"
                                 ToolTip.Tip="Abrir a pasta da instância">
-                            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                                <TextBlock Grid.Column="0" Text="ID:" FontSize="11"
-                                           Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="{Binding InstanceIdShort}"
-                                           HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  VerticalAlignment="Center">
+                                <TextBlock Grid.Column="0"
+                                           Text="ID:"
+                                           FontSize="11"
+                                           Foreground="{StaticResource TextDim}"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding InstanceIdShort}"
+                                           HorizontalAlignment="Stretch"
+                                           VerticalAlignment="Center"
                                            Margin="8,0,8,0"
                                            FontFamily="Cascadia Code,Consolas,monospace"
                                            FontSize="11" Foreground="{StaticResource TextSecondary}" />
-                                <PathIcon Grid.Column="2" Data="{StaticResource IconFolder}"
-                                          Width="14" Height="14" VerticalAlignment="Center"
+                                <PathIcon Grid.Column="2"
+                                          Data="{StaticResource IconFolder}"
+                                          Width="14"
+                                          Height="14"
+                                          VerticalAlignment="Center"
                                           Foreground="{StaticResource TextSecondary}" />
                             </Grid>
                         </Button>
                     </StackPanel>
 
                     <!-- Servidores do modpack (lista com scroll) -->
-                    <StackPanel IsVisible="{Binding HasServer}" Margin="0,16,0,0" Spacing="6">
-                        <TextBlock Classes="section-label" Text="SERVIDORES" Margin="0" />
+                    <StackPanel IsVisible="{Binding HasServer}"
+                                Margin="0,16,0,0"
+                                Spacing="6">
+                        <TextBlock Classes="section-label"
+                                   Text="SERVIDORES"
+                                   Margin="0" />
                         <Border Classes="inset">
-                            <ScrollViewer MaxHeight="170" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer MaxHeight="200"
+                                          VerticalScrollBarVisibility="Auto">
                                 <ItemsControl ItemsSource="{Binding Servers}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="vm:ServerStatusItem">

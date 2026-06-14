@@ -8,69 +8,105 @@
              x:Class="TCMine_Launcher.Views.CreateInstancePageView"
              x:DataType="vm:CreateInstancePageViewModel">
 
-    <Grid Margin="26" RowDefinitions="Auto,*">
+    <Grid Margin="26"
+          RowDefinitions="Auto,*">
 
         <!-- Cabeçalho com voltar -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-            <Button Classes="ghost-btn" Command="{Binding CancelCommand}" Padding="4">
-                <PathIcon Data="{StaticResource IconBack}" Width="18" Height="18"
+        <StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Spacing="14"
+                    VerticalAlignment="Center">
+            <Button Classes="ghost-btn"
+                    Command="{Binding CancelCommand}"
+                    Padding="4">
+                <PathIcon Data="{StaticResource IconBack}"
+                          Width="18"
+                          Height="18"
                           Foreground="{StaticResource TextSecondary}" />
             </Button>
             <StackPanel>
-                <TextBlock Classes="page-title" Text="Nova instância" />
-                <TextBlock Classes="muted" Text="Configura uma instalação isolada de Minecraft"
+                <TextBlock Classes="page-title"
+                           Text="Nova instância" />
+                <TextBlock Classes="muted"
+                           Text="Configura uma instalação isolada de Minecraft"
                            Margin="0,4,0,0" />
             </StackPanel>
         </StackPanel>
 
         <!-- Formulário -->
-        <ScrollViewer Grid.Row="1" Margin="0,20,0,0" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="18" Width="600" HorizontalAlignment="Center">
+        <ScrollViewer Grid.Row="1"
+                      Margin="0,20,0,0"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="18"
+                        Width="600"
+                        HorizontalAlignment="Center">
 
                 <!-- Nome + versões -->
                 <Border Classes="panel">
                     <StackPanel Spacing="0">
-                        <TextBlock Classes="section-label" Text="NOME" />
-                        <TextBox Classes="field" Text="{Binding Name}"
+                        <TextBlock Classes="section-label"
+                                   Text="NOME" />
+                        <TextBox Classes="field"
+                                 Text="{Binding Name}"
                                  PlaceholderText="Nome da instância"
                                  Foreground="{StaticResource TextPrimary}" />
 
-                        <Grid ColumnDefinitions="*,16,*" Margin="0,16,0,0">
-                            <ctl:VersionSelector Grid.Column="0" Label="VERSÃO MINECRAFT"
+                        <Grid ColumnDefinitions="*,16,*"
+                              Margin="0,16,0,0">
+
+                            <ctl:VersionSelector Grid.Column="0"
+                                                 Label="VERSÃO MINECRAFT"
                                                  ItemsSource="{Binding MinecraftVersions}"
                                                  SelectedItem="{Binding SelectedMinecraftVersion}"
                                                  IsLoading="{Binding IsLoadingMinecraft}" />
-                            <ctl:VersionSelector Grid.Column="2" Label="NEOFORGE"
+                            <ctl:VersionSelector Grid.Column="2"
+                                                 Label="NEOFORGE"
                                                  ItemsSource="{Binding NeoForgeVersions}"
                                                  SelectedItem="{Binding SelectedNeoForgeVersion}"
                                                  IsLoading="{Binding IsLoadingNeoForge}" />
                         </Grid>
 
-                        <TextBlock Classes="muted" FontSize="11" Margin="2,10,0,0"
+                        <TextBlock Classes="muted"
+                                   FontSize="11"
+                                   Margin="2,10,0,0"
                                    Text="Versões obtidas em tempo real (apenas releases do Minecraft)." />
                     </StackPanel>
                 </Border>
 
                 <!-- Mods (CurseForge) -->
                 <Border Classes="panel">
-                    <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
-                        <StackPanel Grid.Column="0" Spacing="2">
-                            <TextBlock Classes="section-label" Text="MODS (OPCIONAL)" Margin="0" />
+                    <Grid ColumnDefinitions="*,Auto"
+                          VerticalAlignment="Center">
+                        <StackPanel Grid.Column="0"
+                                    Spacing="2">
+                            <TextBlock Classes="section-label"
+                                       Text="MODS (OPCIONAL)"
+                                       Margin="0" />
                             <TextBlock Text="{Binding ModCount, StringFormat='{}{0} mod(s) selecionado(s)'}"
-                                       Foreground="{StaticResource TextSecondary}" FontSize="12.5" />
+                                       Foreground="{StaticResource TextSecondary}" 
+                                       FontSize="12.5" />
                         </StackPanel>
-                        <Button Grid.Column="1" Classes="outline-btn" Height="38"
+                        <Button Grid.Column="1" 
+                                Classes="outline-btn"
+                                Height="38"
                                 Command="{Binding OpenModsCommand}">
-                            <TextBlock Text="Selecionar mods" FontSize="12.5" />
+                            <TextBlock Text="Selecionar mods" 
+                                       FontSize="12.5" />
                         </Button>
                     </Grid>
                 </Border>
 
                 <!-- Ações -->
-                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
-                    <Button Classes="play-btn" Height="42" Width="160"
+                <StackPanel Orientation="Horizontal"
+                            Spacing="12"
+                            HorizontalAlignment="Right">
+                    <Button Classes="play-btn" 
+                            Height="42" 
+                            Width="160"
                             Command="{Binding ConfirmCommand}">
-                        <TextBlock Text="Criar instância" FontSize="13" FontWeight="Bold" />
+                        <TextBlock Text="Criar instância"
+                                   FontSize="13" 
+                                   FontWeight="Bold" />
                     </Button>
                 </StackPanel>
             </StackPanel>
