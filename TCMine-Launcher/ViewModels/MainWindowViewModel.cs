@@ -79,6 +79,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private string _statusMessage = "Não autenticado";
 
+    // ── Estado da ligação ao servidor (indicador na barra de estado) ─
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ServerStatusColor))]
+    [NotifyPropertyChangedFor(nameof(ServerStatusLabel))]
+    private ServerConnectionState _serverState;
+
     private bool _suppressRam;
 
     // ── Auto-update do launcher ──────────────────────────────────
@@ -93,6 +99,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ModInstaller = new ModInstaller(CurseForge);
         Manifest = new ManifestService(() => _game.ServerUrl);
         NewsFeed = new NewsService(() => _game.ServerUrl);
+        ContentWatcher = new ContentWatcher(() => _game.ServerUrl);
         _updater = new AppUpdater(() => _game.ServerUrl);
 
         LoadInstances();
@@ -106,6 +113,12 @@ public partial class MainWindowViewModel : ViewModelBase
         Settings = new SettingsPageViewModel(_player, _game, this);
 
         _currentPage = Home;
+
+        // Mantém o conteúdo (novidades/modpacks) reativo a alterações no servidor.
+        ContentWatcher.ContentChanged += OnServerContentChanged;
+        ContentWatcher.ConnectionChanged += OnServerConnectionChanged;
+        ContentWatcher.Start();
+        ServerState = ContentWatcher.State;
 
         // Se ficou um Minecraft a correr de uma sessão anterior, deteta-o.
         DetectRunningGame();
@@ -123,6 +136,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public ModInstaller ModInstaller { get; }
     public ManifestService Manifest { get; }
     public NewsService NewsFeed { get; }
+
+    /// <summary>Escuta o servidor (SSE) e mantém novidades/modpacks reativos.</summary>
+    public ContentWatcher ContentWatcher { get; }
 
     // ── Memória da instância ativa (editável no footer) ─────────
     // A RAM é por instância, mas o controlo vive na barra de estado (sempre acessível).
@@ -173,6 +189,23 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsModpacksSelected => SelectedTab == AppTab.Modpacks;
     public bool IsNewsSelected => SelectedTab == AppTab.News;
     public bool IsSettingsSelected => SelectedTab == AppTab.Settings;
+
+    // ── Indicador de ligação ao servidor (barra de estado) ──────
+    /// <summary>Cor do ponto de estado conforme a ligação ao servidor.</summary>
+    public string ServerStatusColor => ServerState switch
+    {
+        ServerConnectionState.Connected => "#22C55E", // verde
+        ServerConnectionState.Connecting => "#F59E0B", // âmbar
+        _ => "#6B7280" // cinza (offline / sem servidor)
+    };
+
+    /// <summary>Texto do estado da ligação ao servidor.</summary>
+    public string ServerStatusLabel => ServerState switch
+    {
+        ServerConnectionState.Connected => "Servidor ligado",
+        ServerConnectionState.Connecting => "A ligar ao servidor…",
+        _ => "Servidor indisponível"
+    };
 
     public string PageTitle => SelectedTab switch
     {
@@ -314,6 +347,27 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             /* noop */
         }
+    }
+
+    /// <summary>
+    ///     O servidor anunciou (via SSE) que o conteúdo mudou: recarrega novidades e o
+    ///     catálogo de modpacks e reavalia o banner de atualização da instância ativa.
+    ///     Corre na thread da UI (o <see cref="ContentWatcher" /> faz o marshalling).
+    ///     Conservador: não altera instâncias já instaladas — isso fica para o botão
+    ///     "Atualizar".
+    /// </summary>
+    private void OnServerContentChanged()
+    {
+        Modpacks.Begin();
+        News.Reload();
+        Home.RefreshUpdateState();
+        Log.Debug("Conteúdo do servidor mudou — novidades/modpacks recarregados");
+    }
+
+    /// <summary>A ligação SSE ao servidor mudou de estado — atualiza o indicador.</summary>
+    private void OnServerConnectionChanged()
+    {
+        ServerState = ContentWatcher.State;
     }
 
     private async Task CheckForUpdateAsync()

@@ -3,6 +3,7 @@
 @layout AdminLayout
 @rendermode InteractiveServer
 @inject IDbContextFactory<AppDbContext> DbFactory
+@inject ContentNotifier Notifier
 
 <h1>Novidades</h1>
 <p class="muted">Geridas aqui e servidas em <code>/news</code>.</p>
@@ -115,6 +116,7 @@
         else
             db.News.Update(_form);
         await db.SaveChangesAsync();
+        Notifier.Bump(); // avisa os launchers ligados
 
         NewForm();
         await LoadAsync();
@@ -125,6 +127,7 @@
         await using var db = await DbFactory.CreateDbContextAsync();
         db.News.Remove(n);
         await db.SaveChangesAsync();
+        Notifier.Bump(); // avisa os launchers ligados
         if (_form.Id == n.Id) NewForm();
         await LoadAsync();
     }

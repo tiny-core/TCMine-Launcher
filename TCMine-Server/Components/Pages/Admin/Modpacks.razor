@@ -4,6 +4,7 @@
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject CurseForgeService Cf
 @inject OverridesStore Overrides
+@inject ContentNotifier Notifier
 @inject NavigationManager Nav
 
 <h1>Modpacks</h1>
@@ -201,6 +202,7 @@
             if (imported.Overrides is not null)
                 await Overrides.SaveAsync(slug, imported.Overrides);
 
+            Notifier.Bump(); // avisa os launchers ligados
             Nav.NavigateTo($"/admin/modpacks/{slug}");
         }
         catch (Exception ex)
@@ -233,6 +235,7 @@
 
         db.Modpacks.Add(new ModpackEntity { Id = id, Name = _newName.Trim(), IsPublished = true });
         await db.SaveChangesAsync();
+        Notifier.Bump(); // avisa os launchers ligados
         Nav.NavigateTo($"/admin/modpacks/{id}");
     }
 
@@ -242,6 +245,7 @@
         db.Modpacks.Remove(m);
         await db.SaveChangesAsync();
         Overrides.Delete(m.Id);
+        Notifier.Bump(); // avisa os launchers ligados
         await LoadAsync();
     }
 

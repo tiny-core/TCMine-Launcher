@@ -64,6 +64,7 @@ builder.Services.AddScoped<ContentService>();
 builder.Services.AddScoped<CurseForgeService>();
 builder.Services.AddScoped<PlayerConfigStore>();
 builder.Services.AddSingleton<OverridesStore>();
+builder.Services.AddSingleton<ContentNotifier>();
 
 // Persiste as chaves de Data Protection no volume (junto da BD) para que os cookies
 // de admin e os tokens antiforgery sobrevivam a reinícios/atualizações do container.
@@ -268,6 +269,54 @@ app.MapPut("/players/{uuid}/configs/{modpackId}", async (
 
     var updatedAt = await store.UpsertAsync(uuid, modpackId, ms.ToArray(), ct);
     return Results.Json(new { updatedAt });
+});
+
+// ── Stream de eventos (SSE) — avisa os launchers que o conteúdo mudou ─────────
+// O launcher liga-se a /events e recarrega novidades/modpacks quando recebe uma
+// versão nova. Leitura pública (sem auth), tal como /news e /modpacks.
+app.MapGet("/events", async (HttpContext ctx, ContentNotifier notifier, CancellationToken ct) =>
+{
+    ctx.Response.Headers.ContentType = "text/event-stream";
+    ctx.Response.Headers.CacheControl = "no-cache";
+    ctx.Response.Headers["X-Accel-Buffering"] = "no"; // desliga o buffering do nginx
+
+    var reader = notifier.Subscribe(out var channel);
+    try
+    {
+        // Evento inicial com a versão atual (o cliente fixa-a como baseline).
+        await ctx.Response.WriteAsync($"data: {notifier.Version}\n\n", ct);
+        await ctx.Response.Body.FlushAsync(ct);
+
+        while (!ct.IsCancellationRequested)
+        {
+            // Espera por uma nova versão, com keep-alive periódico (comentário SSE)
+            // para manter a ligação viva através de proxies/firewalls.
+            long version;
+            try
+            {
+                using var hb = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                hb.CancelAfter(TimeSpan.FromSeconds(25));
+                version = await reader.ReadAsync(hb.Token);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                await ctx.Response.WriteAsync(": keep-alive\n\n", ct);
+                await ctx.Response.Body.FlushAsync(ct);
+                continue;
+            }
+
+            await ctx.Response.WriteAsync($"data: {version}\n\n", ct);
+            await ctx.Response.Body.FlushAsync(ct);
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        // Cliente desligou — normal.
+    }
+    finally
+    {
+        notifier.Unsubscribe(channel);
+    }
 });
 
 // ── Autenticação de admin (form login/logout) ────────────────────────────────

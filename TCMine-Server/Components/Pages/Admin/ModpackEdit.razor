@@ -4,6 +4,7 @@
 @inject IDbContextFactory<AppDbContext> DbFactory
 @inject CurseForgeService Cf
 @inject OverridesStore Overrides
+@inject ContentNotifier Notifier
 @inject NavigationManager Nav
 
 @if (_m is null)
@@ -434,6 +435,7 @@ else
                 _pendingOverrides = null;
             }
 
+            Notifier.Bump(); // avisa os launchers ligados
             _saved = true;
         }
         finally

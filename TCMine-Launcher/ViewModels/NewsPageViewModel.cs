@@ -34,6 +34,13 @@ public partial class NewsPageViewModel : ViewModelBase
         _ = LoadAsync();
     }
 
+    /// <summary>Força recarregar (ex.: o servidor anunciou novidades novas via SSE).</summary>
+    public void Reload()
+    {
+        _loadedOnce = true;
+        _ = LoadAsync();
+    }
+
     [RelayCommand]
     private async Task RefreshAsync()
     {
