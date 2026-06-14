@@ -289,10 +289,15 @@ textarea.input {
 }
 
 /* ── Listas ─────────────────────────────────────────────── */
+/* Regra geral de listas: altura fixa + scroll. Qualquer lista nova (.list) herda-a.
+   As .cf-results definem o seu próprio max-height a seguir e sobrepõem-no. */
 .list {
     list-style: none;
     margin: 0;
     padding: 0;
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
 .list li {

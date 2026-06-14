@@ -9,17 +9,17 @@
              x:DataType="vm:ModpacksPageViewModel"
              x:Name="PageRoot">
 
-    <Grid Margin="26" 
+    <Grid Margin="26"
           RowDefinitions="Auto,16,Auto,*">
 
         <!-- Cabeçalho -->
-        <Grid Grid.Row="0" 
+        <Grid Grid.Row="0"
               ColumnDefinitions="*,Auto">
             <StackPanel Grid.Column="0">
-                <TextBlock Classes="page-title" 
+                <TextBlock Classes="page-title"
                            Text="Modpacks oficiais" />
-                <TextBlock Classes="muted" 
-                           Text="Modpacks publicados pelo servidor TCMine"
+                <TextBlock Classes="muted"
+                           Text="Modpacks publicados pelo servidor TCMine Server"
                            Margin="0,4,0,0" />
             </StackPanel>
             <ctl:RefreshButton Grid.Column="1"
@@ -28,10 +28,10 @@
         </Grid>
 
         <!-- Estado / mensagens -->
-        <TextBlock Grid.Row="2" 
+        <TextBlock Grid.Row="2"
                    Text="{Binding StatusMessage}"
-                   Classes="muted" 
-                   FontSize="12" 
+                   Classes="muted"
+                   FontSize="12"
                    TextWrapping="Wrap" Margin="0,12,0,0"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 

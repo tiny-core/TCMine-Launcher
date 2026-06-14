@@ -1,3 +1,4 @@
+@inject IWebHostEnvironment Env
 <!DOCTYPE html>
 <html lang="pt">
 <head>
@@ -5,9 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
     <title>TCMine — Administração</title>
-    <link rel="stylesheet" href="app.css"/>
+    <link rel="stylesheet" href="app.css?v=@CssVersion"/>
     <HeadOutlet/>
 </head>
+
+@code {
+    // Cache-busting: a query muda sempre que app.css é alterado, forçando o browser
+    // a buscar a versão nova (evita CSS desatualizado em cache após um deploy).
+    private string CssVersion
+    {
+        get
+        {
+            var file = Env.WebRootFileProvider.GetFileInfo("app.css");
+            return file.Exists ? file.LastModified.ToUnixTimeSeconds().ToString() : "1";
+        }
+    }
+}
 <body>
 <Routes/>
 <script src="_framework/blazor.web.js"></script>

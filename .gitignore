@@ -15,6 +15,9 @@ artifacts/
 **/publish/
 **/releases/
 *.pubxml.user
+**/updates/
+**/secrets/
+**/keys/
 
 # ------ NuGet ------
 *.nupkg

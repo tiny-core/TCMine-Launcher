@@ -14,13 +14,17 @@
 
 <div class="grid-2">
     <section class="panel">
-        <h2>Nova release</h2>
+        <h2>@(_editId == 0 ? "Nova release" : $"Editar v{_version}")</h2>
         <label class="field-label">VERSÃO</label>
         <input class="input" @bind="_version" placeholder="1.1.0"/>
         <label class="field-label">NOTAS (changelog)</label>
         <textarea class="input" rows="3" @bind="_notes"></textarea>
         <label class="field-label">ARTEFACTOS</label>
         <InputFile OnChange="OnFilesSelected" multiple/>
+        @if (_editId != 0)
+        {
+            <p class="muted small">Vazio mantém os ficheiros atuais; novos ficheiros são adicionados.</p>
+        }
         @if (_selected.Count > 0)
         {
             <ul class="files">
@@ -35,9 +39,13 @@
             <p class="@(_isError ? "error" : "ok")">@_message</p>
         }
         <div class="actions">
-            <button class="btn primary" @onclick="PublishAsync" disabled="@_busy">
-                @(_busy ? "A publicar…" : "Publicar")
+            <button class="btn primary" @onclick="SubmitAsync" disabled="@_busy">
+                @(_busy ? "A guardar…" : _editId == 0 ? "Publicar" : "Guardar")
             </button>
+            @if (_editId != 0)
+            {
+                <button class="btn ghost" @onclick="NewForm" disabled="@_busy">Cancelar</button>
+            }
         </div>
     </section>
 
@@ -62,6 +70,7 @@
                             }
                         </div>
                         <div class="row-actions">
+                            <button class="btn small" @onclick="() => Edit(r)">Editar</button>
                             <button class="btn small danger" @onclick="() => DeleteAsync(r)">Remover do histórico
                             </button>
                         </div>
@@ -75,6 +84,7 @@
 @code {
     private List<ReleaseEntity> _items = new();
     private readonly List<IBrowserFile> _selected = new();
+    private int _editId; // 0 = a criar uma nova; senão = id da release em edição
     private string _version = string.Empty;
     private string _notes = string.Empty;
     private bool _busy;
@@ -101,6 +111,29 @@
         _selected.AddRange(e.GetMultipleFiles(50));
     }
 
+    /// <summary>Carrega uma release existente no formulário para edição.</summary>
+    private void Edit(ReleaseEntity r)
+    {
+        _editId = r.Id;
+        _version = r.Version;
+        _notes = r.Notes;
+        _selected.Clear();
+        _message = null;
+    }
+
+    /// <summary>Volta ao modo "nova release" (também serve de Cancelar).</summary>
+    private void NewForm()
+    {
+        _editId = 0;
+        _version = string.Empty;
+        _notes = string.Empty;
+        _selected.Clear();
+        _message = null;
+    }
+
+    /// <summary>Publica (nova) ou guarda (edição) conforme o estado do formulário.</summary>
+    private Task SubmitAsync() => _editId == 0 ? PublishAsync() : SaveEditAsync();
+
     private async Task PublishAsync()
     {
         _message = null;
@@ -114,17 +147,7 @@
         _busy = true;
         try
         {
-            Directory.CreateDirectory(UpdatesDir);
-            var names = new List<string>();
-            foreach (var file in _selected)
-            {
-                var safe = Path.GetFileName(file.Name);
-                var dest = Path.Combine(UpdatesDir, safe);
-                await using var input = file.OpenReadStream(1_000_000_000);
-                await using var output = File.Create(dest);
-                await input.CopyToAsync(output);
-                names.Add(safe);
-            }
+            var names = await SaveFilesAsync();
 
             await using var db = await DbFactory.CreateDbContextAsync();
             db.Releases.Add(new ReleaseEntity
@@ -137,9 +160,7 @@
             });
             await db.SaveChangesAsync();
 
-            _selected.Clear();
-            _version = string.Empty;
-            _notes = string.Empty;
+            NewForm();
             _isError = false;
             _message = $"Release publicada ({names.Count} ficheiro(s)).";
             await LoadAsync();
@@ -155,11 +176,89 @@
         }
     }
 
+    /// <summary>Guarda alterações aos metadados (versão/notas); ficheiros são opcionais.</summary>
+    private async Task SaveEditAsync()
+    {
+        _message = null;
+        if (string.IsNullOrWhiteSpace(_version))
+        {
+            _isError = true;
+            _message = "Indica a versão.";
+            return;
+        }
+
+        _busy = true;
+        try
+        {
+            await using var db = await DbFactory.CreateDbContextAsync();
+            var release = await db.Releases.FirstOrDefaultAsync(r => r.Id == _editId);
+            if (release is null)
+            {
+                _isError = true;
+                _message = "Release já não existe.";
+                NewForm();
+                await LoadAsync();
+                return;
+            }
+
+            release.Version = _version.Trim();
+            release.Notes = _notes.Trim();
+
+            // Ficheiros novos (opcionais) acrescentam-se aos já existentes.
+            if (_selected.Count > 0)
+            {
+                var added = await SaveFilesAsync();
+                var existing = release.Files
+                    .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToList();
+                foreach (var name in added)
+                    if (!existing.Contains(name))
+                        existing.Add(name);
+                release.Files = string.Join('\n', existing);
+            }
+
+            await db.SaveChangesAsync();
+
+            NewForm();
+            _isError = false;
+            _message = "Release atualizada.";
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _message = "Falha: " + ex.Message;
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    /// <summary>Copia os ficheiros selecionados para o UPDATES_DIR e devolve os nomes.</summary>
+    private async Task<List<string>> SaveFilesAsync()
+    {
+        Directory.CreateDirectory(UpdatesDir);
+        var names = new List<string>();
+        foreach (var file in _selected)
+        {
+            var safe = Path.GetFileName(file.Name);
+            var dest = Path.Combine(UpdatesDir, safe);
+            await using var input = file.OpenReadStream(1_000_000_000);
+            await using var output = File.Create(dest);
+            await input.CopyToAsync(output);
+            names.Add(safe);
+        }
+
+        return names;
+    }
+
     private async Task DeleteAsync(ReleaseEntity r)
     {
         await using var db = await DbFactory.CreateDbContextAsync();
         db.Releases.Remove(r);
         await db.SaveChangesAsync();
+        if (_editId == r.Id) NewForm();
         await LoadAsync();
     }
 

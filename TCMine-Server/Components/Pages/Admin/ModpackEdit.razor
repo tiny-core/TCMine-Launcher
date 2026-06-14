@@ -178,15 +178,17 @@ else
             <h2>Servidores (@_m.Servers.Count)</h2>
             <button class="btn small" @onclick="AddServer">+ Servidor</button>
         </div>
-        @foreach (var srv in _m.Servers)
-        {
-            <div class="row mod-row">
-                <input class="input" @bind="srv.Name" placeholder="Nome"/>
-                <input class="input" @bind="srv.Address" placeholder="endereço.servidor.net"/>
-                <input class="input narrow" type="number" @bind="srv.Port" placeholder="25565"/>
-                <button class="btn small danger" @onclick="() => _m.Servers.Remove(srv)">✕</button>
-            </div>
-        }
+        <div class="mod-list">
+            @foreach (var srv in _m.Servers)
+            {
+                <div class="row mod-row">
+                    <input class="input" @bind="srv.Name" placeholder="Nome"/>
+                    <input class="input" @bind="srv.Address" placeholder="endereço.servidor.net"/>
+                    <input class="input narrow" type="number" @bind="srv.Port" placeholder="25565"/>
+                    <button class="btn small danger" @onclick="() => _m.Servers.Remove(srv)">✕</button>
+                </div>
+            }
+        </div>
     </section>
 
     <div class="actions sticky">
