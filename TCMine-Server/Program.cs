@@ -65,6 +65,7 @@ builder.Services.AddScoped<CurseForgeService>();
 builder.Services.AddScoped<PlayerConfigStore>();
 builder.Services.AddSingleton<OverridesStore>();
 builder.Services.AddSingleton<ContentNotifier>();
+builder.Services.AddSingleton<MinecraftAuthService>();
 
 // Persiste as chaves de Data Protection no volume (junto da BD) para que os cookies
 // de admin e os tokens antiforgery sobrevivam a reinícios/atualizações do container.
@@ -256,10 +257,9 @@ app.MapGet("/modpacks/{id}/overrides", (string id, OverridesStore store) =>
 });
 
 // ── Configs do jogador (sync entre PCs) ──────────────────────────────────────
-// Guardadas por (uuid, modpackId) como um zip. SEM AUTH: a chave é o UUID do
-// Minecraft (semi-público) — são apenas settings de jogo, sem segredos. Quem
-// souber um UUID pode ler/gravar as configs desse UUID. Endurecimento futuro:
-// validar o access token da MSession enviado pelo launcher.
+// Guardadas por (uuid, modpackId) como um zip. A LEITURA (GET) é aberta (settings de
+// jogo, sem segredos); a ESCRITA (PUT) exige um access token Minecraft válido que
+// pertença ao UUID (validado contra a Mojang, fail-open — ver MinecraftAuthService).
 const long maxConfigBytes = 25 * 1024 * 1024; // 25 MB — limite defensivo do PUT.
 
 // Aceita só slugs simples nas chaves (defesa, embora sejam só chaves de BD).
@@ -267,6 +267,15 @@ static bool IsValidKey(string s)
 {
     return !string.IsNullOrWhiteSpace(s) && s.Length <= 80 &&
            s.All(c => char.IsLetterOrDigit(c) || c is '-' or '_');
+}
+
+// Extrai o token de "Authorization: Bearer <token>".
+static string? BearerToken(HttpContext ctx)
+{
+    var h = ctx.Request.Headers.Authorization.ToString();
+    return h.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+        ? h["Bearer ".Length..].Trim()
+        : null;
 }
 
 app.MapGet("/players/{uuid}/configs/{modpackId}", async (
@@ -283,9 +292,15 @@ app.MapGet("/players/{uuid}/configs/{modpackId}", async (
 });
 
 app.MapPut("/players/{uuid}/configs/{modpackId}", async (
-    string uuid, string modpackId, HttpContext ctx, PlayerConfigStore store, CancellationToken ct) =>
+    string uuid, string modpackId, HttpContext ctx, PlayerConfigStore store,
+    MinecraftAuthService auth, CancellationToken ct) =>
 {
     if (!IsValidKey(uuid) || !IsValidKey(modpackId)) return Results.BadRequest();
+
+    // Escrita exige um token Minecraft válido que pertença a este UUID.
+    var token = BearerToken(ctx);
+    if (token is null) return Results.Unauthorized();
+    if (!await auth.AuthorizeAsync(token, uuid, ct)) return Results.StatusCode(403);
 
     using var ms = new MemoryStream();
     await ctx.Request.Body.CopyToAsync(ms, ct);

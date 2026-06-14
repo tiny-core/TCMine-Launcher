@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using TCMine_Launcher.Services;
 using TCMine_Launcher.ViewModels;
 
@@ -37,8 +38,8 @@ public partial class MainWindow : Window
 
         // DataContext é o único "ponto de ligação" entre View e ViewModel.
         // A View nunca acede a métodos ou propriedades do ViewModel directamente
-        // (só via bindings no AXAML).
-        var vm = new MainWindowViewModel();
+        // (só via bindings no AXAML). O VM é resolvido do contentor (DI).
+        var vm = App.Services.GetRequiredService<MainWindowViewModel>();
 
         // Abrir uma janela secundária é responsabilidade da camada View; o ViewModel
         // apenas pede (sem referenciar tipos de janela).

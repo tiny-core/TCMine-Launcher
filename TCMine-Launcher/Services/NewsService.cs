@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using TCMine.Contracts;
 using TCMine_Launcher.Models;
 
 namespace TCMine_Launcher.Services;
@@ -35,7 +37,12 @@ public class NewsService
             throw new InvalidOperationException(
                 "URL do servidor TCMine não configurado. Define-o nas Definições.");
 
-        return await _http.GetFromJsonAsync<List<NewsItem>>(
-            $"{BaseUrl}/news", JsonOptions, ct) ?? new List<NewsItem>();
+        // Consome o contrato partilhado (TCMine.Contracts) e mapeia para o Model de UI.
+        var dtos = await _http.GetFromJsonAsync<List<NewsDto>>(
+            $"{BaseUrl}/news", JsonOptions, ct) ?? new List<NewsDto>();
+
+        return dtos
+            .Select(d => new NewsItem { Tag = d.Tag, Title = d.Title, Date = d.Date, Summary = d.Summary })
+            .ToList();
     }
 }

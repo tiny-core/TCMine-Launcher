@@ -16,9 +16,7 @@
         Background="Transparent"
         TransparencyLevelHint="Transparent">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
+    <!-- DataContext em runtime vem do contentor (DI), via MainWindow.axaml.cs. -->
 
     <!-- ═══════════════════════════════════════════════════════ -->
     <!--  RAIZ — cantos arredondados sobre fundo transparente    -->

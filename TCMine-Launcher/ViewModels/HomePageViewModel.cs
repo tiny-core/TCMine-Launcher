@@ -392,7 +392,7 @@ public partial class HomePageViewModel : ViewModelBase
             LaunchStatus = "Minecraft em execução";
             LaunchLog.Add("Minecraft iniciado.");
 
-            _ = MonitorGameAsync(process, logCapture, instance, session.UUID);
+            _ = MonitorGameAsync(process, logCapture, instance, session.UUID, session.AccessToken);
         }
         catch (OperationCanceledException)
         {
@@ -417,7 +417,7 @@ public partial class HomePageViewModel : ViewModelBase
     }
 
     private async Task MonitorGameAsync(Process process, GameLogCapture logCapture,
-        MinecraftInstance instance, string? uuid)
+        MinecraftInstance instance, string? uuid, string? accessToken)
     {
         var exitCode = 0;
         try
@@ -434,7 +434,7 @@ public partial class HomePageViewModel : ViewModelBase
         _shell.MarkGameStopped();
 
         // Guarda no servidor as configs alteradas na sessão (keybinds, waypoints, …).
-        await _orchestrator.PushConfigsAsync(instance, uuid, _game.ServerUrl);
+        await _orchestrator.PushConfigsAsync(instance, uuid, accessToken, _game.ServerUrl);
 
         if (exitCode != 0)
         {

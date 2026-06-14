@@ -17,7 +17,7 @@ namespace TCMine_Launcher.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
-    private readonly InstanceService _instances = new();
+    private readonly InstanceService _instances;
     private readonly ContentSyncService _contentSync;
 
     /// <summary>Instância atualmente selecionada (a que a Home lança).</summary>

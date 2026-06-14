@@ -32,13 +32,13 @@ public enum AppTab
 /// </summary>
 public partial class MainWindowViewModel : ViewModelBase
 {
-    // Models partilhados (dados puros, sem UI)
+    // Models partilhados (dados puros, sem UI) — injetados pelo container.
     private readonly GameProfile _game;
     private readonly PlayerProfile _player;
-    private readonly GameRunStateStore _runState = new();
+    private readonly GameRunStateStore _runState;
 
-    // Serviços
-    private readonly SettingsService _settings = new();
+    // Serviços (injetados)
+    private readonly SettingsService _settings;
     private readonly AppUpdater _updater;
 
     // ── Estado de autenticação / navegação ───────────────────────
@@ -90,18 +90,25 @@ public partial class MainWindowViewModel : ViewModelBase
     // ── Auto-update do launcher ──────────────────────────────────
     [ObservableProperty] private bool _updateAvailable;
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(
+        GameProfile game, PlayerProfile player, SettingsService settings, GameRunStateStore runState,
+        AppUpdater updater, AuthService auth, InstanceService instances, ContentSyncService contentSync,
+        CurseForgeClient curseForge, ModInstaller modInstaller, ManifestService manifest,
+        NewsService newsFeed, ContentWatcher contentWatcher)
     {
-        _player = new PlayerProfile();
-        _game = _settings.Load();
-
-        CurseForge = new CurseForgeClient(() => _game.ServerUrl);
-        ModInstaller = new ModInstaller(CurseForge);
-        Manifest = new ManifestService(() => _game.ServerUrl);
-        NewsFeed = new NewsService(() => _game.ServerUrl);
-        ContentWatcher = new ContentWatcher(() => _game.ServerUrl);
-        _updater = new AppUpdater(() => _game.ServerUrl);
-        _contentSync = new ContentSyncService(Manifest, _instances.Save);
+        _game = game;
+        _player = player;
+        _settings = settings;
+        _runState = runState;
+        _updater = updater;
+        _auth = auth;
+        _instances = instances;
+        _contentSync = contentSync;
+        CurseForge = curseForge;
+        ModInstaller = modInstaller;
+        Manifest = manifest;
+        NewsFeed = newsFeed;
+        ContentWatcher = contentWatcher;
 
         LoadInstances();
 

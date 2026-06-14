@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using TCMine.Contracts;
 using TCMine_Server.Data;
 
 namespace TCMine_Server.Services;

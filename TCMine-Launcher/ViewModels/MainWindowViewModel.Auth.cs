@@ -17,7 +17,7 @@ namespace TCMine_Launcher.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel
 {
-    private readonly AuthService _auth = new();
+    private readonly AuthService _auth;
 
     /// <summary>Permite cancelar o login interactivo em curso.</summary>
     private CancellationTokenSource? _loginCts;

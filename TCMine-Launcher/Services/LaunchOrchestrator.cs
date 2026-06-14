@@ -53,12 +53,13 @@ public class LaunchOrchestrator
         await _overrides.EnsureAsync(instance, serverUrl, ct);
 
         // Repõe as configs do jogador do servidor se forem mais recentes (sync entre PCs).
-        await _configSync.PullAsync(instance, session.UUID, serverUrl, ct);
+        await _configSync.PullAsync(instance, session.UUID, session.AccessToken, serverUrl, ct);
 
         return process;
     }
 
     /// <summary>Guarda no servidor as configs alteradas na sessão (chamado ao fechar o jogo).</summary>
-    public Task PushConfigsAsync(MinecraftInstance instance, string? uuid, string? serverUrl) =>
-        _configSync.PushAsync(instance, uuid, serverUrl);
+    public Task PushConfigsAsync(MinecraftInstance instance, string? uuid, string? accessToken,
+        string? serverUrl) =>
+        _configSync.PushAsync(instance, uuid, accessToken, serverUrl);
 }

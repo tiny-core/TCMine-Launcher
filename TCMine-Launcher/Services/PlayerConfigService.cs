@@ -27,15 +27,17 @@ public class PlayerConfigService
     ///     Descarrega as configs do servidor e repõe-nas na pasta do jogo se forem mais
     ///     recentes do que as já aplicadas localmente. Chamado antes de lançar o jogo.
     /// </summary>
-    public async Task PullAsync(MinecraftInstance instance, string? uuid, string? serverUrl,
-        CancellationToken ct = default)
+    public async Task PullAsync(MinecraftInstance instance, string? uuid, string? accessToken,
+        string? serverUrl, CancellationToken ct = default)
     {
-        if (!ShouldSync(instance, uuid, serverUrl)) return;
+        if (!ShouldSync(instance, uuid, accessToken, serverUrl)) return;
 
         try
         {
             var url = BuildUrl(serverUrl!, uuid!, instance.ModpackId!);
-            using var resp = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+            using var req = new HttpRequestMessage(HttpMethod.Get, url);
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            using var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
             if (resp.StatusCode == HttpStatusCode.NotFound) return; // nada guardado no servidor
             resp.EnsureSuccessStatusCode();
 
@@ -78,10 +80,10 @@ public class PlayerConfigService
     ///     Zipa as configs do jogador da pasta do jogo e envia para o servidor. Chamado
     ///     quando o jogo fecha (captura keybinds/waypoints alterados na sessão).
     /// </summary>
-    public async Task PushAsync(MinecraftInstance instance, string? uuid, string? serverUrl,
-        CancellationToken ct = default)
+    public async Task PushAsync(MinecraftInstance instance, string? uuid, string? accessToken,
+        string? serverUrl, CancellationToken ct = default)
     {
-        if (!ShouldSync(instance, uuid, serverUrl)) return;
+        if (!ShouldSync(instance, uuid, accessToken, serverUrl)) return;
 
         try
         {
@@ -104,7 +106,9 @@ public class PlayerConfigService
             var url = BuildUrl(serverUrl!, uuid!, instance.ModpackId!);
             using var content = new StreamContent(buffer);
             content.Headers.ContentType = new MediaTypeHeaderValue("application/zip");
-            using var resp = await _http.PutAsync(url, content, ct);
+            using var req = new HttpRequestMessage(HttpMethod.Put, url) { Content = content };
+            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            using var resp = await _http.SendAsync(req, ct);
             resp.EnsureSuccessStatusCode();
 
             // Marca o timestamp devolvido como aplicado (evita re-pull do que enviámos).
@@ -118,10 +122,12 @@ public class PlayerConfigService
         }
     }
 
-    private static bool ShouldSync(MinecraftInstance instance, string? uuid, string? serverUrl)
+    private static bool ShouldSync(MinecraftInstance instance, string? uuid, string? accessToken,
+        string? serverUrl)
     {
         return instance.IsOfficial && !string.IsNullOrEmpty(instance.ModpackId)
-                                   && !string.IsNullOrEmpty(uuid) && !string.IsNullOrWhiteSpace(serverUrl);
+                                   && !string.IsNullOrEmpty(uuid) && !string.IsNullOrEmpty(accessToken)
+                                   && !string.IsNullOrWhiteSpace(serverUrl);
     }
 
     private static string BuildUrl(string serverUrl, string uuid, string modpackId)
