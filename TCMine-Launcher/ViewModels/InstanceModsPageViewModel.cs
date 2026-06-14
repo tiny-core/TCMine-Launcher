@@ -40,13 +40,23 @@ public partial class InstanceModsPageViewModel : ViewModelBase
     public InstanceModsPageViewModel(MainWindowViewModel shell)
     {
         _shell = shell;
+        Servers.CollectionChanged += (_, _) => OnPropertyChanged(nameof(ServerCount));
     }
 
     /// <summary>Servidores associados à instância (editáveis em memória).</summary>
     public ObservableCollection<ServerEntry> Servers { get; } = new();
 
+    /// <summary>Nº de servidores configurados (para o botão).</summary>
+    public int ServerCount => Servers.Count;
+
     /// <summary>Nº de mods selecionados (para o botão).</summary>
     public int ModCount => _selectedMods?.Count ?? 0;
+
+    [RelayCommand]
+    private void OpenServers()
+    {
+        _shell.ShowServerList(this);
+    }
 
     public ObservableCollection<string> MinecraftVersions { get; } = new();
     public ObservableCollection<string> NeoForgeVersions { get; } = new();

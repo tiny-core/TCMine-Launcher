@@ -10,7 +10,7 @@
              x:DataType="vm:InstancesPageViewModel"
              x:Name="PageRoot">
 
-    <Grid Margin="26" 
+    <Grid Margin="26, 26, 26, 0"
           RowDefinitions="Auto,Auto,Auto,*">
 
         <!-- Cabeçalho -->
@@ -22,7 +22,7 @@
                                Margin="0,4,0,0" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" 
+                <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             Spacing="10"
                             VerticalAlignment="Center">
@@ -40,11 +40,11 @@
                                        VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Classes="play-btn" 
+                    <Button Classes="play-btn"
                             Height="40"
                             IsEnabled="{Binding CanInteract}"
                             Command="{Binding OpenCreateCommand}">
-                        <StackPanel Orientation="Horizontal" 
+                        <StackPanel Orientation="Horizontal"
                                     Spacing="7"
                                     Margin="6,0"
                                     HorizontalAlignment="Center">
@@ -52,7 +52,7 @@
                                       Width="15"
                                       Height="15"
                                       VerticalAlignment="Center" />
-                            <TextBlock Text="Nova instância" 
+                            <TextBlock Text="Nova instância"
                                        FontSize="12.5"
                                        FontWeight="Bold"
                                        VerticalAlignment="Center" />
@@ -60,24 +60,24 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <Separator Classes="divider" 
+            <Separator Classes="divider"
                        Margin="0,18, 0, 0"
                        IsVisible="{Binding IsBusy}" />
         </StackPanel>
 
         <!-- Progresso de import/export (indeterminado; o zip é atômico) -->
-        <StackPanel Grid.Row="1" 
-                    Orientation="Horizontal" 
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
                     Spacing="12"
                     Margin="0,18,0,0"
                     VerticalAlignment="Center"
                     IsVisible="{Binding IsBusy}">
-            <ProgressBar Classes="status-progress" 
+            <ProgressBar Classes="status-progress"
                          IsIndeterminate="True"
-                         Width="100" 
+                         Width="100"
                          VerticalAlignment="Center" />
-            <TextBlock Text="{Binding BusyStatus}" 
-                       Classes="muted" 
+            <TextBlock Text="{Binding BusyStatus}"
+                       Classes="muted"
                        VerticalAlignment="Center" />
         </StackPanel>
 
@@ -86,7 +86,7 @@
                    Margin="0,20" />
 
         <!-- Lista de instâncias -->
-        <ScrollViewer Grid.Row="3" Margin="0,18,0,0" 
+        <ScrollViewer Grid.Row="3"
                       HorizontalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Instances}">
                 <ItemsControl.ItemsPanel>

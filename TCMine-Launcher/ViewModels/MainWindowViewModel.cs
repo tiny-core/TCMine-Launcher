@@ -235,6 +235,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Pedido para abrir a janela de seleção de mods (ligado pela View).</summary>
     public Action<ModSelectionViewModel>? OpenModSelectionRequested { get; set; }
 
+    /// <summary>Pedido para abrir a janela de gestão de servidores (ligado pela View).</summary>
+    public Action<InstanceModsPageViewModel>? OpenServerListRequested { get; set; }
+
     /// <summary>Pedido para abrir a janela do registo de eventos (ligado pela View).</summary>
     public Action<HomePageViewModel>? OpenLogWindowRequested { get; set; }
 
@@ -519,6 +522,12 @@ public partial class MainWindowViewModel : ViewModelBase
     public void ShowModSelection(ModSelectionViewModel selection)
     {
         OpenModSelectionRequested?.Invoke(selection);
+    }
+
+    /// <summary>Abre a janela (própria) de gestão de servidores da instância.</summary>
+    public void ShowServerList(InstanceModsPageViewModel page)
+    {
+        OpenServerListRequested?.Invoke(page);
     }
 
     /// <summary>Mostra um diálogo de confirmação. Sem handler, assume "sim".</summary>

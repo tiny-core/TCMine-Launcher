@@ -40,14 +40,15 @@
                             Spacing="6">
                     <TextBlock Text="{Binding Name}"
                                Classes="card-title"
-                               TextTrimming="CharacterEllipsis" />
+                               TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding Name}" />
                     <StackPanel Orientation="Horizontal"
                                 Spacing="6">
                         <Border Classes="tag">
                             <TextBlock Text="{Binding SourceLabel}" />
                         </Border>
-                        <Border Background="{StaticResource DangerBg}" 
-                                CornerRadius="5" 
+                        <Border Background="{StaticResource DangerBg}"
+                                CornerRadius="5"
                                 Padding="7,3"
                                 VerticalAlignment="Center"
                                 IsVisible="{Binding IsDiscontinued}"

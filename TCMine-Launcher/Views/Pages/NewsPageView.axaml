@@ -9,15 +9,15 @@
              x:Class="TCMine_Launcher.Views.NewsPageView"
              x:DataType="vm:NewsPageViewModel">
 
-    <Grid Margin="26" 
+    <Grid Margin="26, 26, 26,0"
           RowDefinitions="Auto,Auto,16,*">
 
-        <Grid Grid.Row="0" 
+        <Grid Grid.Row="0"
               ColumnDefinitions="*,Auto">
             <StackPanel Grid.Column="0">
                 <TextBlock Classes="page-title"
                            Text="Novidades" />
-                <TextBlock Classes="muted" 
+                <TextBlock Classes="muted"
                            Text="Últimas atualizações do launcher e do modpack"
                            Margin="0,4,0,0" />
             </StackPanel>
@@ -26,10 +26,10 @@
                                IsLoading="{Binding IsLoading}" />
         </Grid>
 
-        <TextBlock Grid.Row="1" 
+        <TextBlock Grid.Row="1"
                    Text="{Binding StatusMessage}"
-                   Classes="muted" 
-                   FontSize="12" 
+                   Classes="muted"
+                   FontSize="12"
                    TextWrapping="Wrap"
                    Margin="0,12,0,0"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />

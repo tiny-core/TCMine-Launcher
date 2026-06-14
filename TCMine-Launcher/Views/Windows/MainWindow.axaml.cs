@@ -45,6 +45,7 @@ public partial class MainWindow : Window
         // apenas pede (sem referenciar tipos de janela).
         vm.OpenModsWindowRequested = OpenInstanceModsWindow;
         vm.OpenModSelectionRequested = OpenModSelectionWindow;
+        vm.OpenServerListRequested = OpenServerListWindow;
         vm.OpenLogWindowRequested = OpenLogWindow;
         vm.OpenMemoryWindowRequested = OpenMemoryWindow;
         vm.ConfirmRequested = ShowConfirmAsync;
@@ -124,6 +125,12 @@ public partial class MainWindow : Window
     {
         // Não-modal (Topmost) para flutuar mesmo sobre a janela de gestão.
         new ModSelectionWindow { DataContext = selection }.Show();
+    }
+
+    private void OpenServerListWindow(InstanceModsPageViewModel page)
+    {
+        // Não-modal (Topmost) para flutuar sobre a janela de gestão da instância.
+        new ServerListWindow { DataContext = page }.Show();
     }
 
     private void OpenLogWindow(HomePageViewModel logViewModel)

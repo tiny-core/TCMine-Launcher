@@ -9,7 +9,7 @@
              x:DataType="vm:ModpacksPageViewModel"
              x:Name="PageRoot">
 
-    <Grid Margin="26"
+    <Grid Margin="26, 26, 26, 0 "
           RowDefinitions="Auto,16,Auto,*">
 
         <!-- Cabeçalho -->

@@ -16,19 +16,19 @@
         <Border Classes="panel"
                 Margin="0, 0,0, 20">
             <StackPanel Spacing="0">
-                <TextBlock Classes="section-label" 
+                <TextBlock Classes="section-label"
                            Text="NOME" />
-                <TextBox Classes="field" 
+                <TextBox Classes="field"
                          Text="{Binding Name}"
                          Foreground="{StaticResource TextPrimary}" />
 
                 <Grid ColumnDefinitions="*,16,*"
                       Margin="0,16,0,0">
-                    <ctl:VersionSelector Grid.Column="0" 
+                    <ctl:VersionSelector Grid.Column="0"
                                          Label="VERSÃO MINECRAFT"
                                          ItemsSource="{Binding MinecraftVersions}"
                                          SelectedItem="{Binding SelectedMinecraftVersion}" />
-                    <ctl:VersionSelector Grid.Column="2" 
+                    <ctl:VersionSelector Grid.Column="2"
                                          Label="NEOFORGE"
                                          ItemsSource="{Binding NeoForgeVersions}"
                                          SelectedItem="{Binding SelectedNeoForgeVersion}"
@@ -43,75 +43,46 @@
                          PlaceholderText="Automático (descarrega o Java correto)" />
 
                 <TextBlock Classes="muted"
-                           FontSize="11" 
+                           FontSize="11"
                            Margin="2,10,0,0"
                            Text="Mudar a versão exige reinstalar ao jogar a seguir. Java vazio = automático." />
             </StackPanel>
         </Border>
 
-        <!-- Servidores -->
+        <!-- Servidores (geridos numa janela própria, como os mods) -->
         <Border Classes="panel"
                 Margin="0,0,0,20">
-            <StackPanel Spacing="10">
-                <TextBlock Classes="section-label" 
-                           Text="SERVIDORES"
-                           Margin="0" />
-
-                <ItemsControl ItemsSource="{Binding Servers}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="m:ServerEntry">
-                            <ctl:ServerEntryRow
-                                Owner="{Binding #PageRoot.((vm:InstanceModsPageViewModel)DataContext)}" />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <TextBlock Classes="muted"
-                           FontSize="11" 
-                           Text="Sem servidores."
-                           IsVisible="{Binding !Servers.Count}" />
-
-                <!-- Adicionar servidor -->
-                <Grid ColumnDefinitions="*,8,1.4*,8,Auto,8,Auto"
-                      Margin="0,6,0,0">
-                    <TextBox Grid.Column="0" 
-                             Classes="field"
-                             Text="{Binding NewServerName}"
-                             PlaceholderText="Nome"
-                             Padding="9,7"
-                             Foreground="{StaticResource TextPrimary}" />
-                    <TextBox Grid.Column="2" Classes="field"
-                             Text="{Binding NewServerAddress}"
-                             PlaceholderText="endereço.servidor.net" Padding="9,7"
-                             Foreground="{StaticResource TextPrimary}" />
-                    <TextBox Grid.Column="4" Classes="field" 
-                             Text="{Binding NewServerPort}"
-                             PlaceholderText="Porta"
-                             Width="64" 
-                             Padding="9,7"
-                             Foreground="{StaticResource TextPrimary}" />
-                    <Button Grid.Column="6" Classes="outline-btn" Height="36"
-                            Command="{Binding AddServerCommand}">
-                        <TextBlock Text="Adicionar" 
-                                   FontSize="12" />
-                    </Button>
-                </Grid>
-            </StackPanel>
-        </Border>
-
-        <!-- Mods -->
-        <Border Classes="panel" 
-                Margin="0,0,0,20">
-            <Grid ColumnDefinitions="*,Auto" 
+            <Grid ColumnDefinitions="*,Auto"
                   VerticalAlignment="Center">
                 <StackPanel Grid.Column="0"
                             Spacing="2">
                     <TextBlock Classes="section-label"
-                               Text="MODS" 
+                               Text="SERVIDORES"
+                               Margin="0" />
+                    <TextBlock Text="{Binding ServerCount, StringFormat='{}{0} servidor(es)'}"
+                               Foreground="{StaticResource TextSecondary}" FontSize="12.5" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="outline-btn" Height="38"
+                        Command="{Binding OpenServersCommand}">
+                    <TextBlock Text="Gerir servidores" FontSize="12.5" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Mods -->
+        <Border Classes="panel"
+                Margin="0,0,0,20">
+            <Grid ColumnDefinitions="*,Auto"
+                  VerticalAlignment="Center">
+                <StackPanel Grid.Column="0"
+                            Spacing="2">
+                    <TextBlock Classes="section-label"
+                               Text="MODS"
                                Margin="0" />
                     <TextBlock Text="{Binding ModCount, StringFormat='{}{0} mod(s) instalado(s)'}"
                                Foreground="{StaticResource TextSecondary}" FontSize="12.5" />
                 </StackPanel>
-                <Button Grid.Column="1" 
+                <Button Grid.Column="1"
                         Classes="outline-btn"
                         Height="38"
                         Command="{Binding OpenModsCommand}">
@@ -120,15 +91,15 @@
             </Grid>
         </Border>
 
-        <StackPanel Orientation="Horizontal" 
+        <StackPanel Orientation="Horizontal"
                     Spacing="12" HorizontalAlignment="Right">
-            <Button Classes="play-btn" 
-                    Height="40" 
+            <Button Classes="play-btn"
+                    Height="40"
                     Width="150"
                     HorizontalContentAlignment="Center"
                     Command="{Binding ConcludeCommand}">
-                <TextBlock Text="Concluído" 
-                           FontSize="13" 
+                <TextBlock Text="Concluído"
+                           FontSize="13"
                            FontWeight="Bold" />
             </Button>
         </StackPanel>

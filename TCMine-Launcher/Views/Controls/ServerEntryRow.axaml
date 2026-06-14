@@ -10,29 +10,32 @@
 
     <!-- Linha de um servidor configurado (nome + ip + remover). DataContext =
          ServerEntry; o comando de remover vem do ViewModel passado em Owner. -->
-    <Grid ColumnDefinitions="*,Auto" 
-          Margin="0,3" 
-          Background="Transparent">
-        <StackPanel Grid.Column="0" 
-                    Spacing="1" 
-                    VerticalAlignment="Center">
-            <TextBlock Text="{Binding Name}" 
-                       FontSize="12.5"
-                       Foreground="{StaticResource TextPrimary}" />
-            <TextBlock Text="{Binding Ip}"
-                       FontSize="11" 
-                       Foreground="{StaticResource TextMuted}" />
-        </StackPanel>
-        
-        <Button Grid.Column="1" 
-                Classes="ghost-btn"
-                Command="{Binding #RowRoot.Owner.RemoveServerCommand}"
-                CommandParameter="{Binding}">
-            
-            <PathIcon Data="{StaticResource IconClose}"
-                      Width="12" 
-                      Height="12"
-                      Foreground="{StaticResource Danger}" />
-        </Button>
-    </Grid>
+    <StackPanel>
+        <Grid ColumnDefinitions="*,Auto"
+              Margin="0,3"
+              Background="Transparent">
+            <StackPanel Grid.Column="0"
+                        Spacing="1"
+                        VerticalAlignment="Center">
+                <TextBlock Text="{Binding Name}"
+                           FontSize="12.5"
+                           Foreground="{StaticResource TextPrimary}" />
+                <TextBlock Text="{Binding Ip}"
+                           FontSize="11"
+                           Foreground="{StaticResource TextMuted}" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Classes="ghost-btn"
+                    Command="{Binding #RowRoot.Owner.RemoveServerCommand}"
+                    CommandParameter="{Binding}">
+
+                <PathIcon Data="{StaticResource IconClose}"
+                          Width="12"
+                          Height="12"
+                          Foreground="{StaticResource Danger}" />
+            </Button>
+        </Grid>
+        <Separator Classes="divider" Margin="0,0,0,10" />
+    </StackPanel>
 </UserControl>

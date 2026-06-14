@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:vm="using:TCMine_Launcher.ViewModels"
+        xmlns:m="using:TCMine_Launcher.Models"
+        xmlns:ctl="using:TCMine_Launcher.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="560"
+        x:Class="TCMine_Launcher.Views.ServerListWindow"
+        x:DataType="vm:InstanceModsPageViewModel"
+        x:Name="ServerWinRoot"
+        Title="Servidores"
+        Icon="/Assets/icon.ico"
+        Width="560" Height="560"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <views:WindowChrome>
+        <Grid RowDefinitions="Auto,*">
+            <views:TitleBar Grid.Row="0"
+                            Title="Servidores"
+                            ShowMinimize="False" />
+
+            <Grid Grid.Row="1" Margin="22"
+                  RowDefinitions="Auto,Auto,*,Auto">
+                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                    <TextBlock Classes="page-title"
+                               Text="Servidores" />
+                    <TextBlock Classes="muted"
+                               Text="Servidores adicionados manualmente a esta instância"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Adicionar servidor -->
+                <Grid Grid.Row="1"
+                      ColumnDefinitions="*,8,1.4*,8,Auto,8,Auto">
+                    <TextBox Grid.Column="0"
+                             Classes="field"
+                             Text="{Binding NewServerName}"
+                             PlaceholderText="Nome"
+                             Padding="9,7"
+                             Foreground="{StaticResource TextPrimary}" />
+                    <TextBox Grid.Column="2"
+                             Classes="field"
+                             Text="{Binding NewServerAddress}"
+                             PlaceholderText="endereço.servidor.net"
+                             Padding="9,7"
+                             Foreground="{StaticResource TextPrimary}" />
+                    <TextBox Grid.Column="4"
+                             Classes="field"
+                             Text="{Binding NewServerPort}"
+                             PlaceholderText="Porta"
+                             Width="64"
+                             Padding="9,7"
+                             Foreground="{StaticResource TextPrimary}" />
+                    <Button Grid.Column="6"
+                            Classes="outline-btn"
+                            Height="36"
+                            Command="{Binding AddServerCommand}">
+                        <TextBlock Text="Adicionar"
+                                   FontSize="12" />
+                    </Button>
+                </Grid>
+
+                <!-- Lista (preenche o resto, com scroll) -->
+                <Border Grid.Row="2"
+                        Classes="panel"
+                        Margin="0,14,0,0">
+                    <Panel>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      IsVisible="{Binding Servers.Count}">
+                            <ItemsControl ItemsSource="{Binding Servers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="m:ServerEntry">
+                                        <ctl:ServerEntryRow
+                                            Owner="{Binding #ServerWinRoot.((vm:InstanceModsPageViewModel)DataContext)}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                        <TextBlock Classes="muted"
+                                   FontSize="12"
+                                   Text="Sem servidores."
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   IsVisible="{Binding !Servers.Count}" />
+                    </Panel>
+                </Border>
+
+                <Button Grid.Row="3" Classes="play-btn"
+                        Height="40" Width="140"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Center"
+                        Margin="0,16,0,0"
+                        Click="Done_Click">
+                    <TextBlock Text="Concluído"
+                               FontSize="13"
+                               FontWeight="Bold" />
+                </Button>
+            </Grid>
+        </Grid>
+    </views:WindowChrome>
+</Window>
