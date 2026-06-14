@@ -44,6 +44,9 @@ public class ModEntryEntity
 
     [MaxLength(200)] public string Name { get; set; } = string.Empty;
 
+    /// <summary>Versão legível do ficheiro (CurseForge DisplayName).</summary>
+    [MaxLength(80)] public string? Version { get; set; }
+
     [MaxLength(260)] public string FileName { get; set; } = string.Empty;
 
     [MaxLength(500)] public string DownloadUrl { get; set; } = string.Empty;

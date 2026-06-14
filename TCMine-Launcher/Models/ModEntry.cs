@@ -13,6 +13,9 @@ public class ModEntry
     /// <summary>Nome legível do mod (para a UI).</summary>
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Versão legível do ficheiro instalado (CurseForge DisplayName).</summary>
+    public string? Version { get; set; }
+
     /// <summary>Nome do ficheiro — também a chave de "já instalado" na pasta de destino.</summary>
     public string FileName { get; set; } = string.Empty;
 

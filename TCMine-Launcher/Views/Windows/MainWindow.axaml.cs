@@ -48,6 +48,7 @@ public partial class MainWindow : Window
         vm.OpenServerListRequested = OpenServerListWindow;
         vm.OpenLogWindowRequested = OpenLogWindow;
         vm.OpenMemoryWindowRequested = OpenMemoryWindow;
+        vm.OpenUpdateWindowRequested = OpenUpdateWindow;
         vm.ConfirmRequested = ShowConfirmAsync;
         vm.SaveFileRequested = SaveZipAsync;
         vm.OpenFileRequested = OpenZipAsync;
@@ -160,6 +161,12 @@ public partial class MainWindow : Window
         _memoryWindow = new MemoryWindow { DataContext = DataContext };
         _memoryWindow.Closed += (_, _) => _memoryWindow = null;
         _memoryWindow.Show(this);
+    }
+
+    private void OpenUpdateWindow()
+    {
+        // Modal: mostra as notas e o botão de atualizar (que se desativa após o clique).
+        _ = new UpdateWindow { DataContext = DataContext }.ShowDialog(this);
     }
 
     private async Task<bool> ShowConfirmAsync(string title, string message)

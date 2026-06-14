@@ -54,8 +54,9 @@ else
         <section class="panel">
             <h2>Importar do CurseForge</h2>
             <p class="muted small">
-                Substitui o <strong>nome, versões, descrição e a lista de mods</strong> deste
-                modpack pelos do CurseForge. Os servidores configurados são mantidos.
+                <strong>Mescla</strong> os mods do modpack CurseForge com os atuais (adiciona os
+                novos, atualiza os existentes, mantém os restantes). Metadados e servidores
+                configurados são preservados (só preenche campos vazios).
             </p>
 
             <div class="row">
@@ -70,20 +71,20 @@ else
             }
             @if (_importDone)
             {
-                <p class="ok">Importado — revê os mods e clica em Guardar.</p>
+                <p class="ok">Mesclado (@_importSummary) — revê os mods e clica em Guardar.</p>
             }
 
             @if (_pendingImport is not null)
             {
                 <div class="warn-box">
-                    <strong>Substituir a configuração atual?</strong>
+                    <strong>Mesclar “@_pendingImport.Name”?</strong>
                     <p class="muted small">
-                        Importar “@_pendingImport.Name” vai <strong>apagar os mods e versões</strong>
-                        já configurados neste modpack. Esta ação só fica gravada quando clicares em Guardar.
+                        Os mods deste modpack CurseForge são <strong>adicionados/atualizados</strong> aos
+                        atuais (os restantes mantêm-se). Só fica gravado quando clicares em Guardar.
                     </p>
                     <div class="actions">
-                        <button class="btn danger" @onclick="ConfirmImport" disabled="@_packBusy">
-                            @(_packBusy ? "A importar…" : "Sim, substituir")
+                        <button class="btn primary" @onclick="ConfirmImport" disabled="@_packBusy">
+                            @(_packBusy ? "A importar…" : "Mesclar")
                         </button>
                         <button class="btn ghost" @onclick="() => _pendingImport = null">Cancelar</button>
                     </div>
@@ -254,6 +255,7 @@ else
     private byte[]? _pendingOverrides;
     private string? _packError;
     private bool _importDone;
+    private string _importSummary = string.Empty;
 
     private async Task OnPackSearchKey(KeyboardEventArgs e)
     {
@@ -294,20 +296,30 @@ else
                 return;
             }
 
-            // Substitui metadados + mods; mantém os servidores configurados.
-            _m.Name = imported.Name;
-            _m.Version = imported.Version;
-            _m.Minecraft = imported.Minecraft;
-            _m.Neoforge = imported.Neoforge;
-            _m.Description = _pendingImport.Summary ?? string.Empty;
-            _m.HasOverrides = imported.Overrides is not null;
-            _pendingOverrides = imported.Overrides;
-            _m.Mods = imported.Mods.Select(x => new ModEntryEntity
-            {
-                CurseModId = x.ModId, FileId = x.FileId, Name = x.Name,
-                FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
-            }).ToList();
+            // MERGE: mantém os metadados do modpack alvo (só preenche os vazios) e mescla
+            // os mods — adiciona os novos, atualiza por id, mantém os restantes.
+            if (string.IsNullOrWhiteSpace(_m.Name)) _m.Name = imported.Name;
+            if (string.IsNullOrWhiteSpace(_m.Version)) _m.Version = imported.Version;
+            if (string.IsNullOrWhiteSpace(_m.Minecraft)) _m.Minecraft = imported.Minecraft;
+            if (string.IsNullOrWhiteSpace(_m.Neoforge)) _m.Neoforge = imported.Neoforge;
+            if (string.IsNullOrWhiteSpace(_m.Description))
+                _m.Description = _pendingImport.Summary ?? string.Empty;
 
+            var incoming = imported.Mods.Select(x => new ModEntryEntity
+            {
+                CurseModId = x.ModId, FileId = x.FileId, Name = x.Name, Version = x.Version,
+                FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
+            });
+            var merged = ModSetMerge.Merge(_m.Mods, incoming, e => e.CurseModId);
+            _m.Mods = merged.Items;
+
+            if (imported.Overrides is not null)
+            {
+                _m.HasOverrides = true;
+                _pendingOverrides = imported.Overrides;
+            }
+
+            _importSummary = $"+{merged.Added} novo(s), ~{merged.Updated} atualizado(s)";
             _pendingImport = null;
             _packResults.Clear();
             _importDone = true;
@@ -385,6 +397,7 @@ else
                 CurseModId = mod.Id,
                 FileId = file.Id,
                 Name = mod.Name,
+                Version = file.DisplayName,
                 FileName = file.FileName,
                 DownloadUrl = CurseForgeService.ResolveDownloadUrl(file) ?? string.Empty,
                 Target = mod.Target
@@ -442,7 +455,7 @@ else
             db.Servers.RemoveRange(tracked.Servers);
             tracked.Mods = _m.Mods.Select(x => new ModEntryEntity
             {
-                CurseModId = x.CurseModId, FileId = x.FileId, Name = x.Name,
+                CurseModId = x.CurseModId, FileId = x.FileId, Name = x.Name, Version = x.Version,
                 FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
             }).ToList();
             tracked.Servers = _m.Servers.Select(x => new ServerEntryEntity

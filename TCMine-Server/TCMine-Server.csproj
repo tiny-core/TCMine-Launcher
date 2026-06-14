@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TCMine-Contracts\TCMine-Contracts.csproj" />
+      <ProjectReference Include="..\TCMine-Core\TCMine-Core.csproj" />
     </ItemGroup>
 
 </Project>

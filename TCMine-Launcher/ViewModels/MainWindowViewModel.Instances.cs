@@ -41,6 +41,15 @@ public partial class MainWindowViewModel
         ActiveInstance =
             Instances.FirstOrDefault(i => i.Id == _game.SelectedInstanceId)
             ?? Instances.First();
+        MoveActiveToFront();
+    }
+
+    /// <summary>Mantém a instância ativa sempre como o primeiro cartão da lista.</summary>
+    private void MoveActiveToFront()
+    {
+        if (ActiveInstance is null) return;
+        var idx = Instances.IndexOf(ActiveInstance);
+        if (idx > 0) Instances.Move(idx, 0);
     }
 
     /// <summary>Cria a instância inicial padrão (usada na 1.ª execução e após apagar a última).</summary>
@@ -53,6 +62,7 @@ public partial class MainWindowViewModel
     public void SelectInstance(MinecraftInstance instance)
     {
         ActiveInstance = instance;
+        MoveActiveToFront();
         _game.SelectedInstanceId = instance.Id;
         PersistSettings();
         Home.NotifyInstanceChanged();
@@ -137,6 +147,7 @@ public partial class MainWindowViewModel
 
         ActiveInstance = Instances.FirstOrDefault(i => i.Id == activeId)
                          ?? Instances.FirstOrDefault();
+        MoveActiveToFront();
 
         Home.NotifyInstanceChanged();
         InstancesPage.NotifyActiveChanged();

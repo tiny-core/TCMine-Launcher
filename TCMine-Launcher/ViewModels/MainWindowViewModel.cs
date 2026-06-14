@@ -63,6 +63,14 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] private string _latestVersion = string.Empty;
 
+    /// <summary>Notas (changelog) da atualização pendente, mostradas no modal.</summary>
+    [ObservableProperty] private string _latestNotes = string.Empty;
+
+    /// <summary>A atualização está a ser aplicada (desativa o botão do modal).</summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ApplyUpdateCommand))]
+    private bool _isUpdating;
+
     [ObservableProperty] private string? _loginError;
 
     /// <summary>A RAM da instância ativa foi alterada e ainda não foi gravada em disco.</summary>
@@ -243,6 +251,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Pedido para abrir a janela de configuração de memória (ligado pela View).</summary>
     public Action? OpenMemoryWindowRequested { get; set; }
+
+    /// <summary>Pedido para abrir o modal de atualização do launcher (ligado pela View).</summary>
+    public Action? OpenUpdateWindowRequested { get; set; }
 
     /// <summary>Pedido de confirmação (ligado pela View; abre um diálogo modal).</summary>
     public Func<string, string, Task<bool>>? ConfirmRequested { get; set; }
@@ -431,18 +442,45 @@ public partial class MainWindowViewModel : ViewModelBase
         if (await _updater.CheckAsync())
         {
             LatestVersion = _updater.LatestVersion ?? string.Empty;
+            LatestNotes = await BuildUpdateNotesAsync(LatestVersion);
             UpdateAvailable = true;
             Log.Information("Atualização disponível: {Version}", LatestVersion);
         }
     }
 
-    [RelayCommand]
-    private async Task OpenUpdate()
+    /// <summary>
+    ///     Junta as notas do changelog: primeiro as que o admin escreveu no servidor
+    ///     (curadas), depois as embebidas no pacote Velopack (se existirem e diferirem).
+    /// </summary>
+    private async Task<string> BuildUpdateNotesAsync(string version)
     {
-        if (!UpdateAvailable) return;
+        var serverNotes = (await _updater.GetServerNotesAsync(version))?.Trim();
+        var packNotes = _updater.LatestNotes?.Trim();
+
+        var parts = new System.Collections.Generic.List<string>();
+        if (!string.IsNullOrWhiteSpace(serverNotes)) parts.Add(serverNotes!);
+        if (!string.IsNullOrWhiteSpace(packNotes) && packNotes != serverNotes) parts.Add(packNotes!);
+
+        return parts.Count > 0 ? string.Join("\n\n", parts) : "Sem notas para esta versão.";
+    }
+
+    /// <summary>Botão da barra de estado: abre o modal com as notas da atualização.</summary>
+    [RelayCommand]
+    private void OpenUpdate()
+    {
+        if (UpdateAvailable) OpenUpdateWindowRequested?.Invoke();
+    }
+
+    /// <summary>Botão do modal: descarrega, aplica e reinicia. Desativa-se após o clique.</summary>
+    [RelayCommand(CanExecute = nameof(CanApplyUpdate))]
+    private async Task ApplyUpdate()
+    {
+        IsUpdating = true;
         StatusMessage = "A atualizar o launcher...";
         await _updater.ApplyAndRestartAsync();
     }
+
+    private bool CanApplyUpdate() => !IsUpdating;
 
     /// <summary>Notifica todas as views que dependem do perfil do jogador.</summary>
     private void RefreshPlayer()

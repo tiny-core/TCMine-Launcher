@@ -15,88 +15,167 @@
         <Grid Grid.Row="0"
               ColumnDefinitions="*,10,Auto">
             <TextBox Grid.Column="0"
-                     Classes="field" 
+                     Classes="field"
                      Text="{Binding Query}"
                      PlaceholderText="Pesquisar mods (CurseForge)..."
                      Foreground="{StaticResource TextPrimary}">
                 <TextBox.KeyBindings>
-                    <KeyBinding Gesture="Enter" 
-                        Command="{Binding SearchCommand}" />
+                    <KeyBinding Gesture="Enter"
+                                Command="{Binding SearchCommand}" />
                 </TextBox.KeyBindings>
             </TextBox>
-            <Button Grid.Column="2" 
-                    Classes="outline-btn"
-                    Height="38"
-                    Width="110"
-                    HorizontalContentAlignment="Center"
-                    Command="{Binding SearchCommand}"
-                    IsEnabled="{Binding !IsSearching}">
-                <Panel>
-                    <TextBlock Text="Pesquisar" 
-                               FontSize="12.5"
-                               IsVisible="{Binding !IsSearching}" />
-                    <Ellipse Classes="spinner"
-                             Width="14"
-                             Height="14"
-                             IsVisible="{Binding IsSearching}" />
-                </Panel>
-            </Button>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button Classes="outline-btn"
+                        Height="38"
+                        Width="110"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding SearchCommand}"
+                        IsEnabled="{Binding !IsSearching}">
+                    <Panel>
+                        <TextBlock Text="Pesquisar"
+                                   FontSize="12.5"
+                                   IsVisible="{Binding !IsSearching}" />
+                        <Ellipse Classes="spinner"
+                                 Width="14"
+                                 Height="14"
+                                 IsVisible="{Binding IsSearching}" />
+                    </Panel>
+                </Button>
+                <Button Classes="outline-btn"
+                        Height="38"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding CheckUpdatesCommand}"
+                        IsEnabled="{Binding !IsCheckingUpdates}"
+                        ToolTip.Tip="Verifica se os mods instalados têm versão mais recente">
+                    <Panel>
+                        <TextBlock Text="Procurar atualizações"
+                                   FontSize="12.5"
+                                   IsVisible="{Binding !IsCheckingUpdates}" />
+                        <Ellipse Classes="spinner"
+                                 Width="14"
+                                 Height="14"
+                                 IsVisible="{Binding IsCheckingUpdates}" />
+                    </Panel>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- Estado / mensagens -->
-        <TextBlock Grid.Row="1" 
+        <TextBlock Grid.Row="1"
                    Text="{Binding StatusMessage}"
                    Classes="muted"
-                   FontSize="11.5" 
-                   TextWrapping="Wrap" 
-                   Margin="0,12"
+                   FontSize="11.5"
+                   TextWrapping="Wrap"
+                   Margin="0,12, 0, 0"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Foreground="{StaticResource WarningText}"
                    IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
 
         <!-- Lista única (resultados + selecionados; o botão alterna) — ocupa o resto -->
-        <Border Grid.Row="2" 
+        <Border Grid.Row="2"
                 Background="{StaticResource BgConsole}"
                 BorderBrush="{StaticResource BorderDivider}"
                 BorderThickness="1"
                 CornerRadius="8"
-                Margin="0,12,0,0" 
+                Margin="0,12,0,0"
                 IsVisible="{Binding IsConfigured}">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Results}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vm:ModSearchItem">
-                            <Grid ColumnDefinitions="Auto,12,*,Auto"
-                                  Margin="12,9">
-                                <Border Grid.Column="0"
-                                        Width="38"
-                                        Height="38"
-                                        CornerRadius="6" 
-                                        ClipToBounds="True"
-                                        Background="{StaticResource BgElevated}"
-                                        VerticalAlignment="Center">
-                                    <Image bh:ImageLoader.SourceUrl="{Binding LogoUrl}"
-                                           Stretch="UniformToFill" />
-                                </Border>
-                                <StackPanel Grid.Column="2" 
-                                            Spacing="2"
+                            <StackPanel Margin="12,9" Spacing="0">
+                                <!-- Linha principal: ícone + info + ações (Mudar versão | Adicionar/Remover) -->
+                                <Grid ColumnDefinitions="Auto,12,*,Auto,8,Auto">
+                                    <Border Grid.Column="0"
+                                            Width="38"
+                                            Height="38"
+                                            CornerRadius="6"
+                                            ClipToBounds="True"
+                                            Background="{StaticResource BgElevated}"
                                             VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}"
-                                               FontSize="13" 
-                                               FontWeight="SemiBold"
-                                               Foreground="{StaticResource TextPrimary}" />
-                                    <TextBlock Text="{Binding Summary}"
-                                               FontSize="11" Foreground="{StaticResource TextMuted}"
-                                               TextTrimming="CharacterEllipsis"
-                                               IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                        <Image bh:ImageLoader.SourceUrl="{Binding LogoUrl}"
+                                               Stretch="UniformToFill" />
+                                    </Border>
+                                    <StackPanel Grid.Column="2"
+                                                Spacing="2"
+                                                VerticalAlignment="Center">
+                                        <!-- Nome clicável → abre a página do mod no CurseForge -->
+                                        <Button Background="Transparent" BorderThickness="0" Padding="0"
+                                                HorizontalAlignment="Left" Cursor="Hand"
+                                                Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).OpenModPageCommand}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip.Tip="Abrir no CurseForge para ver as versões disponíveis">
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}" />
+                                        </Button>
+                                        <TextBlock Text="{Binding Summary}"
+                                                   FontSize="11" Foreground="{StaticResource TextMuted}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   IsVisible="{Binding Summary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                        <TextBlock Text="{Binding VersionLabel}"
+                                                   FontSize="10.5"
+                                                   Foreground="{StaticResource TextFaint}"
+                                                   IsVisible="{Binding VersionLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                    </StackPanel>
+
+                                    <!-- Mudar versão (ao lado do toggle, na mesma linha) -->
+                                    <Button Grid.Column="3"
+                                            Classes="outline-btn" Height="34" MinWidth="118"
+                                            HorizontalContentAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            IsVisible="{Binding IsSelected}"
+                                            Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ChangeVersionCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Escolher uma versão (atualizar ou voltar atrás). Clica no nome do mod para ver as versões no CurseForge.">
+                                        <Panel>
+                                            <TextBlock Text="Mudar versão" FontSize="11.5"
+                                                       IsVisible="{Binding !VersionsLoading}" />
+                                            <Ellipse Classes="spinner" Width="13" Height="13"
+                                                     IsVisible="{Binding VersionsLoading}" />
+                                        </Panel>
+                                    </Button>
+                                    <Button Grid.Column="5"
+                                            Classes="outline-btn mod-toggle" Height="34" MinWidth="92"
+                                            HorizontalContentAlignment="Center"
+                                            Classes.selected="{Binding IsSelected}"
+                                            VerticalAlignment="Center" Margin="0,0,8,0"
+                                            Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ToggleCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="{Binding ActionLabel}" FontSize="11.5" />
+                                    </Button>
+                                </Grid>
+
+                                <!-- Painel de versões (dropdown temático), por baixo, alinhado sob a info -->
+                                <StackPanel Orientation="Horizontal" Spacing="6" Margin="50,8,8,2"
+                                            IsVisible="{Binding IsChangingVersion}">
+                                    <ComboBox Classes="version-select" Width="210"
+                                              PlaceholderText="Escolher versão…"
+                                              ItemsSource="{Binding Versions}"
+                                              SelectedItem="{Binding SelectedVersion}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate DataType="vm:ModVersionOption">
+                                                <TextBlock Text="{Binding Label}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <Button Classes="outline-btn" Height="34"
+                                            HorizontalContentAlignment="Center"
+                                            Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ApplyVersionCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="Aplicar" FontSize="11.5"
+                                                   Foreground="{StaticResource Accent}" />
+                                    </Button>
+                                    <Button Classes="outline-btn" Height="34"
+                                            HorizontalContentAlignment="Center"
+                                            Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).CancelVersionCommand}"
+                                            CommandParameter="{Binding}">
+                                        <TextBlock Text="Cancelar" FontSize="11.5" />
+                                    </Button>
                                 </StackPanel>
-                                <Button Grid.Column="3" 
-                                        Classes="outline-btn mod-toggle" Height="30"
-                                        Classes.selected="{Binding IsSelected}"
-                                        VerticalAlignment="Center" Margin="10,0,20,0"
-                                        Command="{Binding #ModRoot.((vm:ModSelectionViewModel)DataContext).ToggleCommand}"
-                                        CommandParameter="{Binding}">
-                                    <TextBlock Text="{Binding ActionLabel}" FontSize="11.5" />
-                                </Button>
-                            </Grid>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

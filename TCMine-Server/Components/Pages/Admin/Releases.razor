@@ -20,7 +20,7 @@
         <label class="field-label">NOTAS (changelog)</label>
         <textarea class="input" rows="3" @bind="_notes"></textarea>
         <label class="field-label">ARTEFACTOS</label>
-        <InputFile OnChange="OnFilesSelected" multiple/>
+        <InputFile class="file-input" OnChange="OnFilesSelected" multiple/>
         @if (_editId != 0)
         {
             <p class="muted small">Vazio mantém os ficheiros atuais; novos ficheiros são adicionados.</p>
@@ -66,7 +66,7 @@
                             <span class="muted small">@r.Channel · @r.PublishedAt.ToString("yyyy-MM-dd HH:mm")</span>
                             @if (!string.IsNullOrWhiteSpace(r.Notes))
                             {
-                                <div class="muted small">@r.Notes</div>
+                                <div class="muted small" title="@r.Notes">@Summarize(r.Notes)</div>
                             }
                         </div>
                         <div class="row-actions">
@@ -82,6 +82,15 @@
 </div>
 
 @code {
+    // Resumo das notas para a lista de histórico: 1.ª linha, truncada (o texto completo
+    // fica no tooltip). Evita changelogs longos a esticarem a lista.
+    private static string Summarize(string notes)
+    {
+        var firstLine = notes.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .FirstOrDefault()?.Trim() ?? "";
+        return firstLine.Length > 70 ? firstLine[..70] + "…" : firstLine;
+    }
+
     private List<ReleaseEntity> _items = new();
     private readonly List<IBrowserFile> _selected = new();
     private int _editId; // 0 = a criar uma nova; senão = id da release em edição

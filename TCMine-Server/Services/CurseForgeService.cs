@@ -125,7 +125,8 @@ public class CurseForgeService
                 mod?.Name ?? file?.FileName ?? $"mod {entry.ProjectID}",
                 file?.FileName ?? string.Empty,
                 url ?? string.Empty,
-                mod?.Target ?? "mod"));
+                mod?.Target ?? "mod",
+                file?.DisplayName));
         }
 
         var loader = manifest.Minecraft.ModLoaders.FirstOrDefault(l => l.Primary)
@@ -234,7 +235,8 @@ public record CfMod(long Id, string Name, string? Summary, CfLogo? Logo, List<Cf
 
 public record CfLogo(string? Url);
 
-public record CfFile(long Id, long ModId, string FileName, string? DownloadUrl, List<string>? GameVersions);
+public record CfFile(long Id, long ModId, string FileName, string? DownloadUrl, List<string>? GameVersions,
+    string? DisplayName = null);
 
 // ── Manifest de um modpack CurseForge (dentro do .zip) ───────────────────────
 public record CfManifest(
@@ -259,4 +261,4 @@ public record ImportedModpack(
     List<ImportedMod> Mods,
     byte[]? Overrides);
 
-public record ImportedMod(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target);
+public record ImportedMod(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target, string? Version = null);

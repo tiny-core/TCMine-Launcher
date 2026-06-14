@@ -68,9 +68,9 @@
                         MinWidth="130"
                         HorizontalContentAlignment="Center"
                         IsEnabled="{Binding RamDirty}"
-                        Command="{Binding SaveRamCommand}">
+                        Click="Save_Click">
                     <TextBlock Text="Guardar"
-                               FontSize="12.5" 
+                               FontSize="12.5"
                                FontWeight="SemiBold" />
                 </Button>
             </StackPanel>

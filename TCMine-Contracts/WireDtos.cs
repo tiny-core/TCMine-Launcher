@@ -17,6 +17,8 @@ public record ModpackManifestDto(
     string Description, bool HasOverrides, int? RecommendedRamMb,
     IReadOnlyList<ModDto> Mods, IReadOnlyList<ServerDto> Servers);
 
-public record ModDto(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target);
+public record ModDto(long ModId, long FileId, string Name, string FileName, string DownloadUrl, string Target, string? Version = null);
 
 public record ServerDto(string Name, string Address, int Port);
+
+public record ReleaseDto(string Version, string Notes, string Channel, DateTime PublishedAt);

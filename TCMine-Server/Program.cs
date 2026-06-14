@@ -249,6 +249,13 @@ app.MapGet("/modpacks/{id}", async (string id, ContentService content, Cancellat
     return manifest is null ? Results.NotFound() : Results.Json(manifest);
 });
 
+// Notas (changelog) de uma release por versão — usadas no modal de update do launcher.
+app.MapGet("/releases/{version}", async (string version, ContentService content, CancellationToken ct) =>
+{
+    var release = await content.GetReleaseAsync(version, ct);
+    return release is null ? Results.NotFound() : Results.Json(release);
+});
+
 // Bundle de overrides do modpack (configs/resourcepacks/options) — zip.
 app.MapGet("/modpacks/{id}/overrides", (string id, OverridesStore store) =>
 {

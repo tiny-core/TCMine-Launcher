@@ -11,17 +11,31 @@
         <Setter Property="BorderBrush" Value="{StaticResource BorderInset}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="7" />
-        <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
-        <Setter Property="Padding" Value="11,8" />
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-        <Setter Property="MaxDropDownHeight" Value="200" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="11,7" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="MaxDropDownHeight" Value="240" />
     </Style>
-    <Style Selector="ComboBox.version-select:pointerover">
+    <Style Selector="ComboBox.version-select:pointerover /template/ Border#Background">
         <Setter Property="BorderBrush" Value="{StaticResource BorderHover}" />
+    </Style>
+    <Style Selector="ComboBox.version-select:focus /template/ Border#Background">
+        <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    </Style>
+
+    <!-- Itens do dropdown alinhados com o tema escuro -->
+    <Style Selector="ComboBox.version-select ComboBoxItem">
+        <Setter Property="Padding" Value="11,8" />
+        <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
     </Style>
-    <Style Selector="ComboBox.version-select:focus">
-        <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+    <Style Selector="ComboBox.version-select ComboBoxItem:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgHover}" />
+    </Style>
+    <Style Selector="ComboBox.version-select ComboBoxItem:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgElevated}" />
     </Style>
 
     <!-- ── Campo de texto (input recuado) ──────────────────────────── -->

@@ -193,7 +193,7 @@
                 HasOverrides = imported.Overrides is not null,
                 Mods = imported.Mods.Select(x => new ModEntryEntity
                 {
-                    CurseModId = x.ModId, FileId = x.FileId, Name = x.Name,
+                    CurseModId = x.ModId, FileId = x.FileId, Name = x.Name, Version = x.Version,
                     FileName = x.FileName, DownloadUrl = x.DownloadUrl, Target = x.Target
                 }).ToList()
             });

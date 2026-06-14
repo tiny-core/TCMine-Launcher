@@ -1,0 +1,61 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:TCMine_Launcher.Views"
+        xmlns:vm="using:TCMine_Launcher.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="460" d:DesignHeight="420"
+        x:Class="TCMine_Launcher.Views.UpdateWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Atualização"
+        Icon="/Assets/icon.ico"
+        Width="460" Height="420"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <views:WindowChrome>
+        <Grid RowDefinitions="45,*">
+            <views:TitleBar Grid.Row="0" Title="Atualização" ShowMinimize="False" />
+
+            <Grid Grid.Row="1" Margin="28,8,28,24" RowDefinitions="Auto,Auto,*,Auto">
+                <TextBlock Grid.Row="0" Classes="page-title"
+                           Text="{Binding LatestVersion, StringFormat='Nova versão v{0}'}" />
+                <TextBlock Grid.Row="1" Classes="muted" FontSize="12"
+                           Text="Há uma atualização do launcher disponível."
+                           Margin="0,4,0,0" />
+
+                <Border Grid.Row="2" Classes="inset" Margin="0,16,0,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding LatestNotes}"
+                                   TextWrapping="Wrap"
+                                   FontSize="12.5"
+                                   Foreground="{StaticResource TextSecondary}" />
+                    </ScrollViewer>
+                </Border>
+
+                <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="12"
+                            HorizontalAlignment="Right" Margin="0,18,0,0">
+                    <Button Classes="outline-btn" Height="40" Width="120"
+                            HorizontalContentAlignment="Center"
+                            IsEnabled="{Binding !IsUpdating}"
+                            Click="Later_Click">
+                        <TextBlock Text="Mais tarde" FontSize="12.5" />
+                    </Button>
+                    <Button Classes="play-btn" Height="40" Width="160"
+                            HorizontalContentAlignment="Center"
+                            Command="{Binding ApplyUpdateCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Ellipse Classes="spinner" Width="13" Height="13"
+                                     IsVisible="{Binding IsUpdating}" />
+                            <TextBlock Text="Atualizar agora"
+                                       FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </views:WindowChrome>
+</Window>

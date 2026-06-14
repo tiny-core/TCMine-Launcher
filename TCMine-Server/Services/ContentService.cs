@@ -61,8 +61,16 @@ public class ContentService
             m.Id, m.Name, m.Version, m.Minecraft, m.Neoforge, m.Description, _overrides.Exists(m.Id),
             m.RecommendedRamMb,
             m.Mods.Select(x => new ModDto(x.CurseModId, x.FileId, x.Name, x.FileName, x.DownloadUrl,
-                string.IsNullOrEmpty(x.Target) ? "mod" : x.Target)).ToList(),
+                string.IsNullOrEmpty(x.Target) ? "mod" : x.Target, x.Version)).ToList(),
             m.Servers.Select(x => new ServerDto(x.Name, x.Address, x.Port)).ToList());
+    }
+
+    /// <summary>Metadados de uma release por versão (notas/changelog para o modal de update).</summary>
+    public async Task<ReleaseDto?> GetReleaseAsync(string version, CancellationToken ct = default)
+    {
+        await using var db = await _factory.CreateDbContextAsync(ct);
+        var r = await db.Releases.FirstOrDefaultAsync(x => x.Version == version, ct);
+        return r is null ? null : new ReleaseDto(r.Version, r.Notes, r.Channel, r.PublishedAt);
     }
 
     /// <summary>Formata a data no estilo das novidades (ex.: "07 jun 2026").</summary>

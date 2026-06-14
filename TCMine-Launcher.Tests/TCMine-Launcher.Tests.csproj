@@ -20,11 +20,13 @@
     rápidos, isolados e imunes ao .exe bloqueado quando a app está a correr.
   -->
   <ItemGroup>
-    <Compile Include="..\TCMine-Launcher\Models\**\*.cs"
-             Link="Models\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\TCMine-Launcher\Models\**\*.cs" Link="Models\%(RecursiveDir)%(Filename)%(Extension)" />
     <!-- ContentSyncService é lógica pura (depende só dos Models + IManifestSource). -->
     <Compile Include="..\TCMine-Launcher\Services\ContentSyncService.cs" Link="Services\ContentSyncService.cs" />
     <Compile Include="..\TCMine-Launcher\Services\IManifestSource.cs" Link="Services\IManifestSource.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TCMine-Core\TCMine-Core.csproj" />
   </ItemGroup>
 
 </Project>

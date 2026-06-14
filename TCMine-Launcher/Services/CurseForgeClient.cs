@@ -28,7 +28,7 @@ public class CurseForgeClient
     };
 
     private readonly Func<string?> _baseUrlProvider;
-    private readonly ConcurrentDictionary<string, CurseForgeFile?> _fileCache = new();
+    private readonly ConcurrentDictionary<string, List<CurseForgeFile>> _filesCache = new();
     private readonly HttpClient _http = HttpClientProvider.Shared;
     private readonly ConcurrentDictionary<int, CurseForgeMod?> _modCache = new();
 
@@ -70,23 +70,35 @@ public class CurseForgeClient
         return list;
     }
 
-    /// <summary>Melhor ficheiro (mais recente com download permitido) para a versão dada.</summary>
-    public async Task<CurseForgeFile?> GetBestFileAsync(
+    /// <summary>
+    ///     Ficheiros (mais recentes primeiro) de um mod compatíveis com a versão dada.
+    ///     Em cache por sessão — uma chamada serve para "latest" e para resolver uma
+    ///     versão específica, evitando repetir pedidos ao CurseForge.
+    /// </summary>
+    public async Task<List<CurseForgeFile>> GetFilesAsync(
         int modId, string gameVersion, CancellationToken ct = default)
     {
         EnsureConfigured();
 
         var cacheKey = $"{modId}|{gameVersion}";
-        if (_fileCache.TryGetValue(cacheKey, out var cached)) return cached;
+        if (_filesCache.TryGetValue(cacheKey, out var cached)) return cached;
 
         var url = $"{BaseUrl}/v1/mods/{modId}/files" +
                   $"?gameVersion={Uri.EscapeDataString(gameVersion)}" +
-                  $"&modLoaderType={NeoForgeLoaderType}&pageSize=20";
+                  $"&modLoaderType={NeoForgeLoaderType}&pageSize=50";
 
         var resp = await _http.GetFromJsonAsync<CurseForgeListResponse<CurseForgeFile>>(url, JsonOptions, ct);
-        var file = resp?.Data?.FirstOrDefault(f => !string.IsNullOrEmpty(f.DownloadUrl));
-        _fileCache[cacheKey] = file;
-        return file;
+        var list = resp?.Data ?? new List<CurseForgeFile>();
+        _filesCache[cacheKey] = list;
+        return list;
+    }
+
+    /// <summary>Melhor ficheiro (mais recente com download permitido) para a versão dada.</summary>
+    public async Task<CurseForgeFile?> GetBestFileAsync(
+        int modId, string gameVersion, CancellationToken ct = default)
+    {
+        var files = await GetFilesAsync(modId, gameVersion, ct);
+        return files.FirstOrDefault(f => !string.IsNullOrEmpty(f.DownloadUrl));
     }
 
     /// <summary>Detalhe de um mod (usado para o nome das dependências). Em cache.</summary>
